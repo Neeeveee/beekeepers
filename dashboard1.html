@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BeeHive Dashboard (EMQX MQTT WebSocket)</title>
+  <style>
+    :root { --bd:#e5e7eb; --fg:#111827; --muted:#6b7280; --ok:#16a34a; --bad:#dc2626; }
+    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans SC",sans-serif; margin: 24px; color: var(--fg); }
+    h1 { margin: 0 0 14px; font-size: 30px; }
+    small { color: var(--muted); font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+    .card { border: 1px solid var(--bd); border-radius: 12px; padding: 14px 16px; background: #fff; }
+    .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--bad); }
+    .dot.ok { background: var(--ok); }
+    code.badge { background:#f3f4f6; border:1px solid var(--bd); padding:2px 6px; border-radius: 8px; }
+    .btn { border: 1px solid var(--bd); background: #fff; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+    .btn:hover { background:#f9fafb; }
+    .hint { margin-top: 10px; color:#b45309; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border-top: 1px solid var(--bd); padding: 10px 8px; text-align: left; white-space: nowrap; }
+    th { background: #fafafa; font-weight: 700; }
+    .section-title { margin: 18px 0 10px; font-size: 22px; }
+    .mono { font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace; }
+    .chart-wrap { height: 320px; }
+    .subtle { color: var(--muted); font-size: 13px; }
+  </style>
+
+  <!-- mqtt.js (browser) -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <h1>BeeHive Dashboard <small>(EMQX MQTT WebSocket)</small></h1>
+
+  <div class="grid">
+    <div class="card">
+      <div class="row">
+        <div id="dot" class="dot"></div>
+        <div>
+          <div style="font-size:18px;font-weight:800;">连接状态：<span id="connText">未连接</span></div>
+          <div class="mono subtle" id="wsUrl"></div>
+        </div>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--bd);margin:12px 0;">
+      <div class="subtle">订阅：<code class="badge mono" id="subTopic"></code></div>
+      <div class="subtle">数据 Topic：<code class="badge mono" id="dataTopic"></code></div>
+      <div class="subtle">状态 Topic：<code class="badge mono" id="statusTopic"></code></div>
+
+      <div class="row" style="margin-top: 12px;">
+        <button class="btn" id="btnClear">清空列表</button>
+        <button class="btn" id="btnReconnect">重连</button>
+      </div>
+
+      <div class="hint">如果打开页面后一条消息都不显示：按 F12 → Console 看有没有报错（常见是账号/密码或 WS 地址）。</div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:20px;font-weight:900;">最新一条（10min）</div>
+      <div id="latest" style="margin-top:10px;font-size:16px;">（等待数据...）</div>
+      <div class="subtle" style="margin-top:8px;">只会显示 topic 为 <span class="mono" id="latestFilter"></span> 的消息</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div style="font-size:20px;font-weight:900;">IN / OUT 折线图（10min）</div>
+      <div class="subtle">默认显示最近 <span id="maxPointsLabel"></span> 个点</div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">最近 200 条</div>
+  <div class="card" style="padding:0; overflow:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>time</th>
+          <th>in</th>
+          <th>out</th>
+          <th>daily_in</th>
+          <th>daily_out</th>
+          <th>raw topic</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+<script>
+/** ===================== 你只要确认这里 4 个配置 ===================== **/
+const WS_URL      = "wss://h1b01eed.ala.asia-southeast1.emqxsl.com:8084/mqtt";
+const MQTT_USER   = "bee01";
+const MQTT_PASS   = "12345678";
+
+// 订阅（你现在就是这个前缀）
+const SUB_TOPIC   = "beehive/hive01/#";
+
+// 你的 ESP32 发的两个 topic（和你代码一致）
+const DATA_TOPIC  = "beehive/hive01/10min";
+const STATUS_TOPIC= "beehive/hive01/status";
+
+/** 图表最多保留多少个点（比如 288 = 2天的10分钟点） **/
+const MAX_POINTS = 288;
+/** 表格最多显示多少行 **/
+const MAX_ROWS = 200;
+
+// ---- UI elements
+const dot = document.getElementById("dot");
+const connText = document.getElementById("connText");
+const elWS = document.getElementById("wsUrl");
+const elSub = document.getElementById("subTopic");
+const elData = document.getElementById("dataTopic");
+const elStatus = document.getElementById("statusTopic");
+const elLatest = document.getElementById("latest");
+const tbody = document.getElementById("tbody");
+
+document.getElementById("latestFilter").textContent = DATA_TOPIC;
+document.getElementById("maxPointsLabel").textContent = String(MAX_POINTS);
+
+elWS.textContent = WS_URL;
+elSub.textContent = SUB_TOPIC;
+elData.textContent = DATA_TOPIC;
+elStatus.textContent = STATUS_TOPIC;
+
+let client = null;
+
+// ---- Chart.js setup
+const ctx = document.getElementById('chart');
+const labels = [];
+const seriesIn = [];
+const seriesOut = [];
+
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      { label: 'IN (10min)', data: seriesIn, tension: 0.25, pointRadius: 2 },
+      { label: 'OUT (10min)', data: seriesOut, tension: 0.25, pointRadius: 2 },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      legend: { display: true }
+    },
+    scales: {
+      x: { ticks: { maxRotation: 0, autoSkip: true } },
+      y: { beginAtZero: true }
+    }
+  }
+});
+
+function setConnected(yes) {
+  dot.classList.toggle("ok", yes);
+  connText.textContent = yes ? "已连接" : "未连接";
+}
+
+function safeJsonParse(s) {
+  try { return JSON.parse(s); } catch (e) { return null; }
+}
+
+function addRowFront(rowObj) {
+  // rowObj: {time,in,out,daily_in,daily_out,topic}
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td class="mono">${rowObj.time ?? ""}</td>
+    <td>${rowObj.in ?? ""}</td>
+    <td>${rowObj.out ?? ""}</td>
+    <td>${rowObj.daily_in ?? ""}</td>
+    <td>${rowObj.daily_out ?? ""}</td>
+    <td class="mono">${rowObj.topic ?? ""}</td>
+  `;
+  tbody.prepend(tr);
+
+  // trim rows
+  while (tbody.children.length > MAX_ROWS) {
+    tbody.removeChild(tbody.lastElementChild);
+  }
+}
+
+function pushChartPoint(timeStr, inVal, outVal) {
+  labels.push(timeStr);
+  seriesIn.push(inVal);
+  seriesOut.push(outVal);
+
+  while (labels.length > MAX_POINTS) {
+    labels.shift();
+    seriesIn.shift();
+    seriesOut.shift();
+  }
+  chart.update();
+}
+
+function onMqttMessage(topic, payloadBytes) {
+  const payload = new TextDecoder().decode(payloadBytes);
+
+  // 只拿 DATA_TOPIC 来画图/填表
+  if (topic === DATA_TOPIC) {
+    const data = safeJsonParse(payload);
+    if (!data) return;
+
+    // 兼容你之前两种 time 写法：
+    // 1) "2026-02-14 11:40"
+    // 2) 2026-02-14 11:40（不带引号）<- 这种不是合法 JSON，你现在这版已经是合法 JSON 了
+    const timeStr = (data.time ?? "").toString();
+
+    const inVal  = Number(data.in ?? 0);
+    const outVal = Number(data.out ?? 0);
+    const dailyIn  = Number(data.daily_in ?? 0);
+    const dailyOut = Number(data.daily_out ?? 0);
+
+    elLatest.innerHTML = `
+      <div class="mono" style="font-size:14px;color:var(--muted);">Topic: ${topic}</div>
+      <div style="margin-top:6px;"><b>${timeStr}</b></div>
+      <div style="margin-top:6px;">IN: <b>${inVal}</b>　OUT: <b>${outVal}</b></div>
+      <div style="margin-top:6px;color:var(--muted);">今日累计 IN: ${dailyIn}　OUT: ${dailyOut}</div>
+    `;
+
+    addRowFront({
+      time: timeStr,
+      in: inVal,
+      out: outVal,
+      daily_in: dailyIn,
+      daily_out: dailyOut,
+      topic
+    });
+
+    pushChartPoint(timeStr, inVal, outVal);
+    return;
+  }
+
+  // 状态消息可选显示（不进表、不进图）
+  if (topic === STATUS_TOPIC) {
+    // 可以在 console 看状态
+    console.log("[STATUS]", topic, payload);
+  }
+}
+
+function connect() {
+  if (client) {
+    try { client.end(true); } catch(e) {}
+    client = null;
+  }
+
+  setConnected(false);
+
+  client = mqtt.connect(WS_URL, {
+    username: MQTT_USER,
+    password: MQTT_PASS,
+    clean: true,
+    reconnectPeriod: 2000,
+    connectTimeout: 8000,
+    keepalive: 60
+  });
+
+  client.on("connect", () => {
+    setConnected(true);
+    client.subscribe(SUB_TOPIC, { qos: 0 }, (err) => {
+      if (err) console.error("Subscribe error:", err);
+      else console.log("Subscribed:", SUB_TOPIC);
+    });
+  });
+
+  client.on("reconnect", () => {
+    setConnected(false);
+    console.log("Reconnecting...");
+  });
+
+  client.on("close", () => {
+    setConnected(false);
+    console.log("Closed");
+  });
+
+  client.on("error", (err) => {
+    setConnected(false);
+    console.error("MQTT error:", err);
+  });
+
+  client.on("message", (topic, payload) => {
+    onMqttMessage(topic, payload);
+  });
+}
+
+document.getElementById("btnClear").addEventListener("click", () => {
+  tbody.innerHTML = "";
+  labels.length = 0;
+  seriesIn.length = 0;
+  seriesOut.length = 0;
+  chart.update();
+  elLatest.textContent = "（已清空，等待新数据...）";
+});
+
+document.getElementById("btnReconnect").addEventListener("click", () => {
+  connect();
+});
+
+// auto connect
+connect();
+</script>
+</body>
+</html>
