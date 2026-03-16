@@ -4,14 +4,14 @@ import sqlite3  # 导入 SQLite 数据库模块
 from pathlib import Path  # 导入 Path 用于处理文件路径
 
 
-DB_PATH = r"D:\homeworks\workshop\s7-8\bee-project\bee_env.db"  # 你的数据库路径
+DB_PATH = Path(__file__).resolve().parent / "bee_env.db"
 
 
 def get_db_connection() -> sqlite3.Connection:  # 定义获取数据库连接的函数
     db_file = Path(DB_PATH)  # 把数据库路径转成 Path 对象
     if not db_file.exists():  # 如果数据库文件不存在
         raise FileNotFoundError(f"数据库文件不存在：{DB_PATH}")  # 抛出文件不存在错误
-    conn = sqlite3.connect(DB_PATH, timeout=30)  # 连接 SQLite 数据库，并设置超时时间
+    conn = sqlite3.connect(str(DB_PATH), timeout=30)  # 连接 SQLite 数据库，并设置超时时间
     conn.execute("PRAGMA journal_mode=WAL;")  # 开启 WAL 模式，提高稳定性
     conn.execute("PRAGMA busy_timeout = 30000;")  # 数据库繁忙时最多等待 30 秒
     return conn  # 返回数据库连接

@@ -9,14 +9,14 @@ from datetime import datetime, date
 app = Flask(__name__)
 CORS(app)
 
-DB_PATH = r"D:\homeworks\workshop\s7-8\bee-project\bee_env.db"
+DB_PATH = Path(__file__).resolve().parent / "bee_env.db"
 
 
 def get_db_connection() -> sqlite3.Connection:
     db_file = Path(DB_PATH)
     if not db_file.exists():
         raise FileNotFoundError(f"数据库文件不存在：{DB_PATH}")
-    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn = sqlite3.connect(str(DB_PATH), timeout=30)
     conn.row_factory = sqlite3.Row
     return conn
 

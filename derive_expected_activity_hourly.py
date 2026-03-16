@@ -4,10 +4,10 @@ import math
 from pathlib import Path
 from datetime import datetime
 
-DB_PATH = r"D:\homeworks\workshop\s7-8\bee-project\bee_env.db"
+DB_PATH = Path(__file__).resolve().parent / "bee_env.db"
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn = sqlite3.connect(str(DB_PATH), timeout=30)
     conn.execute("PRAGMA journal_mode=WAL;")
     return conn
 
