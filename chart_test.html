@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曲线测试页</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f7f7f7;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+        }
+
+        .chart-block {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart {
+            width: 100%;
+            height: 420px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .button-group button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            background: #e9ecf5;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button-group button.active {
+            background: #cfd8ff;
+            font-weight: bold;
+        }
+
+        .eco-flex {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mini-chart {
+            width: 100%;
+            height: 200px;
+            background: #fafbff;
+            border-radius: 10px;
+        }
+
+        .hint-box {
+            margin-top: 12px;
+            padding: 12px 14px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            line-height: 1.7;
+            color: #444;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>生态时间序列与蜜蜂活跃度曲线测试</h1>
+
+    <div class="chart-block">
+        <h2>蜜蜂活跃度曲线（历史实测 + 未来预测）</h2>
+        <div class="button-group">
+            <button id="btn-bee-hour" class="active" onclick="setBeeTimeScale('hour')">按小时</button>
+            <button id="btn-bee-day" onclick="setBeeTimeScale('day')">按天</button>
+            <button id="btn-bee-day-mean" style="display: none;" onclick="setBeeDailyMetric('mean')">日均值</button>
+            <button id="btn-bee-day-peak" style="display: none;" onclick="setBeeDailyMetric('peak')">日峰值</button>
+        </div>
+        <div id="beeChart" class="chart"></div>
+    </div>
+
+    <div class="chart-block">
+        <h2>生态时间序列</h2>
+
+        <div class="button-group">
+            <button id="btn-flowering_overview" class="active" onclick="setEcoMetric('flowering_overview')">开花状态</button>
+            <button id="btn-nectar_supply_overview" onclick="setEcoMetric('nectar_supply_overview')">蜜源供给强度</button>
+            <button id="btn-mismatch_overview" onclick="setEcoMetric('mismatch_overview')">错配风险</button>
+        </div>
+
+        <div class="eco-flex">
+            <div>
+                <div id="ecoChart" class="chart"></div>
+
+                <div id="floweringHint" class="hint-box" style="display: none;">
+                    综合开花状态趋势表示：在当前阶段与未来阶段，研究区域内主要蜜源植物整体处于怎样的开花进程。数值越高，说明整体越接近盛花阶段；数值越低，说明整体仍未进入主要花期或已过花期。
+                </div>
+
+                <div id="nectarHint" class="hint-box" style="display: none;">
+                    综合蜜源供给强度表示：在当前阶段与未来阶段，研究区域内主要蜜源植物整体能够提供多强的资源供给。它不同于开花状态，重点反映“花开之后，实际可供蜜蜂利用的资源强弱”。数值越高，说明资源供给越强；数值越低，说明虽然可能有开花，但实际可利用资源较弱。
+                </div>
+
+                <div id="mismatchHint" class="hint-box" style="display: none;">
+                    综合错配风险表示：当前及未来阶段，蜜源供给强度与蜜蜂行为强度之间是否同步。数值越高，说明资源侧与行为侧偏差越大，物候错配风险越高；数值越低，说明二者变化更接近，整体处于相对匹配状态。
+                </div>
+            </div>
+
+            <div id="floweringSidePanel" class="side-panel" style="display: none;">
+                <div id="currentPie" class="mini-chart"></div>
+                <div id="futurePie" class="mini-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./chart_page.js"></script>
+</body>
+
+</html>

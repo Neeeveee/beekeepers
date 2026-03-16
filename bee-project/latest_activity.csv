@@ -1,2 +1,0 @@
-﻿site_id,species_code,date,expected_min,expected_max,observed_activity,match_score,deviation_tag,deviation_value,explain_text
-1,CHINESE_BEE,2026-01-22,15.0,40.0,28.0,1.0,within_expected,0.0,实测活跃度落在预期范围内，表现与该场地规律一致。

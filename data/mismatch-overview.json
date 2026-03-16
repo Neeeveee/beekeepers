@@ -1,0 +1,55 @@
+{
+  "actual": [
+    {
+      "time": "2026-03-07",
+      "value": 0.275
+    },
+    {
+      "time": "2026-03-10",
+      "value": 0.551
+    },
+    {
+      "time": "2026-03-11",
+      "value": 0.0
+    }
+  ],
+  "forecast": [
+    {
+      "time": "2026-03-16",
+      "value": 0.0
+    },
+    {
+      "time": "2026-03-17",
+      "value": 0.551
+    }
+  ],
+  "forecast_info": [
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "matched",
+      "time": "2026-03-16"
+    },
+    {
+      "mismatch_level": "显著错配",
+      "mismatch_type": "behavior_ahead",
+      "time": "2026-03-17"
+    }
+  ],
+  "history_info": [
+    {
+      "mismatch_level": "轻度错配",
+      "mismatch_type": "resource_ahead",
+      "time": "2026-03-07"
+    },
+    {
+      "mismatch_level": "显著错配",
+      "mismatch_type": "behavior_ahead",
+      "time": "2026-03-10"
+    },
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "matched",
+      "time": "2026-03-11"
+    }
+  ]
+}
