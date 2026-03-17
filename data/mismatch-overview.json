@@ -15,24 +15,24 @@
   ],
   "forecast": [
     {
-      "time": "2026-03-16",
-      "value": 0.612
+      "time": "2026-03-17",
+      "value": 0.424
     },
     {
-      "time": "2026-03-17",
-      "value": 0.551
+      "time": "2026-03-18",
+      "value": 0.014
     }
   ],
   "forecast_info": [
     {
-      "mismatch_level": "显著错配",
-      "mismatch_type": "behavior_ahead",
-      "time": "2026-03-16"
-    },
-    {
-      "mismatch_level": "显著错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-03-17"
+    },
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "behavior_ahead",
+      "time": "2026-03-18"
     }
   ],
   "history_info": [
