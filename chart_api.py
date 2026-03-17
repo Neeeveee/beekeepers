@@ -275,34 +275,34 @@ def calc_nectar_resource_factor(nectar_grade, avg_yield_kg_per_colony, confidenc
 
 def calc_nectar_temp_factor(avg_temp_c):
     if avg_temp_c is None:
-        return 0.50
+        return 0.75
     elif avg_temp_c < 10:
-        return 0.35
+        return 0.55
     elif avg_temp_c < 15:
-        return 0.65
+        return 0.82
     elif avg_temp_c < 22:
-        return 0.90
-    elif avg_temp_c < 28:
         return 1.00
+    elif avg_temp_c < 28:
+        return 1.02
     elif avg_temp_c < 32:
-        return 0.80
+        return 0.90
     else:
-        return 0.60
+        return 0.72
 
 
 def calc_nectar_humidity_factor(avg_humidity_pct):
     if avg_humidity_pct is None:
-        return 0.90
+        return 0.95
     elif avg_humidity_pct < 35:
-        return 0.70
+        return 0.85
     elif avg_humidity_pct < 50:
-        return 0.90
-    elif avg_humidity_pct <= 75:
         return 1.00
     elif avg_humidity_pct <= 85:
-        return 0.88
+        return 1.00
+    elif avg_humidity_pct <= 92:
+        return 0.94
     else:
-        return 0.70
+        return 0.84
 
 
 def calc_nectar_rain_factor(precip_mm):
@@ -311,11 +311,11 @@ def calc_nectar_rain_factor(precip_mm):
     elif precip_mm == 0:
         return 1.00
     elif precip_mm < 1:
-        return 0.80
+        return 0.92
     elif precip_mm < 5:
-        return 0.50
+        return 0.72
     else:
-        return 0.25
+        return 0.45
 
 
 def calc_nectar_supply_index(
@@ -328,8 +328,8 @@ def calc_nectar_supply_index(
     temp_factor = calc_nectar_temp_factor(avg_temp_c)
     humidity_factor = calc_nectar_humidity_factor(avg_humidity_pct)
     rain_factor = calc_nectar_rain_factor(precip_mm)
-    env_modifier = 0.45 * temp_factor + 0.20 * humidity_factor + 0.35 * rain_factor
-    nectar_resource_modifier = 0.65 + 0.35 * clamp(nectar_resource_factor, 0.0, 1.1) / 1.1
+    env_modifier = 0.50 * temp_factor + 0.20 * humidity_factor + 0.30 * rain_factor
+    nectar_resource_modifier = 0.80 + 0.30 * clamp(nectar_resource_factor, 0.0, 1.1) / 1.1
 
     return round(
         clamp(flowering_index * nectar_resource_modifier * env_modifier),
