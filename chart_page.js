@@ -6,15 +6,15 @@ const futurePie = echarts.init(document.getElementById("futurePie"));
 const DEFAULT_DATA_MODE = "api";
 const API_BASE_URL = "http://127.0.0.1:5000";
 const STATIC_DATA_BASE_URL = "./data";
+const PAST_DAYS_VISIBLE = 5;
+const FUTURE_DAYS_VISIBLE = 7;
 
 function getDataMode() {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get("mode");
-
     if (mode === "api" || mode === "static") {
         return mode;
     }
-
     return DEFAULT_DATA_MODE;
 }
 
@@ -43,7 +43,7 @@ const DATA_SOURCES = buildDataSourceMap();
 const ECO_METRICS = {
     flowering_overview: {
         source: DATA_SOURCES.floweringOverview,
-        title: "综合开花状态趋势（历史 + 未来）",
+        title: "综合开花状态趋势（过去 5 天 + 未来 7 天）",
         yAxisName: "开花状态",
         legend: ["历史开花状态", "未来开花状态"],
         showSidePanel: true,
@@ -53,7 +53,7 @@ const ECO_METRICS = {
     },
     nectar_supply_overview: {
         source: DATA_SOURCES.nectarSupplyOverview,
-        title: "综合蜜源供给强度（历史 + 未来）",
+        title: "综合蜜源供给强度（过去 5 天 + 未来 7 天）",
         yAxisName: "蜜源供给强度",
         legend: ["历史蜜源供给", "未来蜜源供给"],
         showSidePanel: true,
@@ -63,7 +63,7 @@ const ECO_METRICS = {
     },
     mismatch_overview: {
         source: DATA_SOURCES.mismatchOverview,
-        title: "综合错配风险趋势（历史 + 未来）",
+        title: "综合错配风险趋势（过去 5 天 + 未来 7 天）",
         yAxisName: "错配风险",
         legend: ["历史错配风险", "未来错配风险"],
         showSidePanel: false,
@@ -88,6 +88,54 @@ function parseChartTime(value) {
 
 function roundValue(value) {
     return Math.round(value * 10000) / 10000;
+}
+
+function addDays(date, days) {
+    const next = new Date(date);
+    next.setDate(next.getDate() + days);
+    return next;
+}
+
+function getVisibleWindow() {
+    const now = new Date();
+    const start = addDays(now, -PAST_DAYS_VISIBLE);
+    const end = addDays(now, FUTURE_DAYS_VISIBLE);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return { start, end, now };
+}
+
+function filterSeriesByWindow(items, kind = "all") {
+    const { start, end, now } = getVisibleWindow();
+
+    return (items || []).filter(item => {
+        const time = parseChartTime(item?.time);
+        if (!time) {
+            return false;
+        }
+
+        if (time < start || time > end) {
+            return false;
+        }
+
+        if (kind === "actual" && time > now) {
+            return false;
+        }
+
+        if (kind === "forecast" && time < start) {
+            return false;
+        }
+
+        return true;
+    });
+}
+
+function filterBridgeData(dataObj) {
+    return {
+        ...dataObj,
+        actual: filterSeriesByWindow(dataObj.actual, "actual"),
+        forecast: filterSeriesByWindow(dataObj.forecast, "forecast")
+    };
 }
 
 function updateBeeButtonState() {
@@ -132,6 +180,18 @@ function aggregateBeeDaily(items, metric) {
             value: roundValue(aggregatedValue)
         };
     });
+}
+
+function dropOverlappingForecastDays(actualItems, forecastItems) {
+    const actual = actualItems || [];
+    const forecast = forecastItems || [];
+
+    if (!actual.length) {
+        return forecast;
+    }
+
+    const lastActualDay = actual[actual.length - 1].time;
+    return forecast.filter(item => item.time > lastActualDay);
 }
 
 function updateButtonState() {
@@ -227,7 +287,8 @@ function buildTrendOption(title, yAxisName, legend, built) {
                 type: "line",
                 data: built.actualSeries,
                 smooth: true,
-                connectNulls: false
+                connectNulls: false,
+                smoothMonotone: "x"
             },
             {
                 name: legend[1],
@@ -235,7 +296,8 @@ function buildTrendOption(title, yAxisName, legend, built) {
                 data: built.forecastSeries,
                 smooth: true,
                 connectNulls: false,
-                lineStyle: { type: "dashed" }
+                lineStyle: { type: "dashed" },
+                smoothMonotone: "x"
             }
         ]
     };
@@ -249,10 +311,18 @@ function getBeeDisplaySeries() {
         };
     }
 
+    const visibleBeeData = filterBridgeData(beeRawData);
+
     if (beeTimeScale === "day") {
+        const dailyActual = aggregateBeeDaily(visibleBeeData.actual || [], beeDailyMetric);
+        const dailyForecast = dropOverlappingForecastDays(
+            dailyActual,
+            aggregateBeeDaily(visibleBeeData.forecast || [], beeDailyMetric)
+        );
+
         const aggregated = {
-            actual: aggregateBeeDaily(beeRawData.actual || [], beeDailyMetric),
-            forecast: aggregateBeeDaily(beeRawData.forecast || [], beeDailyMetric)
+            actual: dailyActual,
+            forecast: dailyForecast
         };
 
         return {
@@ -262,7 +332,7 @@ function getBeeDisplaySeries() {
     }
 
     return {
-        built: buildBridgeSeries(beeRawData),
+        built: buildBridgeSeries(visibleBeeData),
         titleSuffix: "按小时"
     };
 }
@@ -272,7 +342,7 @@ function renderBeeChart() {
 
     beeChart.clear();
     beeChart.setOption({
-        title: { text: `蜜蜂活跃度曲线（${titleSuffix}）` },
+        title: { text: `蜜蜂活跃度曲线（${titleSuffix}，过去 5 天 + 未来 7 天）` },
         tooltip: { trigger: "axis" },
         legend: { data: ["历史实测", "未来预测"] },
         xAxis: {
@@ -386,7 +456,7 @@ function updateEcoLayout(metricConfig) {
 }
 
 function renderEcoMetric(data, metricConfig) {
-    const built = buildBridgeSeries(data);
+    const built = buildBridgeSeries(filterBridgeData(data), 36 * 3600 * 1000);
     ecoChart.clear();
     ecoChart.setOption(
         buildTrendOption(metricConfig.title, metricConfig.yAxisName, metricConfig.legend, built),

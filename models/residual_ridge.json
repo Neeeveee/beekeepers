@@ -1,0 +1,120 @@
+{
+  "model_type": "residual_ridge_pure_python",
+  "trained_at": "2026-03-18 17:33:10",
+  "sample_count": 65,
+  "feature_columns": [
+    "hour",
+    "temperature_c",
+    "humidity_pct",
+    "wind_speed_ms",
+    "precip_mm",
+    "base_activity",
+    "temp_factor",
+    "humidity_factor",
+    "wind_factor",
+    "rain_factor",
+    "weather_modifier",
+    "daily_flowering_index",
+    "daily_nectar_supply_index",
+    "flower_factor",
+    "nectar_factor",
+    "resource_factor",
+    "expected_activity"
+  ],
+  "feature_stats": {
+    "hour": {
+      "mean": 14.0,
+      "std": 4.955183765900731
+    },
+    "temperature_c": {
+      "mean": 13.246153846153845,
+      "std": 4.220939630099766
+    },
+    "humidity_pct": {
+      "mean": 56.6,
+      "std": 21.489031191248746
+    },
+    "wind_speed_ms": {
+      "mean": 3.597436752136752,
+      "std": 3.435556011868991
+    },
+    "precip_mm": {
+      "mean": 0.09123076923076923,
+      "std": 0.3411722222091075
+    },
+    "base_activity": {
+      "mean": 0.47256461538461536,
+      "std": 0.3768005946552425
+    },
+    "temp_factor": {
+      "mean": 0.5107692307692309,
+      "std": 0.2999349041801606
+    },
+    "humidity_factor": {
+      "mean": 0.9253846153846154,
+      "std": 0.07702301200743986
+    },
+    "wind_factor": {
+      "mean": 0.7892307692307693,
+      "std": 0.2439250054504943
+    },
+    "rain_factor": {
+      "mean": 0.9538461538461539,
+      "std": 0.15696831926996566
+    },
+    "weather_modifier": {
+      "mean": 0.738,
+      "std": 0.12786050090746434
+    },
+    "daily_flowering_index": {
+      "mean": 0.23528615384615384,
+      "std": 0.025253526041224283
+    },
+    "daily_nectar_supply_index": {
+      "mean": 0.19221384615384615,
+      "std": 0.032171281397320214
+    },
+    "flower_factor": {
+      "mean": 0.6176230769230769,
+      "std": 0.012614055277052824
+    },
+    "nectar_factor": {
+      "mean": 0.5960815384615384,
+      "std": 0.01607805855393945
+    },
+    "resource_factor": {
+      "mean": 0.6068523076923077,
+      "std": 0.014252633847736099
+    },
+    "expected_activity": {
+      "mean": 0.21674000000000002,
+      "std": 0.19764550612727752
+    }
+  },
+  "coefficients": [
+    0.21525076923076922,
+    0.03107535622179315,
+    -0.030419529687881156,
+    0.09637683928606143,
+    0.08426040775908426,
+    0.028522786636733844,
+    0.2819714062464337,
+    -0.015775460525123606,
+    -0.010708851288232384,
+    0.02463676301949521,
+    0.10652000521824008,
+    0.019461425835001905,
+    0.015236964664652514,
+    -0.004631124599557128,
+    0.009349372872213203,
+    -0.0035140805798463647,
+    -0.00047638335742314656,
+    -0.15775757077896002
+  ],
+  "safeguards": {
+    "full_confidence_sample_count": 24,
+    "low_sample_cap": 0.08,
+    "medium_sample_cap": 0.12,
+    "high_sample_cap": 0.18
+  }
+}

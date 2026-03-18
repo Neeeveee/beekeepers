@@ -82,7 +82,7 @@ def calc_mismatch_risk(raw_gap):
     if raw_gap is None:
         return None
 
-    risk = (raw_gap - 0.20) / 0.80
+    risk = (raw_gap - 0.10) / 0.60
     return round(clamp(risk), 3)
 
 
@@ -90,7 +90,7 @@ def calc_mismatch_type(nectar_supply_index, behavior_index_norm, raw_gap):
     if nectar_supply_index is None or behavior_index_norm is None or raw_gap is None:
         return "no_data"
 
-    if raw_gap < 0.15:
+    if raw_gap < 0.10:
         return "matched"
 
     if nectar_supply_index > behavior_index_norm:

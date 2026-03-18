@@ -5,11 +5,13 @@ from flask_cors import CORS
 import sqlite3
 from pathlib import Path
 from datetime import datetime, date
+import json
 
 app = Flask(__name__)
 CORS(app)
 
 DB_PATH = Path(__file__).resolve().parent / "bee_env.db"
+DATA_RAW_DIR = Path(__file__).resolve().parent / "data_raw"
 
 
 def get_db_connection() -> sqlite3.Connection:
@@ -30,6 +32,319 @@ def parse_chart_time(value: str | None) -> datetime | None:
         except ValueError:
             continue
     return None
+
+
+def load_latest_qweather_7d_payload() -> dict | None:
+    files = sorted(DATA_RAW_DIR.glob("qweather_7d_*.json"))
+    if not files:
+        return None
+
+    latest_file = files[-1]
+    try:
+        return json.loads(latest_file.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def build_future_daily_weather(conn: sqlite3.Connection) -> list[dict]:
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            forecast_date AS date,
+            AVG(temperature_c) AS avg_temp_c,
+            AVG(humidity_pct) AS avg_humidity_pct,
+            AVG(wind_speed_ms) AS wind_speed_ms,
+            SUM(COALESCE(precip_mm, 0)) AS precip_mm,
+            AVG(expected_activity) AS behavior_index_raw
+        FROM future_expected_activity_hourly
+        GROUP BY forecast_date
+        ORDER BY forecast_date ASC
+        """
+    )
+    merged = {
+        row["date"]: {
+            "date": row["date"],
+            "avg_temp_c": row["avg_temp_c"],
+            "avg_humidity_pct": row["avg_humidity_pct"],
+            "wind_speed_ms": row["wind_speed_ms"],
+            "precip_mm": row["precip_mm"],
+            "behavior_index_raw": row["behavior_index_raw"],
+            "source": "qweather-24h",
+        }
+        for row in cursor.fetchall()
+    }
+
+    payload = load_latest_qweather_7d_payload()
+    if not payload:
+        return [merged[key] for key in sorted(merged)]
+
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    for item in payload.get("daily", []):
+        forecast_date = item.get("fxDate")
+        if not forecast_date or forecast_date <= today_str:
+            continue
+
+        if forecast_date in merged:
+            continue
+
+        temp_max = float(item.get("tempMax") or 0.0)
+        temp_min = float(item.get("tempMin") or 0.0)
+        avg_temp_c = round((temp_max + temp_min) / 2.0, 2)
+        humidity_pct = float(item.get("humidity") or 0.0)
+        precip_mm = float(item.get("precip") or 0.0)
+        wind_speed_raw = float(item.get("windSpeedDay") or 0.0)
+        wind_speed_ms = round(wind_speed_raw / 3.6, 2)
+
+        merged[forecast_date] = {
+            "date": forecast_date,
+            "avg_temp_c": avg_temp_c,
+            "avg_humidity_pct": humidity_pct,
+            "wind_speed_ms": wind_speed_ms,
+            "precip_mm": precip_mm,
+            "behavior_index_raw": None,
+            "source": "qweather-7d",
+        }
+
+    return [merged[key] for key in sorted(merged)]
+
+
+def base_hour_activity(hour: int) -> float:
+    if hour < 6 or hour > 19:
+        return 0.0
+    return round(2.718281828 ** (-((hour - 13.0) ** 2) / 12.0), 4)
+
+
+def calc_behavior_temp_factor(temp_c: float | None) -> float:
+    if temp_c is None:
+        return 0.0
+    if temp_c < 8:
+        return 0.0
+    if temp_c < 10:
+        return 0.10
+    if temp_c < 14:
+        return 0.40
+    if temp_c < 20:
+        return 0.75
+    if temp_c <= 30:
+        return 1.00
+    if temp_c <= 35:
+        return 0.80
+    return 0.50
+
+
+def calc_behavior_humidity_factor(humidity_pct: float | None) -> float:
+    if humidity_pct is None:
+        return 0.0
+    if 40 <= humidity_pct <= 75:
+        return 1.00
+    if humidity_pct <= 85:
+        return 0.90
+    return 0.75
+
+
+def calc_behavior_wind_factor(wind_speed_ms: float | None) -> float:
+    if wind_speed_ms is None:
+        return 0.0
+    if wind_speed_ms < 1.5:
+        return 1.00
+    if wind_speed_ms < 3:
+        return 0.90
+    if wind_speed_ms < 5:
+        return 0.70
+    if wind_speed_ms <= 6.7:
+        return 0.45
+    return 0.0
+
+
+def calc_behavior_rain_factor(precip_mm: float | None) -> float:
+    if precip_mm is None:
+        return 1.0
+    if precip_mm == 0:
+        return 1.0
+    if precip_mm < 1:
+        return 0.7
+    if precip_mm < 5:
+        return 0.3
+    return 0.18
+
+
+def load_plant_meta(conn: sqlite3.Connection) -> tuple[dict[str, dict], dict[str, float]]:
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT
+            plant_name,
+            nectar_grade,
+            pollen_grade,
+            avg_yield_kg_per_colony,
+            confidence,
+            bloom_start_mmdd,
+            bloom_end_mmdd
+        FROM nectar_plants
+        ORDER BY plant_name ASC
+        """
+    )
+
+    plant_meta = {}
+    plant_weights = {}
+    for plant in cursor.fetchall():
+        plant_name = plant["plant_name"]
+        plant_meta[plant_name] = {
+            "nectar_grade": plant["nectar_grade"],
+            "pollen_grade": plant["pollen_grade"],
+            "avg_yield_kg_per_colony": plant["avg_yield_kg_per_colony"],
+            "confidence": plant["confidence"],
+            "bloom_start_mmdd": plant["bloom_start_mmdd"],
+            "bloom_end_mmdd": plant["bloom_end_mmdd"],
+        }
+        plant_weights[plant_name] = calc_nectar_resource_factor(
+            plant["nectar_grade"],
+            plant["avg_yield_kg_per_colony"],
+            plant["confidence"],
+        )
+
+    return plant_meta, plant_weights
+
+
+def calc_future_resource_overview(
+    forecast_date: str,
+    avg_temp_c: float,
+    avg_humidity_pct: float,
+    precip_mm: float,
+    plant_meta: dict[str, dict],
+    plant_weights: dict[str, float],
+) -> tuple[float, float]:
+    total_weight = 0.0
+    flowering_weighted_sum = 0.0
+    nectar_weighted_sum = 0.0
+
+    for plant_name, meta in plant_meta.items():
+        if not is_date_in_bloom_window(
+            forecast_date,
+            meta["bloom_start_mmdd"],
+            meta["bloom_end_mmdd"],
+        ):
+            continue
+
+        base_flowering_score = calc_base_season_score(
+            model_date=forecast_date,
+            bloom_start_mmdd=meta["bloom_start_mmdd"],
+            bloom_end_mmdd=meta["bloom_end_mmdd"],
+        )
+        flowering_resource_factor = calc_resource_factor(
+            meta["nectar_grade"],
+            meta["pollen_grade"],
+            meta["confidence"],
+        )
+        flowering_index = calc_flowering_index(
+            avg_temp_c=avg_temp_c,
+            avg_humidity_pct=avg_humidity_pct,
+            precip_mm=precip_mm,
+            base_flowering_score=base_flowering_score,
+            resource_factor=flowering_resource_factor,
+        )
+
+        nectar_resource_factor = calc_nectar_resource_factor(
+            meta["nectar_grade"],
+            meta["avg_yield_kg_per_colony"],
+            meta["confidence"],
+        )
+        nectar_supply_index = calc_nectar_supply_index(
+            flowering_index=flowering_index,
+            avg_temp_c=avg_temp_c,
+            avg_humidity_pct=avg_humidity_pct,
+            precip_mm=precip_mm,
+            nectar_resource_factor=nectar_resource_factor,
+        )
+
+        weight = plant_weights.get(plant_name, 1.0)
+        total_weight += weight
+        flowering_weighted_sum += flowering_index * weight
+        nectar_weighted_sum += nectar_supply_index * weight
+
+    if total_weight <= 0:
+        return 0.0, 0.0
+
+    return (
+        round(flowering_weighted_sum / total_weight, 3),
+        round(nectar_weighted_sum / total_weight, 3),
+    )
+
+
+def calc_daily_behavior_value(avg_temp_c, avg_humidity_pct, wind_speed_ms, precip_mm) -> float:
+    daylight_hours = list(range(6, 20))
+    hourly_values = []
+
+    tf = calc_behavior_temp_factor(avg_temp_c)
+    hf = calc_behavior_humidity_factor(avg_humidity_pct)
+    wf = calc_behavior_wind_factor(wind_speed_ms)
+    rf = calc_behavior_rain_factor(precip_mm)
+
+    for hour in daylight_hours:
+        base = base_hour_activity(hour)
+        if base == 0.0 or tf == 0.0 or wf == 0.0 or rf == 0.0:
+            hourly_values.append(0.0)
+            continue
+
+        weather_modifier = 0.4 * tf + 0.2 * hf + 0.2 * wf + 0.2 * rf
+        hourly_values.append(round(base * weather_modifier, 4))
+
+    if not hourly_values:
+        return 0.0
+
+    return round(sum(hourly_values) / len(hourly_values), 4)
+
+
+def build_extended_future_hourly_forecast(conn: sqlite3.Connection) -> list[dict]:
+    plant_meta, plant_weights = load_plant_meta(conn)
+    future_days = build_future_daily_weather(conn)
+    if not future_days:
+        return []
+
+    forecast_data = []
+
+    for day in future_days:
+        forecast_date = day["date"]
+
+        avg_temp_c = day["avg_temp_c"]
+        avg_humidity_pct = day["avg_humidity_pct"]
+        wind_speed_ms = day["wind_speed_ms"]
+        precip_mm = day["precip_mm"]
+        daily_flowering_index, daily_nectar_supply_index = calc_future_resource_overview(
+            forecast_date,
+            avg_temp_c,
+            avg_humidity_pct,
+            precip_mm,
+            plant_meta,
+            plant_weights,
+        )
+
+        flower_factor = round(0.5 + 0.5 * clamp(daily_flowering_index), 4)
+        nectar_factor = round(0.5 + 0.5 * clamp(daily_nectar_supply_index), 4)
+        resource_factor = round(0.5 * flower_factor + 0.5 * nectar_factor, 4)
+
+        tf = calc_behavior_temp_factor(avg_temp_c)
+        hf = calc_behavior_humidity_factor(avg_humidity_pct)
+        wf = calc_behavior_wind_factor(wind_speed_ms)
+        rf = calc_behavior_rain_factor(precip_mm)
+
+        for hour in range(6, 20):
+            base = base_hour_activity(hour)
+            if base == 0.0 or tf == 0.0 or wf == 0.0 or rf == 0.0:
+                expected_activity = 0.0
+            else:
+                weather_modifier = 0.4 * tf + 0.2 * hf + 0.2 * wf + 0.2 * rf
+                expected_activity = round(base * weather_modifier * resource_factor, 4)
+
+            forecast_data.append({
+                "time": f"{forecast_date} {hour:02d}:00:00",
+                "value": expected_activity,
+            })
+
+    forecast_data.sort(key=lambda item: item["time"])
+    return forecast_data
 
 
 # =========================
@@ -359,6 +674,33 @@ def build_bridge_series(actual, forecast):
     return {"actual": actual, "forecast": forecast}
 
 
+def split_daily_actual_forecast(actual, forecast):
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    actual = [item for item in (actual or []) if item.get("time") and item["time"] <= today_str]
+    forecast = [item for item in (forecast or []) if item.get("time") and item["time"] > today_str]
+    return actual, forecast
+
+
+def split_hourly_actual_forecast(actual, forecast):
+    actual = actual[:] if actual else []
+    forecast = forecast[:] if forecast else []
+
+    if not actual:
+        return actual, forecast
+
+    last_actual_time = parse_chart_time(actual[-1].get("time"))
+    if not last_actual_time:
+        return actual, forecast
+
+    filtered_forecast = []
+    for item in forecast:
+        forecast_time = parse_chart_time(item.get("time"))
+        if forecast_time and forecast_time > last_actual_time:
+            filtered_forecast.append(item)
+
+    return actual, filtered_forecast
+
+
 # =========================
 # 错配判断规则
 # =========================
@@ -378,7 +720,7 @@ def calc_mismatch_risk(raw_gap):
     if raw_gap is None:
         return None
 
-    risk = (raw_gap - 0.20) / 0.80
+    risk = (raw_gap - 0.10) / 0.60
     return round(clamp(risk), 3)
 
 
@@ -386,7 +728,7 @@ def calc_mismatch_type(nectar_supply_index, behavior_index_norm, raw_gap):
     if nectar_supply_index is None or behavior_index_norm is None or raw_gap is None:
         return "no_data"
 
-    if raw_gap < 0.15:
+    if raw_gap < 0.10:
         return "matched"
 
     if nectar_supply_index > behavior_index_norm:
@@ -428,17 +770,9 @@ def get_bee_activity_forecast():
         )
         actual_rows = cursor.fetchall()
 
-        cursor.execute(
-            """
-            SELECT forecast_time AS time, expected_activity
-            FROM future_expected_activity_hourly
-            ORDER BY forecast_time ASC
-            """
-        )
-        future_rows = cursor.fetchall()
-
         actual_data = [{"time": row["time"], "value": row["actual_activity"]} for row in actual_rows]
-        forecast_data = [{"time": row["time"], "value": row["expected_activity"]} for row in future_rows]
+        forecast_data = build_extended_future_hourly_forecast(conn)
+        actual_data, forecast_data = split_hourly_actual_forecast(actual_data, forecast_data)
 
         return jsonify(build_bridge_series(actual_data, forecast_data))
     finally:
@@ -623,25 +957,11 @@ def get_flowering_overview():
                 for plant_name, value in ranked
             ]
 
-        cursor.execute(
-            """
-            SELECT
-                forecast_date,
-                AVG(temperature_c) AS avg_temp_c,
-                AVG(humidity_pct) AS avg_humidity_pct,
-                SUM(COALESCE(precip_mm, 0)) AS precip_mm
-            FROM future_expected_activity_hourly
-            GROUP BY forecast_date
-            ORDER BY forecast_date ASC
-            """
-        )
-        future_days = cursor.fetchall()
-
         forecast = []
         future_last_day_scores = []
 
-        for row in future_days:
-            forecast_date = row["forecast_date"]
+        for row in build_future_daily_weather(conn):
+            forecast_date = row["date"]
             avg_temp_c = row["avg_temp_c"]
             avg_humidity_pct = row["avg_humidity_pct"]
             precip_mm = row["precip_mm"]
@@ -697,6 +1017,7 @@ def get_flowering_overview():
                 for plant_name, value in ranked
             ]
 
+        actual, forecast = split_daily_actual_forecast(actual, forecast)
         result = build_bridge_series(actual, forecast)
         result["current_top"] = current_top
         result["future_top"] = future_top
@@ -814,25 +1135,11 @@ def get_nectar_supply_overview():
                 for plant_name, value in ranked
             ]
 
-        cursor.execute(
-            """
-            SELECT
-                forecast_date,
-                AVG(temperature_c) AS avg_temp_c,
-                AVG(humidity_pct) AS avg_humidity_pct,
-                SUM(COALESCE(precip_mm, 0)) AS precip_mm
-            FROM future_expected_activity_hourly
-            GROUP BY forecast_date
-            ORDER BY forecast_date ASC
-            """
-        )
-        future_days = cursor.fetchall()
-
         forecast = []
         future_last_day_scores = []
 
-        for row in future_days:
-            forecast_date = row["forecast_date"]
+        for row in build_future_daily_weather(conn):
+            forecast_date = row["date"]
             avg_temp_c = row["avg_temp_c"]
             avg_humidity_pct = row["avg_humidity_pct"]
             precip_mm = row["precip_mm"]
@@ -901,6 +1208,7 @@ def get_nectar_supply_overview():
                 for plant_name, value in ranked
             ]
 
+        actual, forecast = split_daily_actual_forecast(actual, forecast)
         result = build_bridge_series(actual, forecast)
         result["current_top"] = current_top
         result["future_top"] = future_top
@@ -923,6 +1231,7 @@ def get_mismatch_overview():
             """
             SELECT
                 model_date,
+                raw_gap,
                 mismatch_gap,
                 mismatch_type,
                 mismatch_level
@@ -960,25 +1269,25 @@ def get_mismatch_overview():
         )
         hist_behavior_rows = cursor.fetchall()
 
-        cursor.execute(
-            """
-            SELECT AVG(expected_activity) AS behavior_index_raw
-            FROM future_expected_activity_hourly
-            WHERE CAST(substr(forecast_time, 12, 2) AS INTEGER) BETWEEN 6 AND 19
-            GROUP BY forecast_date
-            """
-        )
-        future_behavior_rows_for_norm = cursor.fetchall()
-
         all_behavior_values = [
             row["behavior_index_raw"]
             for row in hist_behavior_rows
             if row["behavior_index_raw"] is not None
-        ] + [
-            row["behavior_index_raw"]
-            for row in future_behavior_rows_for_norm
-            if row["behavior_index_raw"] is not None
         ]
+
+        future_days = build_future_daily_weather(conn)
+        for row in future_days:
+            behavior_index_raw = row["behavior_index_raw"]
+            if behavior_index_raw is None:
+                behavior_index_raw = calc_daily_behavior_value(
+                    row["avg_temp_c"],
+                    row["avg_humidity_pct"],
+                    row["wind_speed_ms"],
+                    row["precip_mm"],
+                )
+                row["behavior_index_raw"] = behavior_index_raw
+            if behavior_index_raw is not None:
+                all_behavior_values.append(behavior_index_raw)
 
         max_behavior = max(all_behavior_values) if all_behavior_values else 1.0
         if max_behavior <= 0:
@@ -1027,27 +1336,11 @@ def get_mismatch_overview():
         # =========================
         # 未来天气（日级）
         # =========================
-        cursor.execute(
-            """
-            SELECT
-                forecast_date,
-                AVG(temperature_c) AS avg_temp_c,
-                AVG(humidity_pct) AS avg_humidity_pct,
-                SUM(COALESCE(precip_mm, 0)) AS precip_mm,
-                AVG(expected_activity) AS behavior_index_raw
-            FROM future_expected_activity_hourly
-            WHERE CAST(substr(forecast_time, 12, 2) AS INTEGER) BETWEEN 6 AND 19
-            GROUP BY forecast_date
-            ORDER BY forecast_date ASC
-            """
-        )
-        future_days = cursor.fetchall()
-
         forecast = []
         forecast_info = []
 
         for row in future_days:
-            forecast_date = row["forecast_date"]
+            forecast_date = row["date"]
             avg_temp_c = row["avg_temp_c"]
             avg_humidity_pct = row["avg_humidity_pct"]
             precip_mm = row["precip_mm"]
@@ -1123,6 +1416,7 @@ def get_mismatch_overview():
                 "mismatch_level": mismatch_level
             })
 
+        actual, forecast = split_daily_actual_forecast(actual, forecast)
         result = build_bridge_series(actual, forecast)
         result["history_info"] = history_info
         result["forecast_info"] = forecast_info
