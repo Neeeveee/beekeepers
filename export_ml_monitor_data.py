@@ -87,6 +87,8 @@ def load_history_rows():
             FROM expected_activity_hourly
             WHERE actual_activity IS NOT NULL
               AND expected_activity IS NOT NULL
+              AND hour BETWEEN 8 AND 17
+              AND expected_activity > 0.03
             ORDER BY aligned_time ASC
             """
         ).fetchall()
@@ -125,6 +127,7 @@ def build_history_payload(model_bundle):
         raw_residual = predict(coefficients, vector)
         residual, confidence_scale, cap = apply_residual_guard(raw_residual, model_bundle)
         ml_adjusted = clamp(rule_expected + residual)
+        effective_adjustment = ml_adjusted - rule_expected
 
         rule_error = actual - rule_expected
         ml_error = actual - ml_adjusted
@@ -139,7 +142,8 @@ def build_history_payload(model_bundle):
                 "rule_expected_activity": round(rule_expected, 4),
                 "ml_adjusted_activity": round(ml_adjusted, 4),
                 "ml_raw_residual_adjustment": round(raw_residual, 4),
-                "ml_residual_adjustment": round(residual, 4),
+                "ml_guarded_residual_adjustment": round(residual, 4),
+                "ml_residual_adjustment": round(effective_adjustment, 4),
                 "ml_confidence_scale": round(confidence_scale, 4),
                 "ml_adjustment_cap": round(cap, 4),
                 "rule_error": round(rule_error, 4),
@@ -185,7 +189,7 @@ def build_alerts(history_summary, future_payload, model_bundle):
 
     future_items = future_payload.get("items", []) if future_payload else []
     if future_items:
-        max_adjustment = max(abs(item["ml_residual_adjustment"]) for item in future_items)
+        max_adjustment = max(abs(item.get("ml_guarded_residual_adjustment", item["ml_residual_adjustment"])) for item in future_items)
         max_cap = max(item.get("ml_adjustment_cap", 0.0) for item in future_items)
         if max_adjustment >= max_cap and max_cap > 0:
             alerts.append({

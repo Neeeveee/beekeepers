@@ -12,7 +12,7 @@ DB_PATH = BASE_DIR / "bee_env.db"
 MODEL_DIR = BASE_DIR / "models"
 MODEL_PATH = MODEL_DIR / "residual_ridge.json"
 METRICS_PATH = MODEL_DIR / "residual_ridge_metrics.json"
-FULL_CONFIDENCE_SAMPLE_COUNT = 24
+FULL_CONFIDENCE_SAMPLE_COUNT = 72
 
 FEATURE_COLUMNS = [
     "hour",
@@ -64,6 +64,8 @@ def load_training_rows():
             FROM expected_activity_hourly
             WHERE actual_activity IS NOT NULL
               AND expected_activity IS NOT NULL
+              AND hour BETWEEN 8 AND 17
+              AND expected_activity > 0.03
             ORDER BY aligned_time ASC
             """
         ).fetchall()
@@ -217,9 +219,9 @@ def main():
         "coefficients": coefficients,
         "safeguards": {
             "full_confidence_sample_count": FULL_CONFIDENCE_SAMPLE_COUNT,
-            "low_sample_cap": 0.08,
-            "medium_sample_cap": 0.12,
-            "high_sample_cap": 0.18,
+            "low_sample_cap": 0.04,
+            "medium_sample_cap": 0.08,
+            "high_sample_cap": 0.10,
         },
     }
 

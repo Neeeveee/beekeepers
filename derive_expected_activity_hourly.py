@@ -25,6 +25,19 @@ def clamp(value: float, min_value: float = 0.0, max_value: float = 1.0) -> float
     return max(min_value, min(max_value, value))
 
 
+def percentile(values: list[float], q: float) -> float:
+    if not values:
+        return 1.0
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    pos = (len(ordered) - 1) * q
+    lower = int(pos)
+    upper = min(lower + 1, len(ordered) - 1)
+    weight = pos - lower
+    return ordered[lower] * (1 - weight) + ordered[upper] * weight
+
+
 def base_activity(hour: int) -> float:
     if hour < 6 or hour > 19:
         return 0.0
@@ -157,12 +170,14 @@ def rebuild_expected_activity_hourly() -> None:
             """
         ).fetchall()
 
-        max_actual_raw = max(
-            [float(row["avg_activity_value"] or 0.0) for row in rows],
-            default=1.0,
-        )
-        if max_actual_raw <= 0:
-            max_actual_raw = 1.0
+        positive_actuals = [
+            float(row["avg_activity_value"])
+            for row in rows
+            if row["avg_activity_value"] is not None and float(row["avg_activity_value"]) > 0
+        ]
+        actual_scale = percentile(positive_actuals, 0.99)
+        if actual_scale <= 0:
+            actual_scale = 1.0
 
         inserted = 0
         for row in rows:
@@ -191,7 +206,7 @@ def rebuild_expected_activity_hourly() -> None:
 
             act_raw = row["avg_activity_value"]
             actual_activity = (
-                round(clamp(float(act_raw) / max_actual_raw), 4)
+                round(clamp(float(act_raw) / actual_scale), 4)
                 if act_raw is not None else None
             )
 
