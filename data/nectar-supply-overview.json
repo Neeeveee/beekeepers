@@ -99,26 +99,22 @@
     {
       "time": "2026-03-19",
       "value": 0.516
+    },
+    {
+      "time": "2026-03-20",
+      "value": 0.425
     }
   ],
   "current_top": [
     {
-      "nectar_supply_index": 0.422,
+      "nectar_supply_index": 0.346,
       "plant_name": "油菜"
-    },
-    {
-      "nectar_supply_index": 0.229,
-      "plant_name": "果梅"
     }
   ],
   "forecast": [
     {
-      "time": "2026-03-20",
-      "value": 0.347
-    },
-    {
       "time": "2026-03-21",
-      "value": 0.62
+      "value": 0.346
     },
     {
       "time": "2026-03-22",
@@ -126,14 +122,18 @@
     },
     {
       "time": "2026-03-23",
-      "value": 0.398
+      "value": 0.511
     },
     {
       "time": "2026-03-24",
-      "value": 0.287
+      "value": 0.329
     },
     {
       "time": "2026-03-25",
+      "value": 0.351
+    },
+    {
+      "time": "2026-03-26",
       "value": 0.351
     }
   ],
