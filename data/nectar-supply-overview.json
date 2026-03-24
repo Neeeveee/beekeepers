@@ -2,102 +2,103 @@
   "actual": [
     {
       "time": "2025-05-01",
-      "value": 0.786
+      "value": 0.773
     },
     {
       "time": "2025-12-09",
-      "value": 0.7
+      "value": 0.685
     },
     {
       "time": "2025-12-10",
-      "value": 0.883
+      "value": 0.876
     },
     {
       "time": "2025-12-11",
-      "value": 0.883
+      "value": 0.876
     },
     {
       "time": "2025-12-12",
-      "value": 0.883
+      "value": 0.876
     },
     {
       "time": "2026-01-08",
-      "value": 0.455
+      "value": 0.529
     },
     {
       "time": "2026-01-09",
-      "value": 0.455
+      "value": 0.529
     },
     {
       "time": "2026-01-22",
-      "value": 0.31
+      "value": 0.278
     },
     {
       "time": "2026-01-23",
-      "value": 0.315
+      "value": 0.283
     },
     {
       "time": "2026-02-06",
-      "value": 0.216
+      "value": 0.238
     },
     {
       "time": "2026-02-07",
-      "value": 0.29
+      "value": 0.264
     },
     {
       "time": "2026-03-06",
-      "value": 0.511
+      "value": 0.41
     },
     {
       "time": "2026-03-07",
-      "value": 0.511
+      "value": 0.41
     },
     {
       "time": "2026-03-08",
-      "value": 0.455
+      "value": 0.399
     },
     {
       "time": "2026-03-09",
-      "value": 0.455
+      "value": 0.399
     },
     {
       "time": "2026-03-10",
-      "value": 0.449
+      "value": 0.396
     },
     {
       "time": "2026-03-11",
-      "value": 0.511
+      "value": 0.45
     },
     {
       "time": "2026-03-12",
-      "value": 0.511
+      "value": 0.492
     },
     {
       "time": "2026-03-13",
-      "value": 0.618
+      "value": 0.595
     },
     {
       "time": "2026-03-14",
-      "value": 0.618
+      "value": 0.6
     },
     {
       "time": "2026-03-15",
-      "value": 0.581
+      "value": 0.565
     },
     {
       "time": "2026-03-16",
-      "value": 0.436
+      "value": 0.493
     },
     {
       "time": "2026-03-17",
-      "value": 0.42
+      "value": 0.474
     },
     {
       "time": "2026-03-18",
-      "value": 0.327
+      "value": 0.369
     },
     {
       "time": "2026-03-19",
+<<<<<<< HEAD
       "value": 0.516
     },
     {
@@ -119,17 +120,41 @@
     {
       "time": "2026-03-24",
       "value": 0.239
+=======
+      "value": 0.614
+    },
+    {
+      "time": "2026-03-20",
+      "value": 0.511
+>>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
     }
   ],
   "current_top": [
     {
+<<<<<<< HEAD
       "nectar_supply_index": 0.385,
       "plant_name": "油菜"
+=======
+      "contribution_value": 0.491,
+      "nectar_supply_index": 0.545,
+      "plant_name": "油菜"
+    },
+    {
+      "contribution_value": 0.394,
+      "nectar_supply_index": 0.512,
+      "plant_name": "紫云英"
+    },
+    {
+      "contribution_value": 0.167,
+      "nectar_supply_index": 0.474,
+      "plant_name": "蚕豆"
+>>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
     }
   ],
   "forecast": [
     {
       "time": "2026-03-25",
+<<<<<<< HEAD
       "value": 0.385
     },
     {
@@ -151,12 +176,46 @@
     {
       "time": "2026-03-30",
       "value": 0.307
+=======
+      "value": 0.86
+    },
+    {
+      "time": "2026-03-26",
+      "value": 0.828
+    },
+    {
+      "time": "2026-03-27",
+      "value": 0.632
+    },
+    {
+      "time": "2026-03-28",
+      "value": 0.91
+    },
+    {
+      "time": "2026-03-29",
+      "value": 0.895
+>>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
     }
   ],
   "future_top": [
     {
+<<<<<<< HEAD
       "nectar_supply_index": 0.307,
+=======
+      "contribution_value": 0.769,
+      "nectar_supply_index": 1.0,
+      "plant_name": "紫云英"
+    },
+    {
+      "contribution_value": 0.744,
+      "nectar_supply_index": 0.827,
+>>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
       "plant_name": "油菜"
+    },
+    {
+      "contribution_value": 0.34,
+      "nectar_supply_index": 0.963,
+      "plant_name": "蚕豆"
     }
   ]
 }

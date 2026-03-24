@@ -352,7 +352,10 @@ function renderBeeChart() {
         },
         yAxis: {
             type: "value",
-            name: "活跃度"
+            name: "活跃度",
+            min: 0,
+            max: 1,
+            interval: 0.2
         },
         series: [
             {
@@ -377,7 +380,7 @@ function renderBeeChart() {
 function renderPie(chart, title, items) {
     const pieData = (items || []).map(item => ({
         name: item.plant_name,
-        value: item.flowering_index ?? item.nectar_supply_index ?? 0
+        value: item.contribution_value ?? item.flowering_index ?? item.nectar_supply_index ?? 0
     }));
 
     chart.clear();

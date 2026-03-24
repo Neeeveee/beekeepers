@@ -170,8 +170,50 @@ def calc_behavior_rain_factor(precip_mm: float | None) -> float:
     return 0.18
 
 
+def ensure_nectar_plant_site_weights_table(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS nectar_plant_site_weights (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            site_id INTEGER NOT NULL,
+            plant_name TEXT NOT NULL,
+            scenario TEXT NOT NULL DEFAULT 'default',
+            display_weight REAL NOT NULL DEFAULT 1.0,
+            note TEXT,
+            created_at TEXT DEFAULT (datetime('now', 'localtime')),
+            UNIQUE(site_id, plant_name, scenario)
+        )
+        """
+    )
+
+
+def load_site_display_weights(
+    conn: sqlite3.Connection,
+    site_id: int = 1,
+    scenario: str = "farm"
+) -> dict[str, float]:
+    ensure_nectar_plant_site_weights_table(conn)
+    rows = conn.execute(
+        """
+        SELECT plant_name, display_weight
+        FROM nectar_plant_site_weights
+        WHERE site_id = ? AND scenario = ?
+        """,
+        (site_id, scenario),
+    ).fetchall()
+    return {
+        row["plant_name"]: float(row["display_weight"] or 1.0)
+        for row in rows
+    }
+
+
+def build_effective_weight(base_weight: float, display_weight: float | None) -> float:
+    return round(base_weight * max(0.0, float(display_weight or 1.0)), 4)
+
+
 def load_plant_meta(conn: sqlite3.Connection) -> tuple[dict[str, dict], dict[str, float]]:
     cursor = conn.cursor()
+    display_weights = load_site_display_weights(conn)
     cursor.execute(
         """
         SELECT
@@ -198,11 +240,16 @@ def load_plant_meta(conn: sqlite3.Connection) -> tuple[dict[str, dict], dict[str
             "confidence": plant["confidence"],
             "bloom_start_mmdd": plant["bloom_start_mmdd"],
             "bloom_end_mmdd": plant["bloom_end_mmdd"],
+            "display_weight": display_weights.get(plant_name, 1.0),
         }
-        plant_weights[plant_name] = calc_nectar_resource_factor(
+        base_weight = calc_nectar_resource_factor(
             plant["nectar_grade"],
             plant["avg_yield_kg_per_colony"],
             plant["confidence"],
+        )
+        plant_weights[plant_name] = build_effective_weight(
+            base_weight,
+            display_weights.get(plant_name, 1.0),
         )
 
     return plant_meta, plant_weights
@@ -861,6 +908,7 @@ def get_flowering_overview():
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+        display_weights = load_site_display_weights(conn)
 
         cursor.execute(
             """
@@ -881,18 +929,20 @@ def get_flowering_overview():
         plant_weights = {}
         for plant in plants:
             plant_name = plant["plant_name"]
-            weight = calc_resource_factor(
+            base_weight = calc_resource_factor(
                 plant["nectar_grade"],
                 plant["pollen_grade"],
                 plant["confidence"]
             )
-            plant_weights[plant_name] = weight
+            display_weight = display_weights.get(plant_name, 1.0)
+            plant_weights[plant_name] = build_effective_weight(base_weight, display_weight)
             plant_meta[plant_name] = {
                 "bloom_start_mmdd": plant["bloom_start_mmdd"],
                 "bloom_end_mmdd": plant["bloom_end_mmdd"],
                 "nectar_grade": plant["nectar_grade"],
                 "pollen_grade": plant["pollen_grade"],
                 "confidence": plant["confidence"],
+                "display_weight": display_weight,
             }
 
         cursor.execute(
@@ -938,7 +988,11 @@ def get_flowering_overview():
             latest_hist_date = sorted(history_by_date.keys())[-1]
             ranked = sorted(
                 [
-                    (plant_name, value)
+                    (
+                        plant_name,
+                        value,
+                        round((value or 0.0) * plant_weights.get(plant_name, 1.0), 3)
+                    )
                     for plant_name, value in history_by_date[latest_hist_date]
                     if plant_name in plant_meta and is_date_in_bloom_window(
                         latest_hist_date,
@@ -946,15 +1000,16 @@ def get_flowering_overview():
                         plant_meta[plant_name]["bloom_end_mmdd"]
                     )
                 ],
-                key=lambda x: x[1],
+                key=lambda x: x[2],
                 reverse=True
             )[:3]
             current_top = [
                 {
                     "plant_name": plant_name,
-                    "flowering_index": round(value, 3)
+                    "flowering_index": round(value, 3),
+                    "contribution_value": contribution_value
                 }
-                for plant_name, value in ranked
+                for plant_name, value, contribution_value in ranked
             ]
 
         forecast = []
@@ -1008,11 +1063,16 @@ def get_flowering_overview():
 
         future_top = []
         if future_last_day_scores:
-            ranked = sorted(future_last_day_scores, key=lambda x: x[1], reverse=True)[:3]
+            ranked = sorted(
+                future_last_day_scores,
+                key=lambda x: x[1] * plant_weights.get(x[0], 1.0),
+                reverse=True
+            )[:3]
             future_top = [
                 {
                     "plant_name": plant_name,
-                    "flowering_index": round(value, 3)
+                    "flowering_index": round(value, 3),
+                    "contribution_value": round(value * plant_weights.get(plant_name, 1.0), 3)
                 }
                 for plant_name, value in ranked
             ]
@@ -1032,6 +1092,7 @@ def get_nectar_supply_overview():
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+        display_weights = load_site_display_weights(conn)
 
         cursor.execute(
             """
@@ -1055,13 +1116,14 @@ def get_nectar_supply_overview():
         for plant in plants:
             plant_name = plant["plant_name"]
 
-            weight = calc_nectar_resource_factor(
+            base_weight = calc_nectar_resource_factor(
                 plant["nectar_grade"],
                 plant["avg_yield_kg_per_colony"],
                 plant["confidence"]
             )
 
-            plant_weights[plant_name] = weight
+            display_weight = display_weights.get(plant_name, 1.0)
+            plant_weights[plant_name] = build_effective_weight(base_weight, display_weight)
             plant_meta[plant_name] = {
                 "nectar_grade": plant["nectar_grade"],
                 "pollen_grade": plant["pollen_grade"],
@@ -1069,6 +1131,7 @@ def get_nectar_supply_overview():
                 "confidence": plant["confidence"],
                 "bloom_start_mmdd": plant["bloom_start_mmdd"],
                 "bloom_end_mmdd": plant["bloom_end_mmdd"],
+                "display_weight": display_weight,
             }
 
         cursor.execute(
@@ -1115,7 +1178,11 @@ def get_nectar_supply_overview():
             latest_hist_date = sorted(history_by_date.keys())[-1]
             ranked = sorted(
                 [
-                    (plant_name, value)
+                    (
+                        plant_name,
+                        value,
+                        round((value or 0.0) * plant_weights.get(plant_name, 1.0), 3)
+                    )
                     for plant_name, value in history_by_date[latest_hist_date]
                     if plant_name in plant_meta and is_date_in_bloom_window(
                         latest_hist_date,
@@ -1123,16 +1190,17 @@ def get_nectar_supply_overview():
                         plant_meta[plant_name]["bloom_end_mmdd"]
                     )
                 ],
-                key=lambda x: x[1],
+                key=lambda x: x[2],
                 reverse=True
             )[:3]
 
             current_top = [
                 {
                     "plant_name": plant_name,
-                    "nectar_supply_index": round(value, 3)
+                    "nectar_supply_index": round(value, 3),
+                    "contribution_value": contribution_value
                 }
-                for plant_name, value in ranked
+                for plant_name, value, contribution_value in ranked
             ]
 
         forecast = []
@@ -1198,12 +1266,17 @@ def get_nectar_supply_overview():
 
         future_top = []
         if future_last_day_scores:
-            ranked = sorted(future_last_day_scores, key=lambda x: x[1], reverse=True)[:3]
+            ranked = sorted(
+                future_last_day_scores,
+                key=lambda x: x[1] * plant_weights.get(x[0], 1.0),
+                reverse=True
+            )[:3]
 
             future_top = [
                 {
                     "plant_name": plant_name,
-                    "nectar_supply_index": round(value, 3)
+                    "nectar_supply_index": round(value, 3),
+                    "contribution_value": round(value * plant_weights.get(plant_name, 1.0), 3)
                 }
                 for plant_name, value in ranked
             ]
@@ -1223,6 +1296,7 @@ def get_mismatch_overview():
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+        display_weights = load_site_display_weights(conn)
 
         # =========================
         # 历史错配结果
@@ -1317,13 +1391,16 @@ def get_mismatch_overview():
         for plant in plants:
             plant_name = plant["plant_name"]
 
-            weight = calc_nectar_resource_factor(
+            base_weight = calc_nectar_resource_factor(
                 plant["nectar_grade"],
                 plant["avg_yield_kg_per_colony"],
                 plant["confidence"]
             )
 
-            plant_weights[plant_name] = weight
+            plant_weights[plant_name] = build_effective_weight(
+                base_weight,
+                display_weights.get(plant_name, 1.0),
+            )
             plant_meta[plant_name] = {
                 "nectar_grade": plant["nectar_grade"],
                 "pollen_grade": plant["pollen_grade"],
