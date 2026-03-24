@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-03-24 09:57:22",
+  "generated_at": "2026-03-24 10:13:40",
   "source_model": "residual_ridge_pure_python",
   "items": [
-    {
-      "time": "2026-03-24 10:00:00",
-      "date": "2026-03-24",
-      "rule_expected_activity": 0.326,
-      "ml_raw_residual_adjustment": 0.1145,
-      "ml_guarded_residual_adjustment": 0.08,
-      "ml_residual_adjustment": 0.08,
-      "ml_adjusted_activity": 0.406,
-      "ml_confidence_scale": 0.7778,
-      "ml_adjustment_cap": 0.08
-    },
     {
       "time": "2026-03-24 11:00:00",
       "date": "2026-03-24",
@@ -351,6 +340,17 @@
       "ml_guarded_residual_adjustment": -0.08,
       "ml_residual_adjustment": -0.08,
       "ml_adjusted_activity": 0.152,
+      "ml_confidence_scale": 0.7778,
+      "ml_adjustment_cap": 0.08
+    },
+    {
+      "time": "2026-03-25 18:00:00",
+      "date": "2026-03-25",
+      "rule_expected_activity": 0.1096,
+      "ml_raw_residual_adjustment": 0.0,
+      "ml_guarded_residual_adjustment": 0.0,
+      "ml_residual_adjustment": 0.0,
+      "ml_adjusted_activity": 0.1096,
       "ml_confidence_scale": 0.7778,
       "ml_adjustment_cap": 0.08
     }

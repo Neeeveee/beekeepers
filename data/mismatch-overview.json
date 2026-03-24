@@ -2,15 +2,11 @@
   "actual": [
     {
       "time": "2026-03-07",
-      "value": 0.51
+      "value": 0.685
     },
     {
       "time": "2026-03-10",
-<<<<<<< HEAD
       "value": 0.262
-=======
-      "value": 0.375
->>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
     },
     {
       "time": "2026-03-11",
@@ -18,15 +14,11 @@
     },
     {
       "time": "2026-03-12",
-      "value": 0.055
+      "value": 0.0
     },
     {
       "time": "2026-03-13",
-<<<<<<< HEAD
       "value": 0.187
-=======
-      "value": 0.053
->>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
     },
     {
       "time": "2026-03-14",
@@ -38,7 +30,6 @@
     },
     {
       "time": "2026-03-16",
-<<<<<<< HEAD
       "value": 0.435
     },
     {
@@ -73,7 +64,7 @@
   "forecast": [
     {
       "time": "2026-03-25",
-      "value": 0.157
+      "value": 0.127
     },
     {
       "time": "2026-03-26",
@@ -94,54 +85,16 @@
     {
       "time": "2026-03-30",
       "value": 0.327
-=======
-      "value": 0.37
-    },
-    {
-      "time": "2026-03-17",
-      "value": 0.73
-    },
-    {
-      "time": "2026-03-18",
-      "value": 0.067
-    },
-    {
-      "time": "2026-03-19",
-      "value": 0.555
-    }
-  ],
-  "forecast": [
-    {
-      "time": "2026-03-25",
-      "value": 0.008
-    },
-    {
-      "time": "2026-03-26",
-      "value": 0.0
-    },
-    {
-      "time": "2026-03-27",
-      "value": 0.028
-    },
-    {
-      "time": "2026-03-28",
-      "value": 0.063
-    },
-    {
-      "time": "2026-03-29",
-      "value": 0.11
->>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
     }
   ],
   "forecast_info": [
     {
-<<<<<<< HEAD
       "mismatch_level": "轻度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-03-24"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "基本匹配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-03-25"
     },
@@ -169,41 +122,6 @@
       "mismatch_level": "中度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-03-30"
-=======
-      "mismatch_level": "显著错配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-03-19"
-    },
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-03-20"
-    },
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-03-25"
-    },
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "matched",
-      "time": "2026-03-26"
-    },
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-03-27"
-    },
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-03-28"
-    },
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-03-29"
->>>>>>> f94f20d (Localize nectar model for Hangzhou farm scenario)
     }
   ],
   "history_info": [
@@ -213,7 +131,7 @@
       "time": "2026-03-07"
     },
     {
-      "mismatch_level": "中度错配",
+      "mismatch_level": "轻度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-03-10"
     },
@@ -224,11 +142,11 @@
     },
     {
       "mismatch_level": "基本匹配",
-      "mismatch_type": "behavior_ahead",
+      "mismatch_type": "matched",
       "time": "2026-03-12"
     },
     {
-      "mismatch_level": "基本匹配",
+      "mismatch_level": "轻度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-03-13"
     },
