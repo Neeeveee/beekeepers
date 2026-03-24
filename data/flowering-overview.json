@@ -123,14 +123,14 @@
   ],
   "current_top": [
     {
-      "flowering_index": 0.416,
+      "flowering_index": 0.426,
       "plant_name": "油菜"
     }
   ],
   "forecast": [
     {
       "time": "2026-03-25",
-      "value": 0.416
+      "value": 0.426
     },
     {
       "time": "2026-03-26",
@@ -146,16 +146,16 @@
     },
     {
       "time": "2026-03-29",
-      "value": 0.449
+      "value": 0.463
     },
     {
       "time": "2026-03-30",
-      "value": 0.411
+      "value": 0.384
     }
   ],
   "future_top": [
     {
-      "flowering_index": 0.411,
+      "flowering_index": 0.384,
       "plant_name": "油菜"
     }
   ]
