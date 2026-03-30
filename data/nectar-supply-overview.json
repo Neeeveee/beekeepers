@@ -139,23 +139,23 @@
     {
       "time": "2026-03-29",
       "value": 0.396
+    },
+    {
+      "time": "2026-03-30",
+      "value": 0.326
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.219,
-      "nectar_supply_index": 0.307,
+      "contribution_value": 0.268,
+      "nectar_supply_index": 0.376,
       "plant_name": "油菜"
     }
   ],
   "forecast": [
     {
-      "time": "2026-03-30",
-      "value": 0.307
-    },
-    {
       "time": "2026-03-31",
-      "value": 0.361
+      "value": 0.376
     },
     {
       "time": "2026-04-01",
@@ -163,21 +163,25 @@
     },
     {
       "time": "2026-04-02",
-      "value": 0.416
+      "value": 0.383
     },
     {
       "time": "2026-04-03",
-      "value": 0.299
+      "value": 0.278
     },
     {
       "time": "2026-04-04",
-      "value": 0.416
+      "value": 0.403
+    },
+    {
+      "time": "2026-04-05",
+      "value": 0.403
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.19,
-      "nectar_supply_index": 0.416,
+      "contribution_value": 0.184,
+      "nectar_supply_index": 0.403,
       "plant_name": "苦木诸"
     }
   ]
