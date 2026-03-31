@@ -276,7 +276,7 @@ function buildSharedLineOption(built, seriesNames) {
         legend: { show: false },
         tooltip: {
             trigger: "axis",
-            triggerOn: "mousemove",
+            triggerOn: "mousemove|click",
             backgroundColor: CHART_COLORS.tooltipBackground,
             borderColor: CHART_COLORS.tooltipBorder,
             borderWidth: 1,
@@ -284,7 +284,13 @@ function buildSharedLineOption(built, seriesNames) {
                 color: "#292e38"
             },
             axisPointer: {
-                type: "none"
+                type: "line",
+                snap: true,
+                lineStyle: {
+                    color: "rgba(0, 0, 0, 0)",
+                    width: 1,
+                    opacity: 0
+                }
             },
             valueFormatter: value => (
                 typeof value === "number" ? `${Math.round(value * 100)}%` : value
