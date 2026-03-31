@@ -26,11 +26,12 @@
             background: #f7f7f7;
             color: #292e38;
             font-family: Arial, sans-serif;
+            overflow: hidden;
         }
 
         .chart-block {
-            width: min(100%, 1160px);
-            margin: 0 auto 24px;
+            width: min(calc(100vw - 48px), 1160px);
+            margin: 0 auto;
             padding: 24px;
             box-sizing: border-box;
             background: rgba(255, 255, 255, 0.78);
@@ -152,13 +153,13 @@
 
         .eco-flex {
             display: none;
-            width: 220px;
-            min-width: 220px;
+            width: 200px;
+            min-width: 200px;
             align-self: stretch;
         }
 
         .eco-layout.show-side-panel {
-            grid-template-columns: 132px minmax(0, 1fr) 220px;
+            grid-template-columns: 132px minmax(0, 1fr) 200px;
         }
 
         .side-panel {
@@ -168,7 +169,7 @@
         }
 
         .mini-chart {
-            width: 220px;
+            width: 200px;
             height: 156px;
             box-sizing: border-box;
             background: rgba(251, 252, 255, 0.58);
@@ -227,6 +228,7 @@
         @media (max-width: 960px) {
             body {
                 padding: 16px;
+                overflow: auto;
             }
 
             .chart-block {
