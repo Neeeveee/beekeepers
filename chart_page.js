@@ -340,7 +340,7 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.history,
-                    width: 1
+                    width: 1.4
                 }
             },
             {
@@ -354,7 +354,7 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.forecast,
-                    width: 1
+                    width: 1.4
                 }
             }
         ]
