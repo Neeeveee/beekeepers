@@ -2,309 +2,618 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BeeHive Dashboard (EMQX MQTT WebSocket)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bee Dashboard</title>
   <style>
-    :root { --bd:#e5e7eb; --fg:#111827; --muted:#6b7280; --ok:#16a34a; --bad:#dc2626; }
-    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans SC",sans-serif; margin: 24px; color: var(--fg); }
-    h1 { margin: 0 0 14px; font-size: 30px; }
-    small { color: var(--muted); font-weight: 600; }
-    .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
-    .card { border: 1px solid var(--bd); border-radius: 12px; padding: 14px 16px; background: #fff; }
-    .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-    .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--bad); }
-    .dot.ok { background: var(--ok); }
-    code.badge { background:#f3f4f6; border:1px solid var(--bd); padding:2px 6px; border-radius: 8px; }
-    .btn { border: 1px solid var(--bd); background: #fff; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
-    .btn:hover { background:#f9fafb; }
-    .hint { margin-top: 10px; color:#b45309; font-size: 13px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { border-top: 1px solid var(--bd); padding: 10px 8px; text-align: left; white-space: nowrap; }
-    th { background: #fafafa; font-weight: 700; }
-    .section-title { margin: 18px 0 10px; font-size: 22px; }
-    .mono { font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace; }
-    .chart-wrap { height: 320px; }
-    .subtle { color: var(--muted); font-size: 13px; }
+    :root {
+      --page-bg: #ffffff;
+      --surface-soft: rgba(255, 255, 255, 0.4);
+      --surface-softer: rgba(255, 255, 255, 0.08);
+      --line-main: #b0b0b0;
+      --line-soft: #d7d7d7;
+      --line-top: #e7e7e7;
+      --text-main: #2c2c2c;
+      --text-subtle: #3e3e3e;
+      --text-soft: #6c6c6c;
+      --text-muted: #c4c9d4;
+      --highlight: rgba(255, 246, 0, 0.4);
+      --overlay: rgba(0, 0, 0, 0.4);
+      --radius-sm: 6px;
+      --radius-pill: 20px;
+      --gap: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--page-bg);
+      color: var(--text-main);
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app-shell {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--page-bg);
+    }
+
+    .map-module-container {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .map-module-label {
+      position: absolute;
+      top: 293px;
+      left: 295.5px;
+      font-size: 18px;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .map-module-container.heatmap-active::after {
+      content: "heatmap-layer-placeholder";
+      position: absolute;
+      left: 32px;
+      bottom: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 220px;
+      height: 38px;
+      padding: 0 14px;
+      border: 0.6px dashed rgba(188, 188, 188, 0.9);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 246, 0, 0.12);
+      color: #8a7a00;
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .flower-layer-container,
+    .bee-layer-container {
+      position: absolute;
+      top: 20px;
+      left: 197px;
+      width: 220px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-sm);
+      background: var(--overlay);
+      color: var(--text-muted);
+      font-size: 14px;
+      z-index: 2;
+    }
+
+    .bee-layer-container {
+      top: 88px;
+      left: 120px;
+    }
+
+    .layer-hidden {
+      display: none;
+    }
+
+    .top-right-info-bar {
+      position: absolute;
+      top: 32px;
+      right: 22px;
+      width: 520px;
+      height: 30px;
+      border: 0.6px solid var(--line-top);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+      z-index: 3;
+    }
+
+    .top-right-info-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 520px;
+      height: 3px;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .info-chip-list {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 87px 86px 87px 87px 86px 87px;
+      align-items: start;
+      padding-top: 2.4px;
+    }
+
+    .info-chip {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-sm);
+      background: var(--surface-softer);
+      color: var(--text-subtle);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .left-navigation {
+      position: absolute;
+      top: 20px;
+      left: 17px;
+      width: 225px;
+      height: 312px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 3;
+    }
+
+    .left-navigation::before,
+    .left-navigation::after {
+      content: "";
+      position: absolute;
+      left: 18px;
+      width: 189px;
+      height: 3px;
+      background-repeat: no-repeat;
+      background-size: 189px 3px;
+      pointer-events: none;
+    }
+
+    .left-navigation::before {
+      top: 24px;
+      background-image: url("./images/image 28.png");
+    }
+
+    .left-navigation::after {
+      top: 285px;
+      background-image: url("./images/image 27.png");
+    }
+
+    .brand-mark {
+      position: absolute;
+      top: 30px;
+      left: 18px;
+      width: 120px;
+      height: 105px;
+      object-fit: contain;
+      object-position: left top;
+      pointer-events: none;
+    }
+
+    .mode-switch {
+      position: absolute;
+      inset: 0;
+    }
+
+    .mode-button {
+      position: absolute;
+      left: 18px;
+      width: 165px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding-left: 18px;
+      border: 0;
+      border-top: 0.4px solid var(--line-main);
+      background: var(--surface-softer);
+      color: var(--text-soft);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .mode-button.active {
+      background: linear-gradient(90deg, rgba(255, 246, 0, 0.29) 50%, rgba(255, 246, 0, 0) 100%);
+    }
+
+    .overlay-hidden {
+      display: none;
+    }
+
+    .mode-button.mode-flower {
+      top: 150px;
+    }
+
+    .mode-button.mode-bee {
+      top: 195px;
+    }
+
+    .mode-button.mode-plan {
+      top: 240px;
+    }
+
+    .mode-icon {
+      width: 30px;
+      height: 30px;
+      object-fit: cover;
+      flex: 0 0 auto;
+      pointer-events: none;
+    }
+
+    .mode-label {
+      font-size: 21px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .bottom-left-layer-toggle {
+      position: absolute;
+      left: 23px;
+      bottom: 20px;
+      width: 118px;
+      height: 50px;
+      border: 1px solid #afafaf;
+      border-radius: 40px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 3;
+    }
+
+    .toggle-button {
+      position: absolute;
+      top: 4px;
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0.6px solid #bbbbbb;
+      border-radius: 20px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .toggle-button.active {
+      background: var(--highlight);
+    }
+
+    .toggle-button.heatmap-toggle {
+      left: 13px;
+    }
+
+    .toggle-button.curve-toggle {
+      left: 63px;
+    }
+
+    .toggle-icon {
+      width: 24px;
+      height: 24px;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .toggle-icon.curve {
+      width: 24px;
+      height: 24px;
+      object-position: center;
+    }
+
+    .right-information {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      width: 420px;
+      height: 320px;
+      border: 0;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 3;
+      transition: transform 0.2s ease;
+    }
+
+    .app-shell.curve-panel-open .right-information {
+      transform: translateY(-132px);
+    }
+
+    .dashboard-panel-title {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      width: 392px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .dashboard-grid {
+      position: absolute;
+      left: 18px;
+      top: 54px;
+      display: grid;
+      grid-template-columns: repeat(2, 185px);
+      grid-template-rows: repeat(2, 122px);
+      gap: 14px;
+    }
+
+    .dashboard-gauge-slot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 185px;
+      height: 122px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .bottom-curve-panel {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      height: 112px;
+      padding: 12px 16px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 1;
+    }
+
+    .bottom-curve-panel.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .curve-module-mount {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .curve-module-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: transparent;
+    }
+
+    .curve-module-hint {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .curve-module-hint.is-hidden {
+      display: none;
+    }
   </style>
-
-  <!-- mqtt.js (browser) -->
-  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-
 <body>
-  <h1>BeeHive Dashboard <small>(EMQX MQTT WebSocket)</small></h1>
+  <main class="app-shell">
+    <div class="map-module-container">
+      <div class="map-module-label">map-module-container</div>
+    </div>
 
-  <div class="grid">
-    <div class="card">
-      <div class="row">
-        <div id="dot" class="dot"></div>
-        <div>
-          <div style="font-size:18px;font-weight:800;">连接状态：<span id="connText">未连接</span></div>
-          <div class="mono subtle" id="wsUrl"></div>
+    <div class="flower-layer-container overlay-hidden">flower-layer-container</div>
+    <div class="bee-layer-container layer-hidden">bee-layer-container</div>
+
+    <header class="top-right-info-bar" aria-label="右上信息条">
+      <img class="top-right-info-line" src="./images/image 29.png" alt="" aria-hidden="true" />
+      <div class="info-chip-list">
+        <div class="info-chip">地点</div>
+        <div class="info-chip">日期</div>
+        <div class="info-chip">时间</div>
+        <div class="info-chip">天气</div>
+        <div class="info-chip">温度</div>
+        <div class="info-chip">湿度</div>
+      </div>
+    </header>
+
+    <aside class="left-navigation" aria-label="左侧导航">
+      <img class="brand-mark" src="./images/image 21.png" alt="B-Cue 标识" />
+      <nav class="mode-switch" aria-label="模式切换">
+        <button class="mode-button mode-flower" type="button" data-toggle-group="mode-switch" data-layer-target="flower">
+          <img class="mode-icon" src="./images/image 26.png" alt="" aria-hidden="true" />
+          <span class="mode-label">环境</span>
+        </button>
+        <button class="mode-button mode-bee" type="button" data-toggle-group="mode-switch" data-layer-target="bee">
+          <img class="mode-icon" src="./images/image 25.png" alt="" aria-hidden="true" />
+          <span class="mode-label">行为</span>
+        </button>
+        <button class="mode-button mode-plan" type="button" data-toggle-group="mode-switch">
+          <img class="mode-icon" src="./images/image 24.png" alt="" aria-hidden="true" />
+          <span class="mode-label">策略</span>
+        </button>
+      </nav>
+    </aside>
+
+    <section class="bottom-left-layer-toggle" aria-label="左下控制区">
+      <button class="toggle-button heatmap-toggle" type="button" data-toggle-mode="independent" data-panel-target="heatmap" aria-label="热力图开关">
+        <img class="toggle-icon" src="./images/image 22.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="toggle-button curve-toggle" type="button" data-toggle-mode="independent" data-panel-target="curve" aria-label="曲线图开关">
+        <img class="toggle-icon curve" src="./images/image 23.png" alt="" aria-hidden="true" />
+      </button>
+    </section>
+
+    <aside class="right-information" aria-label="右侧信息区">
+      <div class="dashboard-panel-title">bottom-right-dashboard-panel</div>
+      <div class="dashboard-grid">
+        <div class="dashboard-gauge-slot">gauge-slot-1</div>
+        <div class="dashboard-gauge-slot">gauge-slot-2</div>
+        <div class="dashboard-gauge-slot">gauge-slot-3</div>
+        <div class="dashboard-gauge-slot">gauge-slot-4</div>
+      </div>
+    </aside>
+
+    <section class="bottom-curve-panel" aria-label="底部曲线面板">
+      <div class="curve-module-mount">
+        <iframe
+          id="curveModuleFrame"
+          class="curve-module-frame"
+          title="底部曲线模块"
+          loading="lazy"
+        ></iframe>
+        <div id="curveModuleHint" class="curve-module-hint">
+          请选择“环境”或“行为”模式以加载对应曲线模块
         </div>
       </div>
-      <hr style="border:none;border-top:1px solid var(--bd);margin:12px 0;">
-      <div class="subtle">订阅：<code class="badge mono" id="subTopic"></code></div>
-      <div class="subtle">数据 Topic：<code class="badge mono" id="dataTopic"></code></div>
-      <div class="subtle">状态 Topic：<code class="badge mono" id="statusTopic"></code></div>
+    </section>
+  </main>
 
-      <div class="row" style="margin-top: 12px;">
-        <button class="btn" id="btnClear">清空列表</button>
-        <button class="btn" id="btnReconnect">重连</button>
-      </div>
+  <script>
+    // GitHub-hosted chart page with auto-updated data. Keep this as the only source entry.
+    const CURVE_MODULE_BASE_URL = "https://neeeveee.github.io/beekeepers/chart_test.html?mode=static&t=20260323v2";
 
-      <div class="hint">如果打开页面后一条消息都不显示：按 F12 → Console 看有没有报错（常见是账号/密码或 WS 地址）。</div>
-    </div>
+    const appShell = document.querySelector(".app-shell");
+    const modeButtons = document.querySelectorAll(".mode-button[data-toggle-group='mode-switch']");
+    const independentButtons = document.querySelectorAll(".toggle-button[data-toggle-mode='independent']");
+    const curvePanel = document.querySelector(".bottom-curve-panel");
+    const flowerLayer = document.querySelector(".flower-layer-container");
+    const beeLayer = document.querySelector(".bee-layer-container");
+    const mapModuleContainer = document.querySelector(".map-module-container");
+    const curveModuleFrame = document.getElementById("curveModuleFrame");
+    const curveModuleHint = document.getElementById("curveModuleHint");
 
-    <div class="card">
-      <div style="font-size:20px;font-weight:900;">最新一条（10min）</div>
-      <div id="latest" style="margin-top:10px;font-size:16px;">（等待数据...）</div>
-      <div class="subtle" style="margin-top:8px;">只会显示 topic 为 <span class="mono" id="latestFilter"></span> 的消息</div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-      <div style="font-size:20px;font-weight:900;">IN / OUT 折线图（10min）</div>
-      <div class="subtle">默认显示最近 <span id="maxPointsLabel"></span> 个点</div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="chart"></canvas>
-    </div>
-  </div>
-
-  <div class="section-title">最近 200 条</div>
-  <div class="card" style="padding:0; overflow:auto;">
-    <table>
-      <thead>
-        <tr>
-          <th>time</th>
-          <th>in</th>
-          <th>out</th>
-          <th>daily_in</th>
-          <th>daily_out</th>
-          <th>raw topic</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-<script>
-/** ===================== 你只要确认这里 4 个配置 ===================== **/
-const WS_URL      = "wss://h1b01eed.ala.asia-southeast1.emqxsl.com:8084/mqtt";
-const MQTT_USER   = "bee01";
-const MQTT_PASS   = "12345678";
-
-// 订阅（你现在就是这个前缀）
-const SUB_TOPIC   = "beehive/hive01/#";
-
-// 你的 ESP32 发的两个 topic（和你代码一致）
-const DATA_TOPIC  = "beehive/hive01/10min";
-const STATUS_TOPIC= "beehive/hive01/status";
-
-/** 图表最多保留多少个点（比如 288 = 2天的10分钟点） **/
-const MAX_POINTS = 288;
-/** 表格最多显示多少行 **/
-const MAX_ROWS = 200;
-
-// ---- UI elements
-const dot = document.getElementById("dot");
-const connText = document.getElementById("connText");
-const elWS = document.getElementById("wsUrl");
-const elSub = document.getElementById("subTopic");
-const elData = document.getElementById("dataTopic");
-const elStatus = document.getElementById("statusTopic");
-const elLatest = document.getElementById("latest");
-const tbody = document.getElementById("tbody");
-
-document.getElementById("latestFilter").textContent = DATA_TOPIC;
-document.getElementById("maxPointsLabel").textContent = String(MAX_POINTS);
-
-elWS.textContent = WS_URL;
-elSub.textContent = SUB_TOPIC;
-elData.textContent = DATA_TOPIC;
-elStatus.textContent = STATUS_TOPIC;
-
-let client = null;
-
-// ---- Chart.js setup
-const ctx = document.getElementById('chart');
-const labels = [];
-const seriesIn = [];
-const seriesOut = [];
-
-const chart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [
-      { label: 'IN (10min)', data: seriesIn, tension: 0.25, pointRadius: 2 },
-      { label: 'OUT (10min)', data: seriesOut, tension: 0.25, pointRadius: 2 },
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: false,
-    plugins: {
-      legend: { display: true }
-    },
-    scales: {
-      x: { ticks: { maxRotation: 0, autoSkip: true } },
-      y: { beginAtZero: true }
+    function setLayerVisibility(showFlower) {
+      flowerLayer.classList.remove("overlay-hidden");
+      flowerLayer.classList.toggle("layer-hidden", !showFlower);
+      beeLayer.classList.toggle("layer-hidden", showFlower);
     }
-  }
-});
 
-function setConnected(yes) {
-  dot.classList.toggle("ok", yes);
-  connText.textContent = yes ? "已连接" : "未连接";
-}
+    function clearLayerVisibility() {
+      flowerLayer.classList.add("overlay-hidden");
+      flowerLayer.classList.add("layer-hidden");
+      beeLayer.classList.add("layer-hidden");
+    }
 
-function safeJsonParse(s) {
-  try { return JSON.parse(s); } catch (e) { return null; }
-}
+    function getCurrentCurveMode() {
+      const activeModeButton = document.querySelector(".mode-button.active[data-layer-target]");
+      return activeModeButton ? activeModeButton.dataset.layerTarget : null;
+    }
 
-function addRowFront(rowObj) {
-  // rowObj: {time,in,out,daily_in,daily_out,topic}
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td class="mono">${rowObj.time ?? ""}</td>
-    <td>${rowObj.in ?? ""}</td>
-    <td>${rowObj.out ?? ""}</td>
-    <td>${rowObj.daily_in ?? ""}</td>
-    <td>${rowObj.daily_out ?? ""}</td>
-    <td class="mono">${rowObj.topic ?? ""}</td>
-  `;
-  tbody.prepend(tr);
+    function buildCurveModuleUrl() {
+      const currentMode = getCurrentCurveMode();
+      if (currentMode !== "flower" && currentMode !== "bee") {
+        return "";
+      }
+      return `${CURVE_MODULE_BASE_URL}&panel=${currentMode}`;
+    }
 
-  // trim rows
-  while (tbody.children.length > MAX_ROWS) {
-    tbody.removeChild(tbody.lastElementChild);
-  }
-}
+    function applyCurveModuleView() {
+      const currentMode = getCurrentCurveMode();
+      const nextUrl = buildCurveModuleUrl();
+      const shouldShowFrame = currentMode === "flower" || currentMode === "bee";
 
-function pushChartPoint(timeStr, inVal, outVal) {
-  labels.push(timeStr);
-  seriesIn.push(inVal);
-  seriesOut.push(outVal);
+      curveModuleHint.classList.toggle("is-hidden", shouldShowFrame);
+      curveModuleFrame.style.visibility = shouldShowFrame ? "visible" : "hidden";
 
-  while (labels.length > MAX_POINTS) {
-    labels.shift();
-    seriesIn.shift();
-    seriesOut.shift();
-  }
-  chart.update();
-}
+      if (!shouldShowFrame) {
+        curveModuleFrame.removeAttribute("src");
+        return;
+      }
 
-function onMqttMessage(topic, payloadBytes) {
-  const payload = new TextDecoder().decode(payloadBytes);
+      if (curveModuleFrame.dataset.currentSrc !== nextUrl) {
+        curveModuleFrame.src = nextUrl;
+        curveModuleFrame.dataset.currentSrc = nextUrl;
+      }
+    }
 
-  // 只拿 DATA_TOPIC 来画图/填表
-  if (topic === DATA_TOPIC) {
-    const data = safeJsonParse(payload);
-    if (!data) return;
+    modeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const isAlreadyActive = button.classList.contains("active");
 
-    // 兼容你之前两种 time 写法：
-    // 1) "2026-02-14 11:40"
-    // 2) 2026-02-14 11:40（不带引号）<- 这种不是合法 JSON，你现在这版已经是合法 JSON 了
-    const timeStr = (data.time ?? "").toString();
+        modeButtons.forEach(item => item.classList.remove("active"));
 
-    const inVal  = Number(data.in ?? 0);
-    const outVal = Number(data.out ?? 0);
-    const dailyIn  = Number(data.daily_in ?? 0);
-    const dailyOut = Number(data.daily_out ?? 0);
+        if (isAlreadyActive) {
+          clearLayerVisibility();
+          applyCurveModuleView();
+          return;
+        }
 
-    elLatest.innerHTML = `
-      <div class="mono" style="font-size:14px;color:var(--muted);">Topic: ${topic}</div>
-      <div style="margin-top:6px;"><b>${timeStr}</b></div>
-      <div style="margin-top:6px;">IN: <b>${inVal}</b>　OUT: <b>${outVal}</b></div>
-      <div style="margin-top:6px;color:var(--muted);">今日累计 IN: ${dailyIn}　OUT: ${dailyOut}</div>
-    `;
+        button.classList.add("active");
 
-    addRowFront({
-      time: timeStr,
-      in: inVal,
-      out: outVal,
-      daily_in: dailyIn,
-      daily_out: dailyOut,
-      topic
+        if (button.dataset.layerTarget === "flower") {
+          setLayerVisibility(true);
+          applyCurveModuleView();
+          return;
+        }
+
+        if (button.dataset.layerTarget === "bee") {
+          setLayerVisibility(false);
+          applyCurveModuleView();
+          return;
+        }
+
+        clearLayerVisibility();
+        applyCurveModuleView();
+      });
     });
 
-    pushChartPoint(timeStr, inVal, outVal);
-    return;
-  }
+    independentButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        button.classList.toggle("active");
 
-  // 状态消息可选显示（不进表、不进图）
-  if (topic === STATUS_TOPIC) {
-    // 可以在 console 看状态
-    console.log("[STATUS]", topic, payload);
-  }
-}
+        if (button.dataset.panelTarget === "heatmap") {
+          const shouldShowHeatmap = button.classList.contains("active");
+          mapModuleContainer.classList.toggle("heatmap-active", shouldShowHeatmap);
+        }
 
-function connect() {
-  if (client) {
-    try { client.end(true); } catch(e) {}
-    client = null;
-  }
+        if (button.dataset.panelTarget === "curve") {
+          const shouldShowCurve = button.classList.contains("active");
+          curvePanel.classList.toggle("is-visible", shouldShowCurve);
+          appShell.classList.toggle("curve-panel-open", shouldShowCurve);
 
-  setConnected(false);
+          if (shouldShowCurve) {
+            applyCurveModuleView();
+            return;
+          }
 
-  client = mqtt.connect(WS_URL, {
-    username: MQTT_USER,
-    password: MQTT_PASS,
-    clean: true,
-    reconnectPeriod: 2000,
-    connectTimeout: 8000,
-    keepalive: 60
-  });
-
-  client.on("connect", () => {
-    setConnected(true);
-    client.subscribe(SUB_TOPIC, { qos: 0 }, (err) => {
-      if (err) console.error("Subscribe error:", err);
-      else console.log("Subscribed:", SUB_TOPIC);
+          curveModuleFrame.removeAttribute("src");
+          curveModuleFrame.dataset.currentSrc = "";
+          curveModuleHint.classList.remove("is-hidden");
+        }
+      });
     });
-  });
-
-  client.on("reconnect", () => {
-    setConnected(false);
-    console.log("Reconnecting...");
-  });
-
-  client.on("close", () => {
-    setConnected(false);
-    console.log("Closed");
-  });
-
-  client.on("error", (err) => {
-    setConnected(false);
-    console.error("MQTT error:", err);
-  });
-
-  client.on("message", (topic, payload) => {
-    onMqttMessage(topic, payload);
-  });
-}
-
-document.getElementById("btnClear").addEventListener("click", () => {
-  tbody.innerHTML = "";
-  labels.length = 0;
-  seriesIn.length = 0;
-  seriesOut.length = 0;
-  chart.update();
-  elLatest.textContent = "（已清空，等待新数据...）";
-});
-
-document.getElementById("btnReconnect").addEventListener("click", () => {
-  connect();
-});
-
-// auto connect
-connect();
-</script>
+  </script>
 </body>
 </html>
