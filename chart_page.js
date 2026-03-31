@@ -260,6 +260,15 @@ function formatDateLabel(value) {
 }
 
 function buildSharedLineOption(built, seriesNames) {
+    const historyAreaGradient = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: CHART_COLORS.historyFillTop },
+        { offset: 1, color: CHART_COLORS.historyFillBottom }
+    ]);
+    const forecastAreaGradient = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: CHART_COLORS.forecastFillTop },
+        { offset: 1, color: CHART_COLORS.forecastFillBottom }
+    ]);
+
     return {
         animationDuration: 500,
         color: [CHART_COLORS.history, CHART_COLORS.forecast],
@@ -341,6 +350,29 @@ function buildSharedLineOption(built, seriesNames) {
                 connectNulls: false,
                 emphasis: {
                     focus: "none",
+                    disabled: true,
+                    lineStyle: {
+                        color: CHART_COLORS.history,
+                        width: 1.6,
+                        opacity: 1
+                    },
+                    areaStyle: {
+                        color: historyAreaGradient,
+                        opacity: 1
+                    }
+                },
+                blur: {
+                    lineStyle: {
+                        color: CHART_COLORS.history,
+                        width: 1.6,
+                        opacity: 1
+                    },
+                    areaStyle: {
+                        color: historyAreaGradient,
+                        opacity: 1
+                    }
+                },
+                select: {
                     disabled: true
                 },
                 showSymbol: false,
@@ -348,13 +380,12 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.history,
-                    width: 1.6
+                    width: 1.6,
+                    opacity: 1
                 },
                 areaStyle: {
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: CHART_COLORS.historyFillTop },
-                        { offset: 1, color: CHART_COLORS.historyFillBottom }
-                    ])
+                    color: historyAreaGradient,
+                    opacity: 1
                 }
             },
             {
@@ -365,6 +396,29 @@ function buildSharedLineOption(built, seriesNames) {
                 connectNulls: false,
                 emphasis: {
                     focus: "none",
+                    disabled: true,
+                    lineStyle: {
+                        color: CHART_COLORS.forecast,
+                        width: 1.6,
+                        opacity: 1
+                    },
+                    areaStyle: {
+                        color: forecastAreaGradient,
+                        opacity: 1
+                    }
+                },
+                blur: {
+                    lineStyle: {
+                        color: CHART_COLORS.forecast,
+                        width: 1.6,
+                        opacity: 1
+                    },
+                    areaStyle: {
+                        color: forecastAreaGradient,
+                        opacity: 1
+                    }
+                },
+                select: {
                     disabled: true
                 },
                 showSymbol: false,
@@ -372,13 +426,12 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.forecast,
-                    width: 1.6
+                    width: 1.6,
+                    opacity: 1
                 },
                 areaStyle: {
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: CHART_COLORS.forecastFillTop },
-                        { offset: 1, color: CHART_COLORS.forecastFillBottom }
-                    ])
+                    color: forecastAreaGradient,
+                    opacity: 1
                 }
             }
         ]
