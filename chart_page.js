@@ -1,7 +1,7 @@
 const beeChart = echarts.init(document.getElementById("beeChart"));
 const ecoChart = echarts.init(document.getElementById("ecoChart"));
-let currentPie = null;
-let futurePie = null;
+const currentDominantPlant = document.getElementById("currentDominantPlant");
+const futureDominantPlant = document.getElementById("futureDominantPlant");
 
 const DEFAULT_DATA_MODE = "api";
 const API_BASE_URL = "http://127.0.0.1:5000";
@@ -452,17 +452,6 @@ function buildSharedLineOption(built, seriesNames) {
     };
 }
 
-function ensureChart(instance, elementId) {
-    const element = document.getElementById(elementId);
-    if (!element) {
-        return null;
-    }
-    if (instance && !instance.isDisposed()) {
-        return instance;
-    }
-    return echarts.init(element);
-}
-
 function updateBeeButtonState() {
     const hourBtn = document.getElementById("btn-bee-hour");
     const dayBtn = document.getElementById("btn-bee-day");
@@ -538,43 +527,30 @@ function renderBeeChart() {
     beeChart.resize();
 }
 
-function renderPie(chart, title, items) {
-    if (!chart) {
+function renderDominantPlant(container, title, items) {
+    if (!container) {
         return;
     }
-    const pieData = (items || []).map(item => ({
-        name: item.plant_name,
-        value: item.contribution_value ?? item.flowering_index ?? item.nectar_supply_index ?? 0
-    }));
+    const dominant = (items || []).slice().sort((a, b) => (
+        (b.contribution_value ?? b.flowering_index ?? b.nectar_supply_index ?? 0)
+        - (a.contribution_value ?? a.flowering_index ?? a.nectar_supply_index ?? 0)
+    ))[0];
 
-    chart.clear();
-    chart.setOption({
-        title: {
-            text: title,
-            left: "center",
-            top: 5,
-            textStyle: { fontSize: 14 }
-        },
-        tooltip: { trigger: "item" },
-        legend: {
-            bottom: 5,
-            left: "center",
-            itemWidth: 10,
-            itemHeight: 10,
-            textStyle: { fontSize: 12 }
-        },
-        series: [
-            {
-                name: title,
-                type: "pie",
-                radius: ["30%", "50%"],
-                center: ["50%", "52%"],
-                avoidLabelOverlap: true,
-                label: { formatter: "{b}" },
-                data: pieData
-            }
-        ]
-    }, true);
+    if (!dominant || !dominant.plant_name) {
+        container.innerHTML = `
+            <p class="dominant-plant-title">${title}</p>
+            <div class="dominant-plant-empty">暂无主导植物数据</div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <p class="dominant-plant-title">${title}</p>
+        <div class="dominant-plant-row">
+            <span class="dominant-plant-dot"></span>
+            <span class="dominant-plant-name">${dominant.plant_name}</span>
+        </div>
+    `;
 }
 
 async function fetchJson(source) {
@@ -642,16 +618,8 @@ function renderEcoMetric(data, metricConfig) {
     ecoChart.resize();
 
     if (metricConfig.showSidePanel) {
-        currentPie = ensureChart(currentPie, "currentPie");
-        futurePie = ensureChart(futurePie, "futurePie");
-        renderPie(currentPie, metricConfig.currentPieTitle, data.current_top || []);
-        renderPie(futurePie, metricConfig.futurePieTitle, data.future_top || []);
-        if (currentPie) {
-            currentPie.resize();
-        }
-        if (futurePie) {
-            futurePie.resize();
-        }
+        renderDominantPlant(currentDominantPlant, metricConfig.currentPieTitle, data.current_top || []);
+        renderDominantPlant(futureDominantPlant, metricConfig.futurePieTitle, data.future_top || []);
     }
 }
 
@@ -689,10 +657,4 @@ setInterval(loadEcoChart, 300000);
 window.addEventListener("resize", function () {
     beeChart.resize();
     ecoChart.resize();
-    if (currentPie) {
-        currentPie.resize();
-    }
-    if (futurePie) {
-        futurePie.resize();
-    }
 });
