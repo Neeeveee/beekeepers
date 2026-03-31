@@ -228,10 +228,21 @@
       color: var(--text-soft);
       text-align: left;
       cursor: pointer;
+      transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease;
+    }
+
+    .mode-button:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateX(3px);
+    }
+
+    .mode-button:active {
+      transform: translateX(1px) scale(0.985);
     }
 
     .mode-button.active {
       background: linear-gradient(90deg, rgba(255, 246, 0, 0.29) 50%, rgba(255, 246, 0, 0) 100%);
+      color: #4a4a4a;
     }
 
     .overlay-hidden {
