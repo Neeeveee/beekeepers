@@ -24,7 +24,7 @@ const ECO_METRICS = {
         title: "综合开花状态趋势（过去 5 天 + 未来 7 天）",
         yAxisName: "开花状态",
         legend: ["历史开花状态", "未来开花状态"],
-        showSidePanel: false,
+        showSidePanel: true,
         hintId: "floweringHint",
         currentPieTitle: "当前开花主导植物",
         futurePieTitle: "未来开花主导植物"
@@ -34,7 +34,7 @@ const ECO_METRICS = {
         title: "综合蜜源供给强度（过去 5 天 + 未来 7 天）",
         yAxisName: "蜜源供给强度",
         legend: ["历史蜜源供给", "未来蜜源供给"],
-        showSidePanel: false,
+        showSidePanel: true,
         hintId: "nectarHint",
         currentPieTitle: "当前主要供给植物",
         futurePieTitle: "未来主要供给植物"
@@ -340,7 +340,7 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.history,
-                    width: 3
+                    width: 2
                 }
             },
             {
@@ -354,7 +354,7 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.forecast,
-                    width: 3
+                    width: 2
                 }
             }
         ]
@@ -503,11 +503,19 @@ function setBeeDailyMetric(metric) {
 }
 
 function updateEcoLayout(metricConfig) {
+    const ecoLayout = document.querySelector(".eco-layout");
+    const ecoFlex = document.querySelector(".eco-flex");
     const floweringSidePanel = document.getElementById("floweringSidePanel");
     const floweringHint = document.getElementById("floweringHint");
     const nectarHint = document.getElementById("nectarHint");
     const mismatchHint = document.getElementById("mismatchHint");
 
+    if (ecoLayout) {
+        ecoLayout.classList.toggle("show-side-panel", metricConfig.showSidePanel);
+    }
+    if (ecoFlex) {
+        ecoFlex.style.display = metricConfig.showSidePanel ? "block" : "none";
+    }
     if (floweringSidePanel) {
         floweringSidePanel.style.display = metricConfig.showSidePanel ? "flex" : "none";
     }

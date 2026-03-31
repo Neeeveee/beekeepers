@@ -112,10 +112,33 @@
             height: 286px;
         }
 
-        .eco-flex,
-        .side-panel,
         .hint-box {
             display: none !important;
+        }
+
+        .eco-flex {
+            display: none;
+            width: 220px;
+            min-width: 220px;
+        }
+
+        .eco-layout.show-side-panel {
+            grid-template-columns: 132px minmax(0, 1fr) 220px;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mini-chart {
+            width: 220px;
+            height: 156px;
+            box-sizing: border-box;
+            background: rgba(251, 252, 255, 0.58);
+            border: 1px solid rgba(219, 224, 232, 0.62);
+            border-radius: 12px;
         }
 
         html[data-panel-mode] .chart-block {
@@ -135,6 +158,7 @@
 
         html[data-panel-mode="flower"][data-embed-mode="1"] .eco-side-controls,
         html[data-panel-mode="bee"][data-embed-mode="1"] .bee-side-controls,
+        html[data-panel-mode="flower"][data-embed-mode="1"] .eco-flex,
         html[data-panel-mode][data-embed-mode="1"] .chart-block h2 {
             display: none !important;
         }
@@ -180,6 +204,10 @@
                 gap: 16px;
             }
 
+            .eco-layout.show-side-panel {
+                grid-template-columns: 1fr;
+            }
+
             .eco-side-controls,
             .bee-side-controls {
                 min-height: auto;
@@ -188,6 +216,12 @@
             .button-group {
                 flex-direction: row;
                 flex-wrap: wrap;
+            }
+
+            .eco-flex,
+            .mini-chart {
+                width: 100%;
+                min-width: 0;
             }
         }
     </style>
