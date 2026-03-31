@@ -1,7 +1,7 @@
 const beeChart = echarts.init(document.getElementById("beeChart"));
 const ecoChart = echarts.init(document.getElementById("ecoChart"));
-const currentPie = echarts.init(document.getElementById("currentPie"));
-const futurePie = echarts.init(document.getElementById("futurePie"));
+let currentPie = null;
+let futurePie = null;
 
 const DEFAULT_DATA_MODE = "api";
 const API_BASE_URL = "http://127.0.0.1:5000";
@@ -340,7 +340,7 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.history,
-                    width: 2
+                    width: 1
                 }
             },
             {
@@ -354,11 +354,22 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.forecast,
-                    width: 2
+                    width: 1
                 }
             }
         ]
     };
+}
+
+function ensureChart(instance, elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) {
+        return null;
+    }
+    if (instance && !instance.isDisposed()) {
+        return instance;
+    }
+    return echarts.init(element);
 }
 
 function updateBeeButtonState() {
@@ -437,6 +448,9 @@ function renderBeeChart() {
 }
 
 function renderPie(chart, title, items) {
+    if (!chart) {
+        return;
+    }
     const pieData = (items || []).map(item => ({
         name: item.plant_name,
         value: item.contribution_value ?? item.flowering_index ?? item.nectar_supply_index ?? 0
@@ -537,10 +551,16 @@ function renderEcoMetric(data, metricConfig) {
     ecoChart.resize();
 
     if (metricConfig.showSidePanel) {
+        currentPie = ensureChart(currentPie, "currentPie");
+        futurePie = ensureChart(futurePie, "futurePie");
         renderPie(currentPie, metricConfig.currentPieTitle, data.current_top || []);
         renderPie(futurePie, metricConfig.futurePieTitle, data.future_top || []);
-        currentPie.resize();
-        futurePie.resize();
+        if (currentPie) {
+            currentPie.resize();
+        }
+        if (futurePie) {
+            futurePie.resize();
+        }
     }
 }
 
@@ -578,6 +598,10 @@ setInterval(loadEcoChart, 300000);
 window.addEventListener("resize", function () {
     beeChart.resize();
     ecoChart.resize();
-    currentPie.resize();
-    futurePie.resize();
+    if (currentPie) {
+        currentPie.resize();
+    }
+    if (futurePie) {
+        futurePie.resize();
+    }
 });
