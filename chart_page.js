@@ -276,7 +276,7 @@ function buildSharedLineOption(built, seriesNames) {
         legend: { show: false },
         tooltip: {
             trigger: "axis",
-            triggerOn: "mousemove|click",
+            triggerOn: "mousemove",
             backgroundColor: CHART_COLORS.tooltipBackground,
             borderColor: CHART_COLORS.tooltipBorder,
             borderWidth: 1,
@@ -349,7 +349,6 @@ function buildSharedLineOption(built, seriesNames) {
             {
                 name: seriesNames[0],
                 type: "line",
-                silent: true,
                 legendHoverLink: false,
                 data: built.actualSeries,
                 smooth: true,
@@ -368,6 +367,7 @@ function buildSharedLineOption(built, seriesNames) {
                     }
                 },
                 blur: {
+                    disabled: true,
                     lineStyle: {
                         color: CHART_COLORS.history,
                         width: 1.6,
@@ -397,7 +397,6 @@ function buildSharedLineOption(built, seriesNames) {
             {
                 name: seriesNames[1],
                 type: "line",
-                silent: true,
                 legendHoverLink: false,
                 data: built.forecastSeries,
                 smooth: true,
@@ -416,6 +415,7 @@ function buildSharedLineOption(built, seriesNames) {
                     }
                 },
                 blur: {
+                    disabled: true,
                     lineStyle: {
                         color: CHART_COLORS.forecast,
                         width: 1.6,
