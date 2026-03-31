@@ -339,6 +339,10 @@ function buildSharedLineOption(built, seriesNames) {
                 data: built.actualSeries,
                 smooth: true,
                 connectNulls: false,
+                emphasis: {
+                    focus: "none",
+                    disabled: true
+                },
                 showSymbol: false,
                 symbol: "circle",
                 symbolSize: 6,
@@ -359,6 +363,10 @@ function buildSharedLineOption(built, seriesNames) {
                 data: built.forecastSeries,
                 smooth: true,
                 connectNulls: false,
+                emphasis: {
+                    focus: "none",
+                    disabled: true
+                },
                 showSymbol: false,
                 symbol: "circle",
                 symbolSize: 6,
