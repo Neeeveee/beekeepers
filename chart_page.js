@@ -276,11 +276,15 @@ function buildSharedLineOption(built, seriesNames) {
         legend: { show: false },
         tooltip: {
             trigger: "axis",
+            triggerOn: "click",
             backgroundColor: CHART_COLORS.tooltipBackground,
             borderColor: CHART_COLORS.tooltipBorder,
             borderWidth: 1,
             textStyle: {
                 color: "#292e38"
+            },
+            axisPointer: {
+                type: "none"
             },
             valueFormatter: value => (
                 typeof value === "number" ? `${Math.round(value * 100)}%` : value
@@ -346,6 +350,7 @@ function buildSharedLineOption(built, seriesNames) {
                 name: seriesNames[0],
                 type: "line",
                 data: built.actualSeries,
+                silent: true,
                 smooth: true,
                 connectNulls: false,
                 emphasis: {
@@ -392,6 +397,7 @@ function buildSharedLineOption(built, seriesNames) {
                 name: seriesNames[1],
                 type: "line",
                 data: built.forecastSeries,
+                silent: true,
                 smooth: true,
                 connectNulls: false,
                 emphasis: {
