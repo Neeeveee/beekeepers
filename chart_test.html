@@ -192,37 +192,20 @@
             overflow: hidden;
         }
 
-        html[data-panel-mode="flower"][data-embed-mode="1"] .eco-side-controls,
-        html[data-panel-mode="bee"][data-embed-mode="1"] .bee-side-controls,
-        html[data-panel-mode="flower"][data-embed-mode="1"] .eco-flex,
-        html[data-panel-mode][data-embed-mode="1"] .chart-block h2 {
-            display: none !important;
-        }
-
         html[data-panel-mode][data-embed-mode="1"] .chart-block {
             width: 100%;
+            max-width: none;
             margin: 0;
-            padding: 0;
-            background: transparent;
-            border: none;
-            border-radius: 0;
         }
 
         html[data-panel-mode][data-embed-mode="1"] .eco-layout,
         html[data-panel-mode][data-embed-mode="1"] .bee-layout {
-            display: block;
-        }
-
-        html[data-panel-mode][data-embed-mode="1"] .chart-area {
-            gap: 12px;
+            gap: 20px;
         }
 
         html[data-panel-mode][data-embed-mode="1"] .chart-plot-frame,
         html[data-panel-mode][data-embed-mode="1"] .chart {
             height: 320px;
-            border: none;
-            border-radius: 0;
-            background: transparent;
         }
 
         @media (max-width: 960px) {
