@@ -330,7 +330,7 @@
     }
 
     .app-shell.curve-panel-open .right-information {
-      transform: translateY(-580px);
+      transform: none;
     }
 
     .dashboard-panel-title {
@@ -373,31 +373,32 @@
 
     .bottom-curve-panel {
       position: absolute;
-      left: 20px;
-      right: 20px;
+      left: 270px;
+      right: 460px;
       bottom: 20px;
-      height: 560px;
+      height: 380px;
       padding: 0;
       opacity: 0;
       pointer-events: none;
-      transform: translateY(16px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 1;
+      visibility: hidden;
+      transition: opacity 0.18s ease;
+      z-index: 2;
     }
 
     .bottom-curve-panel.is-visible {
       opacity: 1;
       pointer-events: auto;
-      transform: translateY(0);
+      visibility: visible;
     }
 
     .curve-module-mount {
       width: 100%;
       height: 100%;
       position: relative;
-      border: 1px solid rgba(215, 215, 215, 0.8);
-      border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(215, 215, 215, 0.82);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(6px);
       overflow: hidden;
     }
 
