@@ -9,6 +9,52 @@ const STATIC_DATA_BASE_URL = "./data";
 const PAST_DAYS_VISIBLE = 5;
 const FUTURE_DAYS_VISIBLE = 7;
 
+const CHART_COLORS = {
+    history: "#bfbfbf",
+    forecast: "#efb400",
+    axisText: "#758094",
+    gridLine: "#edf1f5",
+    tooltipBorder: "#dbe0e8",
+    tooltipBackground: "rgba(255,255,255,0.96)"
+};
+
+const ECO_METRICS = {
+    flowering_overview: {
+        source: "floweringOverview",
+        title: "综合开花状态趋势（过去 5 天 + 未来 7 天）",
+        yAxisName: "开花状态",
+        legend: ["历史开花状态", "未来开花状态"],
+        showSidePanel: false,
+        hintId: "floweringHint",
+        currentPieTitle: "当前开花主导植物",
+        futurePieTitle: "未来开花主导植物"
+    },
+    nectar_supply_overview: {
+        source: "nectarSupplyOverview",
+        title: "综合蜜源供给强度（过去 5 天 + 未来 7 天）",
+        yAxisName: "蜜源供给强度",
+        legend: ["历史蜜源供给", "未来蜜源供给"],
+        showSidePanel: false,
+        hintId: "nectarHint",
+        currentPieTitle: "当前主要供给植物",
+        futurePieTitle: "未来主要供给植物"
+    },
+    mismatch_overview: {
+        source: "mismatchOverview",
+        title: "综合错配风险趋势（过去 5 天 + 未来 7 天）",
+        yAxisName: "错配风险",
+        legend: ["历史错配风险", "未来错配风险"],
+        showSidePanel: false,
+        hintId: "mismatchHint"
+    }
+};
+
+let beeRawData = null;
+let beeTimeScale = "hour";
+let beeDailyMetric = "mean";
+let currentEcoMetric = "flowering_overview";
+let ecoRequestId = 0;
+
 function getDataMode() {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get("mode");
@@ -40,41 +86,13 @@ function buildDataSourceMap() {
 
 const DATA_SOURCES = buildDataSourceMap();
 
-const ECO_METRICS = {
-    flowering_overview: {
-        source: DATA_SOURCES.floweringOverview,
-        title: "综合开花状态趋势（过去 5 天 + 未来 7 天）",
-        yAxisName: "开花状态",
-        legend: ["历史开花状态", "未来开花状态"],
-        showSidePanel: true,
-        hintId: "floweringHint",
-        currentPieTitle: "当前开花主导植物",
-        futurePieTitle: "未来开花主导植物"
-    },
-    nectar_supply_overview: {
-        source: DATA_SOURCES.nectarSupplyOverview,
-        title: "综合蜜源供给强度（过去 5 天 + 未来 7 天）",
-        yAxisName: "蜜源供给强度",
-        legend: ["历史蜜源供给", "未来蜜源供给"],
-        showSidePanel: true,
-        hintId: "nectarHint",
-        currentPieTitle: "当前主要供给植物",
-        futurePieTitle: "未来主要供给植物"
-    },
-    mismatch_overview: {
-        source: DATA_SOURCES.mismatchOverview,
-        title: "综合错配风险趋势（过去 5 天 + 未来 7 天）",
-        yAxisName: "错配风险",
-        legend: ["历史错配风险", "未来错配风险"],
-        showSidePanel: false,
-        hintId: "mismatchHint"
-    }
-};
-
-let currentEcoMetric = "flowering_overview";
-let beeTimeScale = "hour";
-let beeDailyMetric = "mean";
-let beeRawData = null;
+function getEcoMetricConfig() {
+    const config = ECO_METRICS[currentEcoMetric];
+    return {
+        ...config,
+        source: DATA_SOURCES[config.source]
+    };
+}
 
 function parseChartTime(value) {
     if (!value) {
@@ -138,22 +156,6 @@ function filterBridgeData(dataObj) {
     };
 }
 
-function updateBeeButtonState() {
-    const hourBtn = document.getElementById("btn-bee-hour");
-    const dayBtn = document.getElementById("btn-bee-day");
-    const dayMeanBtn = document.getElementById("btn-bee-day-mean");
-    const dayPeakBtn = document.getElementById("btn-bee-day-peak");
-
-    hourBtn.classList.toggle("active", beeTimeScale === "hour");
-    dayBtn.classList.toggle("active", beeTimeScale === "day");
-
-    const showDailyButtons = beeTimeScale === "day";
-    dayMeanBtn.style.display = showDailyButtons ? "inline-block" : "none";
-    dayPeakBtn.style.display = showDailyButtons ? "inline-block" : "none";
-    dayMeanBtn.classList.toggle("active", showDailyButtons && beeDailyMetric === "mean");
-    dayPeakBtn.classList.toggle("active", showDailyButtons && beeDailyMetric === "peak");
-}
-
 function aggregateBeeDaily(items, metric) {
     const groups = {};
 
@@ -194,26 +196,6 @@ function dropOverlappingForecastDays(actualItems, forecastItems) {
     return forecast.filter(item => item.time > lastActualDay);
 }
 
-function updateButtonState() {
-    document.querySelectorAll(".button-group button").forEach(btn => btn.classList.remove("active"));
-
-    let activeId = `btn-${currentEcoMetric}`;
-    if (currentEcoMetric === "flowering_overview") {
-        activeId = "btn-flowering_overview";
-    } else if (currentEcoMetric === "nectar_supply_overview") {
-        activeId = "btn-nectar_supply_overview";
-    } else if (currentEcoMetric === "mismatch_overview") {
-        activeId = "btn-mismatch_overview";
-    }
-
-    const activeButton = document.getElementById(activeId);
-    if (activeButton) {
-        activeButton.classList.add("active");
-    }
-
-    updateBeeButtonState();
-}
-
 function buildBridgeSeries(dataObj, maxGapMs = 6 * 3600 * 1000) {
     const actual = (dataObj.actual || []).map(item => ({ ...item }));
     const forecast = (dataObj.forecast || []).map(item => ({ ...item }));
@@ -250,64 +232,176 @@ function buildBridgeSeries(dataObj, maxGapMs = 6 * 3600 * 1000) {
         forecastMap[item.time] = item.value;
     });
 
-    const actualSeries = uniqueTimes.map(time => (
-        Object.prototype.hasOwnProperty.call(actualMap, time) ? actualMap[time] : null
-    ));
-
-    const forecastSeries = uniqueTimes.map(time => (
-        Object.prototype.hasOwnProperty.call(forecastMap, time) ? forecastMap[time] : null
-    ));
-
     return {
         xData: uniqueTimes,
-        actualSeries,
-        forecastSeries
+        actualSeries: uniqueTimes.map(time => (
+            Object.prototype.hasOwnProperty.call(actualMap, time) ? actualMap[time] : null
+        )),
+        forecastSeries: uniqueTimes.map(time => (
+            Object.prototype.hasOwnProperty.call(forecastMap, time) ? forecastMap[time] : null
+        ))
     };
 }
 
-function buildTrendOption(title, yAxisName, legend, built) {
+function formatDateLabel(value) {
+    if (!value) {
+        return "";
+    }
+
+    const text = String(value);
+    if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
+        return text.slice(5, 10).replace("-", "/");
+    }
+    return text;
+}
+
+function buildSharedLineOption(built, seriesNames) {
     return {
-        title: { text: title },
-        tooltip: { trigger: "axis" },
-        legend: { data: legend },
+        animationDuration: 500,
+        color: [CHART_COLORS.history, CHART_COLORS.forecast],
+        title: { show: false },
+        legend: { show: false },
+        tooltip: {
+            trigger: "axis",
+            backgroundColor: CHART_COLORS.tooltipBackground,
+            borderColor: CHART_COLORS.tooltipBorder,
+            borderWidth: 1,
+            textStyle: {
+                color: "#292e38"
+            },
+            valueFormatter: value => (
+                typeof value === "number" ? `${Math.round(value * 100)}%` : value
+            )
+        },
+        grid: {
+            top: 18,
+            right: 28,
+            bottom: 32,
+            left: 44,
+            containLabel: false
+        },
         xAxis: {
             type: "category",
+            boundaryGap: false,
             data: built.xData,
-            axisLabel: { rotate: 30 }
+            axisLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                color: CHART_COLORS.axisText,
+                fontSize: 11,
+                margin: 16,
+                formatter: value => formatDateLabel(value)
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: CHART_COLORS.gridLine,
+                    width: 1
+                }
+            }
         },
         yAxis: {
             type: "value",
-            name: yAxisName,
             min: 0,
-            max: 1
+            max: 1,
+            interval: 0.25,
+            axisLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                color: CHART_COLORS.axisText,
+                fontSize: 11,
+                formatter: value => `${Math.round(value * 100)}`
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: CHART_COLORS.gridLine,
+                    width: 1
+                }
+            }
         },
         series: [
             {
-                name: legend[0],
+                name: seriesNames[0],
                 type: "line",
                 data: built.actualSeries,
                 smooth: true,
                 connectNulls: false,
-                smoothMonotone: "x"
+                showSymbol: false,
+                symbol: "circle",
+                symbolSize: 6,
+                lineStyle: {
+                    color: CHART_COLORS.history,
+                    width: 3
+                }
             },
             {
-                name: legend[1],
+                name: seriesNames[1],
                 type: "line",
                 data: built.forecastSeries,
                 smooth: true,
                 connectNulls: false,
-                lineStyle: { type: "dashed" },
-                smoothMonotone: "x"
+                showSymbol: false,
+                symbol: "circle",
+                symbolSize: 6,
+                lineStyle: {
+                    color: CHART_COLORS.forecast,
+                    width: 3
+                }
             }
         ]
     };
+}
+
+function updateBeeButtonState() {
+    const hourBtn = document.getElementById("btn-bee-hour");
+    const dayBtn = document.getElementById("btn-bee-day");
+    const dayMeanBtn = document.getElementById("btn-bee-day-mean");
+    const dayPeakBtn = document.getElementById("btn-bee-day-peak");
+
+    hourBtn.classList.toggle("active", beeTimeScale === "hour");
+    dayBtn.classList.toggle("active", beeTimeScale === "day");
+
+    const showDailyButtons = beeTimeScale === "day";
+    dayMeanBtn.style.display = showDailyButtons ? "inline-block" : "none";
+    dayPeakBtn.style.display = showDailyButtons ? "inline-block" : "none";
+    dayMeanBtn.classList.toggle("active", showDailyButtons && beeDailyMetric === "mean");
+    dayPeakBtn.classList.toggle("active", showDailyButtons && beeDailyMetric === "peak");
+}
+
+function updateEcoButtonState() {
+    const buttonIds = [
+        "btn-flowering_overview",
+        "btn-nectar_supply_overview",
+        "btn-mismatch_overview"
+    ];
+
+    buttonIds.forEach(id => {
+        const button = document.getElementById(id);
+        if (button) {
+            button.classList.remove("active");
+        }
+    });
+
+    const activeButton = document.getElementById(`btn-${currentEcoMetric}`);
+    if (activeButton) {
+        activeButton.classList.add("active");
+    }
 }
 
 function getBeeDisplaySeries() {
     if (!beeRawData) {
         return {
             built: { xData: [], actualSeries: [], forecastSeries: [] },
-            titleSuffix: "按小时"
+            seriesNames: ["历史活跃度", "预测活跃度"]
         };
     }
 
@@ -320,61 +414,26 @@ function getBeeDisplaySeries() {
             aggregateBeeDaily(visibleBeeData.forecast || [], beeDailyMetric)
         );
 
-        const aggregated = {
-            actual: dailyActual,
-            forecast: dailyForecast
-        };
-
         return {
-            built: buildBridgeSeries(aggregated, 36 * 3600 * 1000),
-            titleSuffix: beeDailyMetric === "peak" ? "按天（日峰值）" : "按天（日均值）"
+            built: buildBridgeSeries({
+                actual: dailyActual,
+                forecast: dailyForecast
+            }, 36 * 3600 * 1000),
+            seriesNames: ["历史活跃度", "预测活跃度"]
         };
     }
 
     return {
         built: buildBridgeSeries(visibleBeeData),
-        titleSuffix: "按小时"
+        seriesNames: ["历史活跃度", "预测活跃度"]
     };
 }
 
 function renderBeeChart() {
-    const { built, titleSuffix } = getBeeDisplaySeries();
-
+    const { built, seriesNames } = getBeeDisplaySeries();
     beeChart.clear();
-    beeChart.setOption({
-        title: { text: `蜜蜂活跃度曲线（${titleSuffix}，过去 5 天 + 未来 7 天）` },
-        tooltip: { trigger: "axis" },
-        legend: { data: ["历史实测", "未来预测"] },
-        xAxis: {
-            type: "category",
-            data: built.xData,
-            axisLabel: { rotate: 30 }
-        },
-        yAxis: {
-            type: "value",
-            name: "活跃度",
-            min: 0,
-            max: 1,
-            interval: 0.2
-        },
-        series: [
-            {
-                name: "历史实测",
-                type: "line",
-                data: built.actualSeries,
-                smooth: true,
-                connectNulls: false
-            },
-            {
-                name: "未来预测",
-                type: "line",
-                data: built.forecastSeries,
-                smooth: true,
-                connectNulls: false,
-                lineStyle: { type: "dashed" }
-            }
-        ]
-    }, true);
+    beeChart.setOption(buildSharedLineOption(built, seriesNames), true);
+    beeChart.resize();
 }
 
 function renderPie(chart, title, items) {
@@ -448,23 +507,25 @@ function updateEcoLayout(metricConfig) {
     const floweringHint = document.getElementById("floweringHint");
     const nectarHint = document.getElementById("nectarHint");
     const mismatchHint = document.getElementById("mismatchHint");
-    const ecoFlexContainer = document.querySelector(".eco-flex");
 
-    floweringSidePanel.style.display = metricConfig.showSidePanel ? "flex" : "none";
-    ecoFlexContainer.style.gridTemplateColumns = metricConfig.showSidePanel ? "2fr 1fr" : "1fr";
-
-    floweringHint.style.display = metricConfig.hintId === "floweringHint" ? "block" : "none";
-    nectarHint.style.display = metricConfig.hintId === "nectarHint" ? "block" : "none";
-    mismatchHint.style.display = metricConfig.hintId === "mismatchHint" ? "block" : "none";
+    if (floweringSidePanel) {
+        floweringSidePanel.style.display = metricConfig.showSidePanel ? "flex" : "none";
+    }
+    if (floweringHint) {
+        floweringHint.style.display = metricConfig.hintId === "floweringHint" ? "block" : "none";
+    }
+    if (nectarHint) {
+        nectarHint.style.display = metricConfig.hintId === "nectarHint" ? "block" : "none";
+    }
+    if (mismatchHint) {
+        mismatchHint.style.display = metricConfig.hintId === "mismatchHint" ? "block" : "none";
+    }
 }
 
 function renderEcoMetric(data, metricConfig) {
     const built = buildBridgeSeries(filterBridgeData(data), 36 * 3600 * 1000);
     ecoChart.clear();
-    ecoChart.setOption(
-        buildTrendOption(metricConfig.title, metricConfig.yAxisName, metricConfig.legend, built),
-        true
-    );
+    ecoChart.setOption(buildSharedLineOption(built, ["历史曲线", "预测曲线"]), true);
     ecoChart.resize();
 
     if (metricConfig.showSidePanel) {
@@ -476,15 +537,20 @@ function renderEcoMetric(data, metricConfig) {
 }
 
 async function loadEcoChart() {
-    const metricConfig = ECO_METRICS[currentEcoMetric];
+    const requestId = ++ecoRequestId;
+    const metricConfig = getEcoMetricConfig();
     updateEcoLayout(metricConfig);
     const data = await fetchJson(metricConfig.source);
+    if (requestId !== ecoRequestId) {
+        return;
+    }
     renderEcoMetric(data, metricConfig);
-    updateButtonState();
+    updateEcoButtonState();
 }
 
 function setEcoMetric(metric) {
     currentEcoMetric = metric;
+    updateEcoButtonState();
     loadEcoChart();
 }
 

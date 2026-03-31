@@ -21,77 +21,132 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 24px;
             background: #f7f7f7;
-        }
-
-        h1 {
-            margin-bottom: 24px;
+            color: #292e38;
+            font-family: Arial, sans-serif;
         }
 
         .chart-block {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            width: min(100%, 1160px);
+            margin: 0 auto 24px;
+            padding: 24px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(219, 224, 232, 0.72);
+            border-radius: 16px;
         }
 
-        .chart {
-            width: 100%;
-            height: 420px;
+        .chart-block h2 {
+            margin: 0 0 16px;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.2;
+            color: #292e38;
         }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .button-group button {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            background: #e9ecf5;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .button-group button.active {
-            background: #cfd8ff;
-            font-weight: bold;
-        }
-
-        .eco-flex {
+        .eco-layout,
+        .bee-layout {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 132px minmax(0, 1fr);
             gap: 20px;
             align-items: start;
         }
 
-        .side-panel {
+        .eco-side-controls,
+        .bee-side-controls {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 10px;
+            min-height: 332px;
         }
 
-        .mini-chart {
-            width: 100%;
-            height: 200px;
-            background: #fafbff;
-            border-radius: 10px;
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 0;
         }
 
-        .hint-box {
-            margin-top: 12px;
-            padding: 12px 14px;
-            background: #f8f9fc;
-            border-radius: 10px;
-            line-height: 1.7;
-            color: #444;
+        .button-group button {
+            width: 128px;
+            min-height: 36px;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            border: none;
+            border-radius: 36px;
+            background: rgba(237, 237, 237, 0.5);
+            color: #292e38;
             font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .button-group button.active {
+            background: rgba(255, 246, 0, 0.5);
+            font-weight: 600;
+        }
+
+        .chart-area {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .curve-legend {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-height: 18px;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #758094;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+        }
+
+        .legend-dot.history {
+            background: #bfbfbf;
+        }
+
+        .legend-dot.forecast {
+            background: #efb400;
+        }
+
+        .chart-plot-frame {
+            width: 100%;
+            height: 286px;
+            box-sizing: border-box;
+            background: rgba(251, 252, 255, 0.58);
+            border: 1px solid rgba(219, 224, 232, 0.62);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chart {
+            width: 100%;
+            height: 286px;
+        }
+
+        .eco-flex,
+        .side-panel,
+        .hint-box {
+            display: none !important;
         }
 
         html[data-panel-mode] .chart-block {
@@ -104,34 +159,68 @@
         }
 
         html[data-panel-mode][data-embed-mode="1"] body {
-            margin: 0;
             padding: 0;
             background: transparent;
             overflow: hidden;
         }
 
-        html[data-panel-mode][data-embed-mode="1"] h1,
-        html[data-panel-mode][data-embed-mode="1"] h2,
-        html[data-panel-mode][data-embed-mode="1"] .button-group,
-        html[data-panel-mode][data-embed-mode="1"] .hint-box,
-        html[data-panel-mode][data-embed-mode="1"] .side-panel {
+        html[data-panel-mode="flower"][data-embed-mode="1"] .eco-side-controls,
+        html[data-panel-mode="bee"][data-embed-mode="1"] .bee-side-controls,
+        html[data-panel-mode][data-embed-mode="1"] .curve-legend,
+        html[data-panel-mode][data-embed-mode="1"] .chart-block h2 {
             display: none !important;
         }
 
         html[data-panel-mode][data-embed-mode="1"] .chart-block {
+            width: 100%;
             margin: 0;
             padding: 0;
             background: transparent;
-            box-shadow: none;
+            border: none;
             border-radius: 0;
         }
 
-        html[data-panel-mode][data-embed-mode="1"] .eco-flex {
+        html[data-panel-mode][data-embed-mode="1"] .eco-layout,
+        html[data-panel-mode][data-embed-mode="1"] .bee-layout {
             display: block;
         }
 
+        html[data-panel-mode][data-embed-mode="1"] .chart-area {
+            gap: 0;
+        }
+
+        html[data-panel-mode][data-embed-mode="1"] .chart-plot-frame,
         html[data-panel-mode][data-embed-mode="1"] .chart {
-            height: 88px;
+            height: 320px;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        @media (max-width: 960px) {
+            body {
+                padding: 16px;
+            }
+
+            .chart-block {
+                padding: 20px;
+            }
+
+            .eco-layout,
+            .bee-layout {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .eco-side-controls,
+            .bee-side-controls {
+                min-height: auto;
+            }
+
+            .button-group {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -139,44 +228,56 @@
 <body>
     <div id="beeCurveBlock" class="chart-block" data-panel="bee">
         <h2>蜜蜂活跃度曲线（历史实测 + 未来预测）</h2>
-        <div class="button-group">
-            <button id="btn-bee-hour" class="active" onclick="setBeeTimeScale('hour')">按小时</button>
-            <button id="btn-bee-day" onclick="setBeeTimeScale('day')">按天</button>
-            <button id="btn-bee-day-mean" style="display: none;" onclick="setBeeDailyMetric('mean')">日均值</button>
-            <button id="btn-bee-day-peak" style="display: none;" onclick="setBeeDailyMetric('peak')">日峰值</button>
+        <div class="bee-layout">
+            <div class="bee-side-controls">
+                <div class="button-group">
+                    <button id="btn-bee-hour" class="active" onclick="setBeeTimeScale('hour')">按小时</button>
+                    <button id="btn-bee-day" onclick="setBeeTimeScale('day')">按天</button>
+                    <button id="btn-bee-day-mean" style="display: none;" onclick="setBeeDailyMetric('mean')">日均值</button>
+                    <button id="btn-bee-day-peak" style="display: none;" onclick="setBeeDailyMetric('peak')">日峰值</button>
+                </div>
+            </div>
+            <div class="chart-area">
+                <div class="curve-legend">
+                    <span class="legend-item"><span class="legend-dot history"></span>历史活跃度</span>
+                    <span class="legend-item"><span class="legend-dot forecast"></span>预测活跃度</span>
+                </div>
+                <div class="chart-plot-frame">
+                    <div id="beeChart" class="chart"></div>
+                </div>
+            </div>
         </div>
-        <div id="beeChart" class="chart"></div>
     </div>
 
     <div id="flowerCurveBlock" class="chart-block" data-panel="flower">
         <h2>生态时间序列</h2>
-
-        <div class="button-group">
-            <button id="btn-flowering_overview" class="active" onclick="setEcoMetric('flowering_overview')">开花状态</button>
-            <button id="btn-nectar_supply_overview" onclick="setEcoMetric('nectar_supply_overview')">蜜源供给强度</button>
-            <button id="btn-mismatch_overview" onclick="setEcoMetric('mismatch_overview')">错配风险</button>
-        </div>
-
-        <div class="eco-flex">
-            <div>
-                <div id="ecoChart" class="chart"></div>
-
-                <div id="floweringHint" class="hint-box" style="display: none;">
-                    综合开花状态趋势表示：在当前阶段与未来阶段，研究区域内主要蜜源植物整体处于怎样的开花进程。数值越高，说明整体越接近盛花阶段；数值越低，说明整体仍未进入主要花期或已过花期。
-                </div>
-
-                <div id="nectarHint" class="hint-box" style="display: none;">
-                    综合蜜源供给强度表示：在当前阶段与未来阶段，研究区域内主要蜜源植物整体能够提供多强的资源供给。它不同于开花状态，重点反映“花开之后，实际可供蜜蜂利用的资源强弱”。数值越高，说明资源供给越强；数值越低，说明虽然可能有开花，但实际可利用资源较弱。
-                </div>
-
-                <div id="mismatchHint" class="hint-box" style="display: none;">
-                    综合错配风险表示：当前及未来阶段，蜜源供给强度与蜜蜂行为强度之间是否同步。数值越高，说明资源侧与行为侧偏差越大，物候错配风险越高；数值越低，说明二者变化更接近，整体处于相对匹配状态。
+        <div class="eco-layout">
+            <div class="eco-side-controls">
+                <div class="button-group">
+                    <button id="btn-flowering_overview" class="active" onclick="setEcoMetric('flowering_overview')">开花状态</button>
+                    <button id="btn-nectar_supply_overview" onclick="setEcoMetric('nectar_supply_overview')">蜜源供给强度</button>
+                    <button id="btn-mismatch_overview" onclick="setEcoMetric('mismatch_overview')">错配风险</button>
                 </div>
             </div>
-
-            <div id="floweringSidePanel" class="side-panel" style="display: none;">
-                <div id="currentPie" class="mini-chart"></div>
-                <div id="futurePie" class="mini-chart"></div>
+            <div class="chart-area">
+                <div class="curve-legend">
+                    <span class="legend-item"><span class="legend-dot history"></span>历史曲线</span>
+                    <span class="legend-item"><span class="legend-dot forecast"></span>预测曲线</span>
+                </div>
+                <div class="chart-plot-frame">
+                    <div id="ecoChart" class="chart"></div>
+                </div>
+            </div>
+            <div class="eco-flex">
+                <div>
+                    <div id="floweringHint" class="hint-box" style="display: none;"></div>
+                    <div id="nectarHint" class="hint-box" style="display: none;"></div>
+                    <div id="mismatchHint" class="hint-box" style="display: none;"></div>
+                </div>
+                <div id="floweringSidePanel" class="side-panel" style="display: none;">
+                    <div id="currentPie" class="mini-chart"></div>
+                    <div id="futurePie" class="mini-chart"></div>
+                </div>
             </div>
         </div>
     </div>
