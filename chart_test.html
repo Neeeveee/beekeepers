@@ -9,8 +9,12 @@
         (function () {
             const params = new URLSearchParams(window.location.search);
             const panel = params.get("panel");
+            const embed = params.get("embed");
             if (panel === "flower" || panel === "bee") {
                 document.documentElement.dataset.panelMode = panel;
+            }
+            if (embed === "1") {
+                document.documentElement.dataset.embedMode = "1";
             }
         })();
     </script>
@@ -90,28 +94,8 @@
             font-size: 14px;
         }
 
-        html[data-panel-mode] body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-            overflow: hidden;
-        }
-
-        html[data-panel-mode] h1,
-        html[data-panel-mode] h2,
-        html[data-panel-mode] .button-group,
-        html[data-panel-mode] .hint-box,
-        html[data-panel-mode] .side-panel {
-            display: none !important;
-        }
-
         html[data-panel-mode] .chart-block {
             display: none;
-            margin: 0;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-            border-radius: 0;
         }
 
         html[data-panel-mode="bee"] #beeCurveBlock,
@@ -119,11 +103,34 @@
             display: block;
         }
 
-        html[data-panel-mode] .eco-flex {
+        html[data-panel-mode][data-embed-mode="1"] body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        html[data-panel-mode][data-embed-mode="1"] h1,
+        html[data-panel-mode][data-embed-mode="1"] h2,
+        html[data-panel-mode][data-embed-mode="1"] .button-group,
+        html[data-panel-mode][data-embed-mode="1"] .hint-box,
+        html[data-panel-mode][data-embed-mode="1"] .side-panel {
+            display: none !important;
+        }
+
+        html[data-panel-mode][data-embed-mode="1"] .chart-block {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        html[data-panel-mode][data-embed-mode="1"] .eco-flex {
             display: block;
         }
 
-        html[data-panel-mode] .chart {
+        html[data-panel-mode][data-embed-mode="1"] .chart {
             height: 88px;
         }
     </style>
