@@ -65,6 +65,13 @@
             min-height: 332px;
         }
 
+        .eco-side-column {
+            display: flex;
+            flex-direction: column;
+            gap: 44px;
+            min-height: 332px;
+        }
+
         .button-group {
             display: flex;
             flex-direction: column;
@@ -153,30 +160,19 @@
             display: none !important;
         }
 
-        .eco-flex {
-            display: none;
-            width: 200px;
-            min-width: 200px;
-            align-self: stretch;
-        }
-
-        .eco-layout.show-side-panel {
-            grid-template-columns: 132px minmax(0, 1fr) 200px;
-        }
-
         .side-panel {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 32px;
         }
 
         .dominant-plant-card {
             width: 200px;
-            height: 156px;
+            min-height: 126px;
             box-sizing: border-box;
-            padding: 18px 16px;
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            padding: 0 0 0 16px;
+            background: transparent;
+            border: 0;
             border-radius: 6px;
             display: flex;
             flex-direction: column;
@@ -192,7 +188,7 @@
         }
 
         .dominant-plant-row {
-            margin-top: 28px;
+            margin-top: 26px;
             display: inline-flex;
             align-items: center;
             gap: 12px;
@@ -203,8 +199,8 @@
         }
 
         .dominant-plant-dot {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: #f6e200;
             flex: 0 0 auto;
@@ -263,12 +259,13 @@
                 gap: 16px;
             }
 
-            .eco-layout.show-side-panel {
-                grid-template-columns: 1fr;
-            }
-
             .eco-side-controls,
             .bee-side-controls {
+                min-height: auto;
+            }
+
+            .eco-side-column {
+                gap: 20px;
                 min-height: auto;
             }
 
@@ -277,7 +274,6 @@
                 flex-wrap: wrap;
             }
 
-            .eco-flex,
             .dominant-plant-card {
                 width: 100%;
                 min-width: 0;
@@ -313,11 +309,17 @@
     <div id="flowerCurveBlock" class="chart-block" data-panel="flower">
         <h2>生态时间序列</h2>
         <div class="eco-layout">
-            <div class="eco-side-controls">
-                <div class="button-group">
-                    <button id="btn-flowering_overview" class="active" onclick="setEcoMetric('flowering_overview')">开花状态</button>
-                    <button id="btn-nectar_supply_overview" onclick="setEcoMetric('nectar_supply_overview')">蜜源供给强度</button>
-                    <button id="btn-mismatch_overview" onclick="setEcoMetric('mismatch_overview')">错配风险</button>
+            <div class="eco-side-column">
+                <div class="eco-side-controls">
+                    <div class="button-group">
+                        <button id="btn-flowering_overview" class="active" onclick="setEcoMetric('flowering_overview')">开花状态</button>
+                        <button id="btn-nectar_supply_overview" onclick="setEcoMetric('nectar_supply_overview')">蜜源供给强度</button>
+                        <button id="btn-mismatch_overview" onclick="setEcoMetric('mismatch_overview')">错配风险</button>
+                    </div>
+                </div>
+                <div id="floweringSidePanel" class="side-panel" style="display: none;">
+                    <div id="currentDominantPlant" class="dominant-plant-card"></div>
+                    <div id="futureDominantPlant" class="dominant-plant-card"></div>
                 </div>
             </div>
             <div class="chart-area">
@@ -329,21 +331,10 @@
                     <div id="ecoChart" class="chart"></div>
                 </div>
             </div>
-            <div class="eco-flex">
-                <div>
-                    <div id="floweringHint" class="hint-box" style="display: none;"></div>
-                    <div id="nectarHint" class="hint-box" style="display: none;"></div>
-                    <div id="mismatchHint" class="hint-box" style="display: none;"></div>
-                </div>
-                <div id="floweringSidePanel" class="side-panel" style="display: none;">
-                    <div id="currentDominantPlant" class="dominant-plant-card"></div>
-                    <div id="futureDominantPlant" class="dominant-plant-card"></div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <script src="./chart_page.js?v=20260331v11"></script>
+    <script src="./chart_page.js?v=20260331v12"></script>
 </body>
 
 </html>
