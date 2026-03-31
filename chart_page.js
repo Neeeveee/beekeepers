@@ -11,7 +11,7 @@ const FUTURE_DAYS_VISIBLE = 7;
 
 const CHART_COLORS = {
     history: "#bfbfbf",
-    forecast: "#efb400",
+    forecast: "#ffef3a",
     axisText: "#758094",
     gridLine: "#edf1f5",
     tooltipBorder: "#dbe0e8",
