@@ -12,6 +12,10 @@ const FUTURE_DAYS_VISIBLE = 7;
 const CHART_COLORS = {
     history: "#bfbfbf",
     forecast: "#f6e200",
+    historyFillTop: "rgba(191, 191, 191, 0.28)",
+    historyFillBottom: "rgba(191, 191, 191, 0.02)",
+    forecastFillTop: "rgba(246, 226, 0, 0.32)",
+    forecastFillBottom: "rgba(246, 226, 0, 0.03)",
     axisText: "#758094",
     gridLine: "#edf1f5",
     tooltipBorder: "#dbe0e8",
@@ -341,6 +345,12 @@ function buildSharedLineOption(built, seriesNames) {
                 lineStyle: {
                     color: CHART_COLORS.history,
                     width: 1.6
+                },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: CHART_COLORS.historyFillTop },
+                        { offset: 1, color: CHART_COLORS.historyFillBottom }
+                    ])
                 }
             },
             {
@@ -355,6 +365,12 @@ function buildSharedLineOption(built, seriesNames) {
                 lineStyle: {
                     color: CHART_COLORS.forecast,
                     width: 1.6
+                },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: CHART_COLORS.forecastFillTop },
+                        { offset: 1, color: CHART_COLORS.forecastFillBottom }
+                    ])
                 }
             }
         ]
