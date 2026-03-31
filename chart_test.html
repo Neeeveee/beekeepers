@@ -93,8 +93,42 @@
         .chart-area {
             display: flex;
             flex-direction: column;
-            gap: 0;
+            gap: 12px;
             min-width: 0;
+        }
+
+        .curve-legend {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            min-height: 18px;
+            padding-left: 4px;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #758094;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+        }
+
+        .legend-dot.history {
+            background: #bfbfbf;
+        }
+
+        .legend-dot.forecast {
+            background: #f6e200;
         }
 
         .chart-plot-frame {
@@ -179,7 +213,7 @@
         }
 
         html[data-panel-mode][data-embed-mode="1"] .chart-area {
-            gap: 0;
+            gap: 12px;
         }
 
         html[data-panel-mode][data-embed-mode="1"] .chart-plot-frame,
@@ -241,6 +275,10 @@
                 </div>
             </div>
             <div class="chart-area">
+                <div class="curve-legend">
+                    <span class="legend-item"><span class="legend-dot history"></span>历史活跃度</span>
+                    <span class="legend-item"><span class="legend-dot forecast"></span>预测活跃度</span>
+                </div>
                 <div class="chart-plot-frame">
                     <div id="beeChart" class="chart"></div>
                 </div>
@@ -259,6 +297,10 @@
                 </div>
             </div>
             <div class="chart-area">
+                <div class="curve-legend">
+                    <span class="legend-item"><span class="legend-dot history"></span>历史曲线</span>
+                    <span class="legend-item"><span class="legend-dot forecast"></span>未来曲线</span>
+                </div>
                 <div class="chart-plot-frame">
                     <div id="ecoChart" class="chart"></div>
                 </div>
