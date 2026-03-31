@@ -11,7 +11,7 @@ const FUTURE_DAYS_VISIBLE = 7;
 
 const CHART_COLORS = {
     history: "#bfbfbf",
-    forecast: "#ffef3a",
+    forecast: "#f6e200",
     axisText: "#758094",
     gridLine: "#edf1f5",
     tooltipBorder: "#dbe0e8",
@@ -340,7 +340,7 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.history,
-                    width: 1.4
+                    width: 1.6
                 }
             },
             {
@@ -354,7 +354,7 @@ function buildSharedLineOption(built, seriesNames) {
                 symbolSize: 6,
                 lineStyle: {
                     color: CHART_COLORS.forecast,
-                    width: 1.4
+                    width: 1.6
                 }
             }
         ]
