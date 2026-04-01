@@ -391,8 +391,8 @@
       position: relative;
       width: 185px;
       height: 122px;
-      border: 1px solid #d7d7d7;
-      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #000000;
       border-radius: 12px;
       color: var(--text-muted);
       font-size: 13px;
@@ -402,18 +402,18 @@
     .gauge-shell {
       position: absolute;
       inset: 0;
-      color: #1e1e1e;
+      color: #ffffff;
       background: transparent;
     }
 
     .gauge-label {
       position: absolute;
-      top: 3px;
-      left: 5px;
-      font-size: 13px;
-      font-weight: 700;
+      top: 10px;
+      left: 12px;
+      font-size: 12px;
+      font-weight: 600;
       line-height: 1;
-      color: #000000;
+      color: rgba(255, 255, 255, 0.9);
     }
 
     .gauge-svg {
@@ -426,54 +426,58 @@
 
     .gauge-track {
       fill: none;
-      stroke: #d9dde5;
-      stroke-width: 2.8;
+      stroke: transparent;
+      stroke-width: 0;
       stroke-linecap: round;
     }
 
     .gauge-progress {
       fill: none;
-      stroke: #ffcb3d;
-      stroke-width: 2.8;
+      stroke: transparent;
+      stroke-width: 0;
       stroke-linecap: round;
     }
 
     .gauge-tick {
-      stroke: #d8dbe2;
-      stroke-width: 1.1;
+      stroke: rgba(255, 255, 255, 0.8);
+      stroke-width: 1.4;
       stroke-linecap: round;
     }
 
     .gauge-tick-active {
-      stroke: #ffcb3d;
+      stroke: #ffbf00;
     }
 
     .gauge-now,
     .gauge-min,
     .gauge-mid,
     .gauge-max {
-      fill: #a1a1a1;
-      font-size: 6px;
-      font-weight: 400;
+      fill: rgba(255, 255, 255, 0.82);
+      font-size: 9px;
+      font-weight: 500;
       font-family: inherit;
     }
 
     .gauge-now {
-      fill: #4c4c4c;
-      font-size: 10px;
+      fill: rgba(255, 255, 255, 0.92);
+      font-size: 8px;
       font-weight: 700;
+    }
+
+    .gauge-indicator {
+      fill: #ff9f00;
     }
 
     .gauge-value {
       position: absolute;
-      top: 73px;
+      top: 74px;
       left: 50%;
       transform: translateX(-50%);
       margin-top: 0;
-      font-size: 30px;
+      font-size: 22px;
       font-weight: 700;
       line-height: 1;
-      color: #000000;
+      color: #ffffff;
     }
 
     .bottom-curve-panel {
