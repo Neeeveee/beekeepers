@@ -573,15 +573,15 @@
     <aside class="left-navigation" aria-label="左侧导航">
       <img class="brand-mark" src="./images/image 21.png" alt="B-Cue 标识" />
       <nav class="mode-switch" aria-label="模式切换">
-        <button class="mode-button mode-flower" type="button" data-toggle-group="mode-switch" data-mode="flower" data-layer-target="flower">
+        <button class="mode-button mode-flower" type="button" data-toggle-group="mode-switch" data-layer-target="flower">
           <img class="mode-icon" src="./images/image 26.png" alt="" aria-hidden="true" />
           <span class="mode-label">环境</span>
         </button>
-        <button class="mode-button mode-bee" type="button" data-toggle-group="mode-switch" data-mode="bee" data-layer-target="bee">
+        <button class="mode-button mode-bee" type="button" data-toggle-group="mode-switch" data-layer-target="bee">
           <img class="mode-icon" src="./images/image 25.png" alt="" aria-hidden="true" />
           <span class="mode-label">行为</span>
         </button>
-        <button class="mode-button mode-plan" type="button" data-toggle-group="mode-switch" data-mode="scenario">
+        <button class="mode-button mode-plan" type="button" data-toggle-group="mode-switch">
           <img class="mode-icon" src="./images/image 24.png" alt="" aria-hidden="true" />
           <span class="mode-label">策略</span>
         </button>
@@ -638,7 +638,6 @@
     const flowerLayer = document.querySelector(".flower-layer-container");
     const beeLayer = document.querySelector(".bee-layer-container");
     const mapModuleContainer = document.querySelector(".map-module-container");
-    const mapModuleLabel = document.querySelector(".map-module-label");
     const curveModuleFrame = document.getElementById("curveModuleFrame");
     const curveModuleHint = document.getElementById("curveModuleHint");
     const gaugeSlots = document.querySelectorAll(".dashboard-gauge-slot");
@@ -647,47 +646,6 @@
     const BEE_CORE_END_HOUR = 15;
     const MIN_CORE_DAY_SAMPLES = 3;
     const MIN_FALLBACK_DAY_SAMPLES = 6;
-    const appState = {
-      mode: null,
-      gaugeData: {
-        flowering: 0,
-        nectar: 0,
-        activity: 0,
-        mismatch: 0
-      }
-    };
-    const MODE_MAP_LABELS = {
-      flower: "flower-mode-main-view",
-      bee: "bee-mode-main-view",
-      scenario: "scenario-mode-main-view",
-      none: "map-module-container"
-    };
-    const GAUGE_MODE_CONFIG = {
-      flower: [
-        { key: "flowering", label: "Flowering" },
-        { key: "nectar", label: "Nectar" },
-        { key: "activity", label: "Activity" },
-        { key: "mismatch", label: "Mismatch" }
-      ],
-      bee: [
-        { key: "activity", label: "Activity" },
-        { key: "mismatch", label: "Mismatch" },
-        { key: "nectar", label: "Nectar" },
-        { key: "flowering", label: "Flowering" }
-      ],
-      scenario: [
-        { key: "mismatch", label: "Scenario Risk" },
-        { key: "flowering", label: "Bloom Trend" },
-        { key: "nectar", label: "Resource" },
-        { key: "activity", label: "Behavior" }
-      ],
-      none: [
-        { key: "nectar", label: "Nectar" },
-        { key: "activity", label: "Activity" },
-        { key: "flowering", label: "Flowering" },
-        { key: "mismatch", label: "Mismatch" }
-      ]
-    };
 
     function parseGaugeTime(value) {
       if (!value) {
@@ -796,33 +754,21 @@
       });
     }
 
-    function getGaugeModeConfig(mode) {
-      return GAUGE_MODE_CONFIG[mode] || GAUGE_MODE_CONFIG.none;
-    }
-
-    function applyGaugeMode() {
-      const gaugeConfig = getGaugeModeConfig(appState.mode);
-      gaugeSlots.forEach((slot, index) => {
-        const config = gaugeConfig[index];
-        if (!config) {
-          return;
-        }
-        slot.dataset.gaugeKey = config.key;
-        slot.dataset.gaugeLabel = config.label;
-        const nextValue = appState.gaugeData[config.key] ?? 0;
-        slot.dataset.gaugeValue = String(nextValue);
-        const instance = gaugeInstances.get(slot);
-        if (instance) {
-          instance.setValue(nextValue, config.label);
-        }
-      });
-    }
-
     async function refreshGaugeSlots() {
       try {
         const latestGaugeValues = await loadGaugeData();
-        appState.gaugeData = latestGaugeValues;
-        applyGaugeMode();
+        gaugeSlots.forEach(slot => {
+          const gaugeKey = slot.dataset.gaugeKey;
+          const nextValue = latestGaugeValues[gaugeKey];
+          if (typeof nextValue !== "number") {
+            return;
+          }
+          slot.dataset.gaugeValue = String(nextValue);
+          const instance = gaugeInstances.get(slot);
+          if (instance) {
+            instance.setValue(nextValue);
+          }
+        });
       } catch (error) {
         console.error("Failed to refresh gauge data:", error);
       }
@@ -840,16 +786,23 @@
       beeLayer.classList.add("layer-hidden");
     }
 
+    function getCurrentCurveMode() {
+      const activeModeButton = document.querySelector(".mode-button.active[data-layer-target]");
+      return activeModeButton ? activeModeButton.dataset.layerTarget : null;
+    }
+
     function buildCurveModuleUrl() {
-      if (appState.mode !== "flower" && appState.mode !== "bee") {
+      const currentMode = getCurrentCurveMode();
+      if (currentMode !== "flower" && currentMode !== "bee") {
         return "";
       }
-      return `${CURVE_MODULE_BASE_URL}&panel=${appState.mode}`;
+      return `${CURVE_MODULE_BASE_URL}&panel=${currentMode}`;
     }
 
     function applyCurveModuleView() {
+      const currentMode = getCurrentCurveMode();
       const nextUrl = buildCurveModuleUrl();
-      const shouldShowFrame = appState.mode === "flower" || appState.mode === "bee";
+      const shouldShowFrame = currentMode === "flower" || currentMode === "bee";
 
       curveModuleHint.classList.toggle("is-hidden", shouldShowFrame);
       curveModuleFrame.style.visibility = shouldShowFrame ? "visible" : "hidden";
@@ -870,34 +823,34 @@
       }
     }
 
-    function applyMainViewMode() {
-      mapModuleLabel.textContent = MODE_MAP_LABELS[appState.mode] || MODE_MAP_LABELS.none;
-    }
-
-    function applyMode(mode) {
-      appState.mode = mode;
-      modeButtons.forEach(button => {
-        button.classList.toggle("active", button.dataset.mode === mode);
-      });
-
-      if (mode === "flower") {
-        setLayerVisibility(true);
-      } else if (mode === "bee") {
-        setLayerVisibility(false);
-      } else {
-        clearLayerVisibility();
-      }
-
-      applyMainViewMode();
-      applyCurveModuleView();
-      applyGaugeMode();
-    }
-
     modeButtons.forEach(button => {
       button.addEventListener("click", () => {
-        const nextMode = button.dataset.mode;
-        const isAlreadyActive = appState.mode === nextMode;
-        applyMode(isAlreadyActive ? null : nextMode);
+        const isAlreadyActive = button.classList.contains("active");
+
+        modeButtons.forEach(item => item.classList.remove("active"));
+
+        if (isAlreadyActive) {
+          clearLayerVisibility();
+          applyCurveModuleView();
+          return;
+        }
+
+        button.classList.add("active");
+
+        if (button.dataset.layerTarget === "flower") {
+          setLayerVisibility(true);
+          applyCurveModuleView();
+          return;
+        }
+
+        if (button.dataset.layerTarget === "bee") {
+          setLayerVisibility(false);
+          applyCurveModuleView();
+          return;
+        }
+
+        clearLayerVisibility();
+        applyCurveModuleView();
       });
     });
 
@@ -928,7 +881,6 @@
     });
 
     mountGaugeSlots();
-    applyMode(null);
     refreshGaugeSlots();
     setInterval(refreshGaugeSlots, 300000);
   </script>
