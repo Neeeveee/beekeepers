@@ -599,10 +599,10 @@
         <span>指数仪表盘</span>
       </div>
       <div class="dashboard-grid">
-        <div class="dashboard-gauge-slot" data-gauge-label="Nectar" data-gauge-value="72"></div>
-        <div class="dashboard-gauge-slot" data-gauge-label="Activity" data-gauge-value="58"></div>
-        <div class="dashboard-gauge-slot" data-gauge-label="Flowering" data-gauge-value="41"></div>
-        <div class="dashboard-gauge-slot" data-gauge-label="Mismatch" data-gauge-value="63"></div>
+        <div class="dashboard-gauge-slot" data-gauge-key="nectar" data-gauge-label="Nectar" data-gauge-value="72"></div>
+        <div class="dashboard-gauge-slot" data-gauge-key="activity" data-gauge-label="Activity" data-gauge-value="58"></div>
+        <div class="dashboard-gauge-slot" data-gauge-key="flowering" data-gauge-label="Flowering" data-gauge-value="41"></div>
+        <div class="dashboard-gauge-slot" data-gauge-key="mismatch" data-gauge-label="Mismatch" data-gauge-value="63"></div>
       </div>
     </aside>
 
@@ -625,6 +625,7 @@
   <script>
     // GitHub-hosted chart page with auto-updated data. Keep this as the only source entry.
     const CURVE_MODULE_BASE_URL = "https://neeeveee.github.io/beekeepers/chart_test.html?mode=static&embed=1&t=20260331v14";
+    const GAUGE_DATA_BASE_URL = "https://neeeveee.github.io/beekeepers/data";
 
     const appShell = document.querySelector(".app-shell");
     const modeButtons = document.querySelectorAll(".mode-button[data-toggle-group='mode-switch']");
@@ -636,6 +637,118 @@
     const curveModuleFrame = document.getElementById("curveModuleFrame");
     const curveModuleHint = document.getElementById("curveModuleHint");
     const gaugeSlots = document.querySelectorAll(".dashboard-gauge-slot");
+    const gaugeInstances = new Map();
+
+    function parseGaugeTime(value) {
+      if (!value) {
+        return null;
+      }
+      const normalized = value.length === 10 ? `${value}T00:00:00` : value.replace(" ", "T");
+      const parsed = new Date(normalized);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function aggregateBeeDaily(items, metric) {
+      const groups = {};
+      (items || []).forEach(item => {
+        if (!item || item.value == null || !item.time) {
+          return;
+        }
+        const day = item.time.slice(0, 10);
+        if (!groups[day]) {
+          groups[day] = [];
+        }
+        groups[day].push(Number(item.value));
+      });
+
+      return Object.keys(groups).sort().map(day => {
+        const values = groups[day].filter(value => Number.isFinite(value));
+        if (!values.length) {
+          return { time: day, value: 0 };
+        }
+        if (metric === "peak") {
+          return { time: day, value: Math.max(...values) };
+        }
+        const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+        return { time: day, value: mean };
+      });
+    }
+
+    function getLatestActualEntry(items) {
+      return (items || [])
+        .filter(item => item && item.value != null && item.time)
+        .map(item => ({ ...item, parsedTime: parseGaugeTime(item.time) }))
+        .filter(item => item.parsedTime)
+        .sort((a, b) => a.parsedTime - b.parsedTime)
+        .pop() || null;
+    }
+
+    function normalizeGaugeValue(value) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) {
+        return 0;
+      }
+      return Math.max(0, Math.min(100, Math.round(numeric * 100)));
+    }
+
+    async function loadGaugeData() {
+      const cacheBust = Date.now();
+      const sources = {
+        flowering: `${GAUGE_DATA_BASE_URL}/flowering-overview.json?t=${cacheBust}`,
+        nectar: `${GAUGE_DATA_BASE_URL}/nectar-supply-overview.json?t=${cacheBust}`,
+        mismatch: `${GAUGE_DATA_BASE_URL}/mismatch-overview.json?t=${cacheBust}`,
+        activity: `${GAUGE_DATA_BASE_URL}/bee-activity-forecast.json?t=${cacheBust}`
+      };
+
+      const [floweringData, nectarData, mismatchData, activityData] = await Promise.all([
+        fetch(sources.flowering, { cache: "no-store" }).then(response => response.json()),
+        fetch(sources.nectar, { cache: "no-store" }).then(response => response.json()),
+        fetch(sources.mismatch, { cache: "no-store" }).then(response => response.json()),
+        fetch(sources.activity, { cache: "no-store" }).then(response => response.json())
+      ]);
+
+      const latestFlowering = getLatestActualEntry(floweringData.actual);
+      const latestNectar = getLatestActualEntry(nectarData.actual);
+      const latestMismatch = getLatestActualEntry(mismatchData.actual);
+      const latestActivity = getLatestActualEntry(aggregateBeeDaily(activityData.actual, "mean"));
+
+      return {
+        flowering: normalizeGaugeValue(latestFlowering?.value ?? 0),
+        nectar: normalizeGaugeValue(latestNectar?.value ?? 0),
+        mismatch: normalizeGaugeValue(latestMismatch?.value ?? 0),
+        activity: normalizeGaugeValue(latestActivity?.value ?? 0)
+      };
+    }
+
+    function mountGaugeSlots() {
+      gaugeSlots.forEach(slot => {
+        const instance = window.BeeGauge.mountGauge(slot, {
+          label: slot.dataset.gaugeLabel,
+          value: Number(slot.dataset.gaugeValue)
+        });
+        gaugeInstances.set(slot, instance);
+      });
+    }
+
+    async function refreshGaugeSlots() {
+      try {
+        const latestGaugeValues = await loadGaugeData();
+        gaugeSlots.forEach(slot => {
+          const gaugeKey = slot.dataset.gaugeKey;
+          const nextValue = latestGaugeValues[gaugeKey];
+          if (typeof nextValue !== "number") {
+            return;
+          }
+          slot.dataset.gaugeValue = String(nextValue);
+          const instance = gaugeInstances.get(slot);
+          if (instance) {
+            instance.setValue(nextValue);
+          }
+        });
+      } catch (error) {
+        console.error("Failed to refresh gauge data:", error);
+      }
+    }
 
     function setLayerVisibility(showFlower) {
       flowerLayer.classList.remove("overlay-hidden");
@@ -743,12 +856,9 @@
       });
     });
 
-    gaugeSlots.forEach(slot => {
-      window.BeeGauge.mountGauge(slot, {
-        label: slot.dataset.gaugeLabel,
-        value: Number(slot.dataset.gaugeValue)
-      });
-    });
+    mountGaugeSlots();
+    refreshGaugeSlots();
+    setInterval(refreshGaugeSlots, 300000);
   </script>
 </body>
 </html>
