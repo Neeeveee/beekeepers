@@ -715,7 +715,13 @@ def build_bridge_series(actual, forecast):
         # Only bridge adjacent segments; otherwise a long data gap creates a fake corner.
         if actual_time and forecast_time:
             gap_seconds = (forecast_time - actual_time).total_seconds()
-            if 0 <= gap_seconds <= 6 * 3600:
+            allowed_gap_seconds = 60 * 3600 if (
+                isinstance(last_actual.get("time"), str)
+                and isinstance(forecast[0].get("time"), str)
+                and len(last_actual.get("time")) == 10
+                and len(forecast[0].get("time")) == 10
+            ) else 6 * 3600
+            if 0 <= gap_seconds <= allowed_gap_seconds:
                 forecast.insert(0, {"time": last_actual["time"], "value": last_actual["value"]})
 
     return {"actual": actual, "forecast": forecast}
@@ -724,7 +730,11 @@ def build_bridge_series(actual, forecast):
 def split_daily_actual_forecast(actual, forecast):
     today_str = datetime.now().strftime("%Y-%m-%d")
     actual = [item for item in (actual or []) if item.get("time") and item["time"] <= today_str]
-    forecast = [item for item in (forecast or []) if item.get("time") and item["time"] > today_str]
+    last_actual_day = actual[-1]["time"] if actual else None
+    if last_actual_day:
+        forecast = [item for item in (forecast or []) if item.get("time") and item["time"] > last_actual_day]
+    else:
+        forecast = [item for item in (forecast or []) if item.get("time")]
     return actual, forecast
 
 

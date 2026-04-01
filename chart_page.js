@@ -116,6 +116,10 @@ function roundValue(value) {
     return Math.round(value * 10000) / 10000;
 }
 
+function isDateOnlyString(value) {
+    return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
 function addDays(date, days) {
     const next = new Date(date);
     next.setDate(next.getDate() + days);
@@ -233,9 +237,14 @@ function buildBridgeSeries(dataObj, maxGapMs = 6 * 3600 * 1000) {
     const firstForecast = rawForecast.length >= 1 ? rawForecast[0] : null;
     const actualTime = parseChartTime(lastActual?.time);
     const forecastTime = parseChartTime(firstForecast?.time);
+    const effectiveGapMs = (
+        isDateOnlyString(lastActual?.time) && isDateOnlyString(firstForecast?.time)
+            ? 60 * 3600 * 1000
+            : maxGapMs
+    );
     const canTransition = actualTime && forecastTime
         && (forecastTime.getTime() - actualTime.getTime()) >= 0
-        && (forecastTime.getTime() - actualTime.getTime()) <= maxGapMs;
+        && (forecastTime.getTime() - actualTime.getTime()) <= effectiveGapMs;
 
     if (canTransition) {
         forecast.unshift({
