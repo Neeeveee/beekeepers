@@ -336,12 +336,14 @@
       right: 20px;
       bottom: 20px;
       width: 420px;
-      height: 320px;
-      border: 0;
-      background: rgba(255, 255, 255, 0.4);
+      height: 298px;
+      border: 1px solid #cecece;
+      border-radius: 12px;
+      background: linear-gradient(232.54deg, rgba(232, 232, 232, 0.1) 4.7%, rgba(195, 195, 195, 0.1) 97.84%);
       backdrop-filter: blur(4px);
       z-index: 3;
       transition: transform 0.2s ease;
+      overflow: hidden;
     }
 
     .app-shell.curve-panel-open .right-information {
@@ -350,24 +352,35 @@
 
     .dashboard-panel-title {
       position: absolute;
-      top: 12px;
-      left: 14px;
+      top: 3px;
+      left: 13px;
       width: 392px;
-      height: 28px;
+      height: 24px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      border: 1px dashed rgba(255, 255, 255, 0.14);
+      justify-content: flex-start;
+      gap: 3px;
+      padding-left: 4px;
       border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-muted);
-      font-size: 14px;
+      background: transparent;
+      color: #616161;
+      font-size: 10px;
+      font-weight: 400;
+      overflow: hidden;
+    }
+
+    .dashboard-panel-title-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: cover;
+      flex: 0 0 auto;
+      pointer-events: none;
     }
 
     .dashboard-grid {
       position: absolute;
-      left: 18px;
-      top: 54px;
+      left: 17px;
+      top: 31px;
       display: grid;
       grid-template-columns: repeat(2, 185px);
       grid-template-rows: repeat(2, 122px);
@@ -379,7 +392,8 @@
       width: 185px;
       height: 122px;
       border: 1px solid #d7d7d7;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
       color: var(--text-muted);
       font-size: 13px;
       overflow: hidden;
@@ -576,7 +590,10 @@
     </section>
 
     <aside class="right-information" aria-label="右侧信息区">
-      <div class="dashboard-panel-title">bottom-right-dashboard-panel</div>
+      <div class="dashboard-panel-title">
+        <img class="dashboard-panel-title-icon" src="./images/image 30.png" alt="" aria-hidden="true" />
+        <span>指数仪表盘</span>
+      </div>
       <div class="dashboard-grid">
         <div class="dashboard-gauge-slot" data-gauge-label="Nectar" data-gauge-value="72"></div>
         <div class="dashboard-gauge-slot" data-gauge-label="Activity" data-gauge-value="58"></div>
