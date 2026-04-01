@@ -78,21 +78,65 @@ function createGaugeMarkup({ value, label }) {
   `;
 }
 
+function easeOutCubic(progress) {
+  return 1 - Math.pow(1 - progress, 3);
+}
+
 function mountGauge(element, options = {}) {
   if (!element) {
     return null;
   }
   const label = options.label ?? element.dataset.gaugeLabel ?? "Gauge";
-  const value = options.value ?? element.dataset.gaugeValue ?? 0;
-  element.innerHTML = createGaugeMarkup({ value, label });
+  let currentValue = 0;
+  let animationFrameId = null;
+
+  function render(value) {
+    element.innerHTML = createGaugeMarkup({ value, label });
+  }
+
+  function animateTo(nextValue, duration = 900) {
+    const targetValue = clampGaugeValue(nextValue);
+    const startValue = currentValue;
+    const valueDelta = targetValue - startValue;
+
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+
+    if (duration <= 0 || valueDelta === 0) {
+      currentValue = targetValue;
+      render(currentValue);
+      return;
+    }
+
+    const startTime = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeOutCubic(progress);
+      currentValue = startValue + valueDelta * eased;
+      render(currentValue);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        currentValue = targetValue;
+        render(currentValue);
+        animationFrameId = null;
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(step);
+  }
+
+  render(0);
+  animateTo(options.value ?? element.dataset.gaugeValue ?? 0, 1000);
 
   return {
     setValue(nextValue) {
       element.dataset.gaugeValue = String(clampGaugeValue(nextValue));
-      element.innerHTML = createGaugeMarkup({
-        value: nextValue,
-        label
-      });
+      animateTo(nextValue, 850);
     }
   };
 }
