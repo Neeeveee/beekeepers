@@ -29,7 +29,7 @@ function createTickMarkup({ cx, cy, radius, tickCount, activeCount }) {
   for (let index = 0; index <= tickCount; index += 1) {
     const angle = -90 + (180 / tickCount) * index;
     const outer = polarToCartesian(cx, cy, radius, angle);
-    const inner = polarToCartesian(cx, cy, radius - (index % 5 === 0 ? 10 : 6), angle);
+    const inner = polarToCartesian(cx, cy, radius - (index % 5 === 0 ? 14 : 10), angle);
     const isActive = index <= activeCount;
     const tickClass = isActive ? "gauge-tick gauge-tick-active" : "gauge-tick";
     tickParts.push(
@@ -41,22 +41,22 @@ function createTickMarkup({ cx, cy, radius, tickCount, activeCount }) {
 
 function createGaugeMarkup({ value, label }) {
   const normalized = clampGaugeValue(value);
-  const activeTickCount = Math.round((normalized / 100) * 30);
+  const activeTickCount = Math.round((normalized / 100) * 34);
   const endAngle = -90 + (normalized / 100) * 180;
-  const progressArc = describeArc(100, 96, 66, -90, endAngle);
-  const trackArc = describeArc(100, 96, 66, -90, 90);
+  const progressArc = describeArc(92, 98, 48, -90, endAngle);
+  const trackArc = describeArc(92, 98, 48, -90, 90);
 
   return `
     <div class="gauge-shell" role="img" aria-label="${label} ${normalized}">
       <div class="gauge-label">${label}</div>
-      <svg class="gauge-svg" viewBox="0 0 200 120" aria-hidden="true">
+      <svg class="gauge-svg" viewBox="0 0 185 122" aria-hidden="true">
+        ${createTickMarkup({ cx: 92, cy: 98, radius: 60, tickCount: 34, activeCount: activeTickCount })}
         <path class="gauge-track" d="${trackArc}"></path>
         <path class="gauge-progress" d="${progressArc}"></path>
-        ${createTickMarkup({ cx: 100, cy: 96, radius: 82, tickCount: 30, activeCount: activeTickCount })}
-        <text class="gauge-now" x="100" y="14" text-anchor="middle">now</text>
-        <text class="gauge-min" x="20" y="100">0</text>
-        <text class="gauge-mid" x="96" y="64">50</text>
-        <text class="gauge-max" x="170" y="100">100</text>
+        <text class="gauge-now" x="92" y="28" text-anchor="middle">now</text>
+        <text class="gauge-min" x="42" y="101">0</text>
+        <text class="gauge-mid" x="90" y="61">50</text>
+        <text class="gauge-max" x="128" y="101">100</text>
       </svg>
       <div class="gauge-value">${Math.round(normalized)}</div>
     </div>

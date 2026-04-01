@@ -378,8 +378,8 @@
       position: relative;
       width: 185px;
       height: 122px;
-      border: 0;
-      background: transparent;
+      border: 1px solid #d7d7d7;
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text-muted);
       font-size: 13px;
       overflow: hidden;
@@ -388,76 +388,78 @@
     .gauge-shell {
       position: absolute;
       inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding-top: 8px;
-      color: #f2f5fb;
-      background:
-        radial-gradient(circle at 50% 100%, rgba(246, 226, 0, 0.1) 0%, rgba(246, 226, 0, 0) 46%),
-        linear-gradient(180deg, rgba(18, 23, 33, 0.96) 0%, rgba(12, 16, 24, 0.96) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+      color: #1e1e1e;
+      background: transparent;
     }
 
     .gauge-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: rgba(235, 239, 246, 0.78);
-      text-transform: uppercase;
+      position: absolute;
+      top: 3px;
+      left: 5px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+      color: #000000;
     }
 
     .gauge-svg {
-      width: 154px;
-      height: 92px;
-      margin-top: 2px;
+      position: absolute;
+      inset: 0;
+      width: 185px;
+      height: 122px;
       overflow: visible;
     }
 
     .gauge-track {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.12);
-      stroke-width: 10;
+      stroke: #d9dde5;
+      stroke-width: 2.8;
       stroke-linecap: round;
     }
 
     .gauge-progress {
       fill: none;
-      stroke: #f6e200;
-      stroke-width: 10;
+      stroke: #ffcb3d;
+      stroke-width: 2.8;
       stroke-linecap: round;
-      filter: drop-shadow(0 0 8px rgba(246, 226, 0, 0.22));
     }
 
     .gauge-tick {
-      stroke: rgba(255, 255, 255, 0.18);
-      stroke-width: 1.6;
+      stroke: #d8dbe2;
+      stroke-width: 1.1;
       stroke-linecap: round;
     }
 
     .gauge-tick-active {
-      stroke: #ffd34d;
+      stroke: #ffcb3d;
     }
 
     .gauge-now,
     .gauge-min,
     .gauge-mid,
     .gauge-max {
-      fill: rgba(220, 227, 238, 0.58);
-      font-size: 8px;
-      font-weight: 600;
+      fill: #a1a1a1;
+      font-size: 6px;
+      font-weight: 400;
       font-family: inherit;
     }
 
+    .gauge-now {
+      fill: #4c4c4c;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
     .gauge-value {
-      margin-top: -16px;
+      position: absolute;
+      top: 73px;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 0;
       font-size: 30px;
       font-weight: 700;
       line-height: 1;
-      color: #ffffff;
+      color: #000000;
     }
 
     .bottom-curve-panel {
