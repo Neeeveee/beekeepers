@@ -4,6 +4,13 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime, date
 
+CORE_BEE_START_HOUR = 10
+CORE_BEE_END_HOUR = 15
+MIN_CORE_HOUR_SAMPLES = 3
+RISK_FREE_GAP = 0.03
+MATCHED_GAP = 0.06
+RISK_SPAN = 0.67
+
 
 def clamp(value, min_value=0.0, max_value=1.0):
     return max(min_value, min(max_value, value))
@@ -82,7 +89,7 @@ def calc_mismatch_risk(raw_gap):
     if raw_gap is None:
         return None
 
-    risk = (raw_gap - 0.10) / 0.60
+    risk = (raw_gap - RISK_FREE_GAP) / RISK_SPAN
     return round(clamp(risk), 3)
 
 
@@ -90,7 +97,7 @@ def calc_mismatch_type(nectar_supply_index, behavior_index_norm, raw_gap):
     if nectar_supply_index is None or behavior_index_norm is None or raw_gap is None:
         return "no_data"
 
-    if raw_gap < 0.10:
+    if raw_gap < MATCHED_GAP:
         return "matched"
 
     if nectar_supply_index > behavior_index_norm:
@@ -191,17 +198,32 @@ def load_daily_behavior(cur):
         """
         SELECT
             aligned_date AS model_date,
-            AVG(expected_activity) AS behavior_index_raw
+            COUNT(CASE WHEN hour BETWEEN ? AND ? THEN 1 END) AS core_sample_count,
+            AVG(CASE WHEN hour BETWEEN ? AND ? THEN expected_activity END) AS core_behavior_mean,
+            COUNT(*) AS daytime_sample_count,
+            AVG(expected_activity) AS daytime_behavior_mean
         FROM expected_activity_hourly
         WHERE hour BETWEEN 6 AND 19
         GROUP BY aligned_date
         ORDER BY model_date ASC
         """
-    ).fetchall()
+    , (
+        CORE_BEE_START_HOUR,
+        CORE_BEE_END_HOUR,
+        CORE_BEE_START_HOUR,
+        CORE_BEE_END_HOUR
+    )).fetchall()
 
     result = {}
     for row in rows:
-        result[row["model_date"]] = round(row["behavior_index_raw"], 3) if row["behavior_index_raw"] is not None else None
+        if row["core_sample_count"] is not None and row["core_sample_count"] >= MIN_CORE_HOUR_SAMPLES and row["core_behavior_mean"] is not None:
+            behavior_value = row["core_behavior_mean"]
+        elif row["daytime_sample_count"] is not None and row["daytime_sample_count"] >= 6 and row["daytime_behavior_mean"] is not None:
+            behavior_value = row["daytime_behavior_mean"]
+        else:
+            behavior_value = None
+
+        result[row["model_date"]] = round(behavior_value, 3) if behavior_value is not None else None
     return result
 
 
@@ -292,7 +314,7 @@ def main():
                 mismatch_gap,
                 mismatch_type,
                 mismatch_level,
-                "rule_v3_daytime_inseason_nectar_vs_behavior_gap",
+                "rule_v4_core_window_aligned_gap",
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
         )

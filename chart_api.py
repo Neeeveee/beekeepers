@@ -752,6 +752,13 @@ def split_hourly_actual_forecast(actual, forecast):
 # 错配判断规则
 # =========================
 
+CORE_BEE_START_HOUR = 10
+CORE_BEE_END_HOUR = 15
+MIN_CORE_HOUR_SAMPLES = 3
+RISK_FREE_GAP = 0.03
+MATCHED_GAP = 0.06
+RISK_SPAN = 0.67
+
 def calc_mismatch_gap(nectar_supply_index, behavior_index_norm):
     if nectar_supply_index is None or behavior_index_norm is None:
         return None
@@ -767,7 +774,7 @@ def calc_mismatch_risk(raw_gap):
     if raw_gap is None:
         return None
 
-    risk = (raw_gap - 0.10) / 0.60
+    risk = (raw_gap - RISK_FREE_GAP) / RISK_SPAN
     return round(clamp(risk), 3)
 
 
@@ -775,7 +782,7 @@ def calc_mismatch_type(nectar_supply_index, behavior_index_norm, raw_gap):
     if nectar_supply_index is None or behavior_index_norm is None or raw_gap is None:
         return "no_data"
 
-    if raw_gap < 0.10:
+    if raw_gap < MATCHED_GAP:
         return "matched"
 
     if nectar_supply_index > behavior_index_norm:
@@ -1305,47 +1312,22 @@ def get_mismatch_overview():
             """
             SELECT
                 model_date,
-                raw_gap,
-                mismatch_gap,
-                mismatch_type,
-                mismatch_level
+                nectar_supply_index,
+                behavior_index_raw
             FROM mismatch_index_daily
             ORDER BY model_date ASC
             """
         )
         hist_rows = cursor.fetchall()
 
-        actual = []
-        history_info = []
-        for row in hist_rows:
-            actual.append({
-                "time": row["model_date"],
-                "value": row["mismatch_gap"]
-            })
-            history_info.append({
-                "time": row["model_date"],
-                "mismatch_type": row["mismatch_type"],
-                "mismatch_level": row["mismatch_level"]
-            })
-
         # =========================
         # 行为归一化基准
         # 不再只用历史最大值，而是用“历史 + 未来”共同最大值
         # 否则未来值一旦超过历史最大值，就会全部被压成 1
         # =========================
-        cursor.execute(
-            """
-            SELECT AVG(expected_activity) AS behavior_index_raw
-            FROM expected_activity_hourly
-            WHERE hour BETWEEN 6 AND 19
-            GROUP BY aligned_date
-            """
-        )
-        hist_behavior_rows = cursor.fetchall()
-
         all_behavior_values = [
             row["behavior_index_raw"]
-            for row in hist_behavior_rows
+            for row in hist_rows
             if row["behavior_index_raw"] is not None
         ]
 
@@ -1366,6 +1348,30 @@ def get_mismatch_overview():
         max_behavior = max(all_behavior_values) if all_behavior_values else 1.0
         if max_behavior <= 0:
             max_behavior = 1.0
+
+        actual = []
+        history_info = []
+        for row in hist_rows:
+            behavior_index_raw = row["behavior_index_raw"]
+            if behavior_index_raw is None:
+                behavior_index_norm = None
+            else:
+                behavior_index_norm = round(clamp(behavior_index_raw / max_behavior), 3)
+
+            raw_gap = calc_mismatch_gap(row["nectar_supply_index"], behavior_index_norm)
+            mismatch_gap = calc_mismatch_risk(raw_gap)
+            mismatch_type = calc_mismatch_type(row["nectar_supply_index"], behavior_index_norm, raw_gap)
+            mismatch_level = calc_mismatch_level(mismatch_gap)
+
+            actual.append({
+                "time": row["model_date"],
+                "value": mismatch_gap
+            })
+            history_info.append({
+                "time": row["model_date"],
+                "mismatch_type": mismatch_type,
+                "mismatch_level": mismatch_level
+            })
 
         # =========================
         # 植物元数据（未来供给推算要用）

@@ -58,6 +58,10 @@ let beeTimeScale = "hour";
 let beeDailyMetric = "mean";
 let currentEcoMetric = "flowering_overview";
 let ecoRequestId = 0;
+const BEE_CORE_START_HOUR = 10;
+const BEE_CORE_END_HOUR = 15;
+const MIN_CORE_DAY_SAMPLES = 3;
+const MIN_FALLBACK_DAY_SAMPLES = 6;
 
 function getDataMode() {
     const params = new URLSearchParams(window.location.search);
@@ -172,11 +176,32 @@ function aggregateBeeDaily(items, metric) {
         if (!groups[day]) {
             groups[day] = [];
         }
-        groups[day].push(Number(item.value));
+        const hour = Number(item.time.slice(11, 13));
+        groups[day].push({
+            value: Number(item.value),
+            hour: Number.isFinite(hour) ? hour : null
+        });
     });
 
     return Object.keys(groups).sort().map(day => {
-        const values = groups[day];
+        const entries = groups[day].filter(entry => Number.isFinite(entry.value));
+        const coreEntries = entries.filter(entry => (
+            entry.hour != null
+            && entry.hour >= BEE_CORE_START_HOUR
+            && entry.hour <= BEE_CORE_END_HOUR
+        ));
+
+        const metricEntries = coreEntries.length >= MIN_CORE_DAY_SAMPLES
+            ? coreEntries
+            : entries.length >= MIN_FALLBACK_DAY_SAMPLES
+                ? entries
+                : [];
+
+        if (!metricEntries.length) {
+            return null;
+        }
+
+        const values = metricEntries.map(entry => entry.value);
         const aggregatedValue = metric === "peak"
             ? Math.max(...values)
             : values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -185,7 +210,7 @@ function aggregateBeeDaily(items, metric) {
             time: day,
             value: roundValue(aggregatedValue)
         };
-    });
+    }).filter(Boolean);
 }
 
 function dropOverlappingForecastDays(actualItems, forecastItems) {
