@@ -375,15 +375,89 @@
     }
 
     .dashboard-gauge-slot {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative;
       width: 185px;
       height: 122px;
-      border: 1px solid var(--line-soft);
-      background: rgba(255, 255, 255, 0.08);
+      border: 0;
+      background: transparent;
       color: var(--text-muted);
       font-size: 13px;
+      overflow: hidden;
+    }
+
+    .gauge-shell {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 8px;
+      color: #f2f5fb;
+      background:
+        radial-gradient(circle at 50% 100%, rgba(246, 226, 0, 0.1) 0%, rgba(246, 226, 0, 0) 46%),
+        linear-gradient(180deg, rgba(18, 23, 33, 0.96) 0%, rgba(12, 16, 24, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
+
+    .gauge-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: rgba(235, 239, 246, 0.78);
+      text-transform: uppercase;
+    }
+
+    .gauge-svg {
+      width: 154px;
+      height: 92px;
+      margin-top: 2px;
+      overflow: visible;
+    }
+
+    .gauge-track {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.12);
+      stroke-width: 10;
+      stroke-linecap: round;
+    }
+
+    .gauge-progress {
+      fill: none;
+      stroke: #f6e200;
+      stroke-width: 10;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 8px rgba(246, 226, 0, 0.22));
+    }
+
+    .gauge-tick {
+      stroke: rgba(255, 255, 255, 0.18);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+    }
+
+    .gauge-tick-active {
+      stroke: #ffd34d;
+    }
+
+    .gauge-now,
+    .gauge-min,
+    .gauge-mid,
+    .gauge-max {
+      fill: rgba(220, 227, 238, 0.58);
+      font-size: 8px;
+      font-weight: 600;
+      font-family: inherit;
+    }
+
+    .gauge-value {
+      margin-top: -16px;
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1;
+      color: #ffffff;
     }
 
     .bottom-curve-panel {
@@ -502,10 +576,10 @@
     <aside class="right-information" aria-label="右侧信息区">
       <div class="dashboard-panel-title">bottom-right-dashboard-panel</div>
       <div class="dashboard-grid">
-        <div class="dashboard-gauge-slot">gauge-slot-1</div>
-        <div class="dashboard-gauge-slot">gauge-slot-2</div>
-        <div class="dashboard-gauge-slot">gauge-slot-3</div>
-        <div class="dashboard-gauge-slot">gauge-slot-4</div>
+        <div class="dashboard-gauge-slot" data-gauge-label="Nectar" data-gauge-value="72"></div>
+        <div class="dashboard-gauge-slot" data-gauge-label="Activity" data-gauge-value="58"></div>
+        <div class="dashboard-gauge-slot" data-gauge-label="Flowering" data-gauge-value="41"></div>
+        <div class="dashboard-gauge-slot" data-gauge-label="Mismatch" data-gauge-value="63"></div>
       </div>
     </aside>
 
@@ -524,6 +598,7 @@
     </section>
   </main>
 
+  <script src="./gauge.js"></script>
   <script>
     // GitHub-hosted chart page with auto-updated data. Keep this as the only source entry.
     const CURVE_MODULE_BASE_URL = "https://neeeveee.github.io/beekeepers/chart_test.html?mode=static&embed=1&t=20260331v14";
@@ -537,6 +612,7 @@
     const mapModuleContainer = document.querySelector(".map-module-container");
     const curveModuleFrame = document.getElementById("curveModuleFrame");
     const curveModuleHint = document.getElementById("curveModuleHint");
+    const gaugeSlots = document.querySelectorAll(".dashboard-gauge-slot");
 
     function setLayerVisibility(showFlower) {
       flowerLayer.classList.remove("overlay-hidden");
@@ -641,6 +717,13 @@
           curveModuleFrame.dataset.currentSrc = "";
           curveModuleHint.classList.remove("is-hidden");
         }
+      });
+    });
+
+    gaugeSlots.forEach(slot => {
+      window.BeeGauge.mountGauge(slot, {
+        label: slot.dataset.gaugeLabel,
+        value: Number(slot.dataset.gaugeValue)
       });
     });
   </script>
