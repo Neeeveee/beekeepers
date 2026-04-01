@@ -11,8 +11,8 @@
       { label: "Coverage", value: "74", fill: 74 },
       { label: "Cost", value: "42", fill: 42 },
       { label: "Stability", value: "81", fill: 81 },
-      { label: "Impact", value: "+12%", fill: 68 },
-    ],
+      { label: "Impact", value: "+12%", fill: 68 }
+    ]
   },
   {
     id: "scenario-b",
@@ -26,8 +26,8 @@
       { label: "Coverage", value: "63", fill: 63 },
       { label: "Cost", value: "68", fill: 68 },
       { label: "Stability", value: "58", fill: 58 },
-      { label: "Impact", value: "+19%", fill: 76 },
-    ],
+      { label: "Impact", value: "+19%", fill: 76 }
+    ]
   },
   {
     id: "scenario-c",
@@ -41,15 +41,29 @@
       { label: "Coverage", value: "52", fill: 52 },
       { label: "Cost", value: "27", fill: 27 },
       { label: "Stability", value: "88", fill: 88 },
-      { label: "Impact", value: "+7%", fill: 49 },
-    ],
-  },
+      { label: "Impact", value: "+7%", fill: 49 }
+    ]
+  }
 ];
+
+const SLOT_CONFIG = {
+  "-3": { x: -760, scale: 0.68, opacity: 0, blur: 8, z: 0 },
+  "-2": { x: -510, scale: 0.78, opacity: 0, blur: 5, z: 0 },
+  "-1": { x: -255, scale: 0.88, opacity: 0.44, blur: 1.4, z: 2 },
+  "0": { x: 0, scale: 1, opacity: 1, blur: 0, z: 4 },
+  "1": { x: 255, scale: 0.88, opacity: 0.44, blur: 1.4, z: 2 },
+  "2": { x: 510, scale: 0.78, opacity: 0, blur: 5, z: 0 },
+  "3": { x: 760, scale: 0.68, opacity: 0, blur: 8, z: 0 }
+};
+
+const ACTIVE_OFFSETS = [-2, -1, 0, 1, 2];
+const TRANSITION_MS = 460;
 
 const state = {
   focusIndex: 0,
   selectedId: scenarios[0].id,
   overlayVisible: true,
+  isAnimating: false
 };
 
 const overlay = document.getElementById("scenarioOverlay");
@@ -71,6 +85,10 @@ function normalizeIndex(index) {
   return ((index % total) + total) % total;
 }
 
+function getWindowScenarioIndex(offsetFromFocus) {
+  return normalizeIndex(state.focusIndex + offsetFromFocus);
+}
+
 function setOverlayVisible(visible) {
   state.overlayVisible = visible;
   overlay.classList.toggle("is-hidden", !visible);
@@ -89,66 +107,82 @@ function buildMetricCard(metric) {
   `;
 }
 
-function buildCard(scenario, offset, absoluteIndex) {
-  const baseTranslate = offset * 250;
-  const scale = offset === 0 ? 1 : 0.88;
-  const opacity = offset === 0 ? 1 : 0.45;
-  const blur = offset === 0 ? 0 : 1.5;
-  const zIndex = offset === 0 ? 3 : 2 - Math.abs(offset);
-  const isSelected = scenario.id === state.selectedId;
-
-  return `
-    <button
-      type="button"
-      class="scenario-card ${offset === 0 ? "is-center" : ""} ${isSelected ? "is-selected" : ""}"
-      data-card-index="${absoluteIndex}"
-      data-scenario-id="${scenario.id}"
-      style="
-        transform: translateX(calc(-50% + ${baseTranslate}px)) scale(${scale});
-        opacity: ${opacity};
-        z-index: ${zIndex};
-        filter: blur(${blur}px);
-      "
-      aria-label="${scenario.title}"
-    >
-      <div class="card-topline">
-        <span class="card-chip"></span>
-        <span class="card-kpi"></span>
-      </div>
-      <span class="card-title-placeholder"></span>
-      <span class="card-text-placeholder"></span>
-      <span class="card-text-placeholder short"></span>
-      <div class="card-number-row">
-        <span class="card-number-placeholder"></span>
-        <span class="card-number-placeholder"></span>
-      </div>
-      <span class="card-footer-placeholder"></span>
-    </button>
+function createCardElement(scenarioIndex) {
+  const scenario = scenarios[scenarioIndex];
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "scenario-card";
+  card.dataset.scenarioId = scenario.id;
+  card.dataset.scenarioIndex = String(scenarioIndex);
+  card.setAttribute("aria-label", scenario.title);
+  card.innerHTML = `
+    <div class="card-topline">
+      <span class="card-chip"></span>
+      <span class="card-kpi"></span>
+    </div>
+    <span class="card-title-placeholder"></span>
+    <span class="card-text-placeholder"></span>
+    <span class="card-text-placeholder short"></span>
+    <div class="card-number-row">
+      <span class="card-number-placeholder"></span>
+      <span class="card-number-placeholder"></span>
+    </div>
+    <span class="card-footer-placeholder"></span>
   `;
+  return card;
 }
 
-function renderCarousel() {
-  const leftIndex = normalizeIndex(state.focusIndex - 1);
-  const centerIndex = normalizeIndex(state.focusIndex);
-  const rightIndex = normalizeIndex(state.focusIndex + 1);
+function applyCardVisual(card, slot) {
+  const config = SLOT_CONFIG[String(slot)];
+  card.dataset.slot = String(slot);
+  card.style.transform = `translateX(calc(-50% + ${config.x}px)) scale(${config.scale})`;
+  card.style.opacity = String(config.opacity);
+  card.style.filter = `blur(${config.blur}px)`;
+  card.style.zIndex = String(config.z);
+  card.classList.toggle("is-center", slot === 0);
+  card.classList.toggle("is-side", slot === -1 || slot === 1);
+  card.classList.toggle("is-selected", card.dataset.scenarioId === state.selectedId);
+}
 
-  const cards = [
-    buildCard(scenarios[leftIndex], -1, leftIndex),
-    buildCard(scenarios[centerIndex], 0, centerIndex),
-    buildCard(scenarios[rightIndex], 1, rightIndex),
-  ];
+function mountCarouselWindow() {
+  carouselStage.innerHTML = "";
+  ACTIVE_OFFSETS.forEach((offset) => {
+    const scenarioIndex = getWindowScenarioIndex(offset);
+    const card = createCardElement(scenarioIndex);
+    applyCardVisual(card, offset);
+    carouselStage.appendChild(card);
+  });
+  bindCardEvents();
+}
 
-  carouselStage.innerHTML = cards.join("");
-
+function bindCardEvents() {
   carouselStage.querySelectorAll(".scenario-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const index = Number(card.dataset.cardIndex);
-      if (index !== state.focusIndex) {
-        state.focusIndex = index;
+    card.onclick = () => {
+      if (state.isAnimating) {
+        return;
       }
-      state.selectedId = card.dataset.scenarioId;
-      render();
-    });
+
+      const clickedIndex = Number(card.dataset.scenarioIndex);
+      if (clickedIndex === state.focusIndex) {
+        state.selectedId = card.dataset.scenarioId;
+        syncSelectedCardState();
+        renderSelectedScenario();
+        return;
+      }
+
+      const delta = (clickedIndex - state.focusIndex + scenarios.length) % scenarios.length;
+      if (delta === 1) {
+        animateCarousel(1);
+      } else if (delta === scenarios.length - 1) {
+        animateCarousel(-1);
+      }
+    };
+  });
+}
+
+function syncSelectedCardState() {
+  carouselStage.querySelectorAll(".scenario-card").forEach((card) => {
+    card.classList.toggle("is-selected", card.dataset.scenarioId === state.selectedId);
   });
 }
 
@@ -165,35 +199,60 @@ function renderSelectedScenario() {
   const chartVariants = {
     "scenario-a": {
       area: "polygon(0% 72%, 12% 68%, 26% 62%, 37% 66%, 48% 55%, 61% 49%, 72% 52%, 83% 39%, 100% 34%, 100% 100%, 0 100%)",
-      line: "polygon(0% 72%, 12% 68%, 26% 62%, 37% 66%, 48% 55%, 61% 49%, 72% 52%, 83% 39%, 100% 34%)",
+      line: "polygon(0% 72%, 12% 68%, 26% 62%, 37% 66%, 48% 55%, 61% 49%, 72% 52%, 83% 39%, 100% 34%)"
     },
     "scenario-b": {
       area: "polygon(0% 78%, 10% 76%, 24% 60%, 34% 65%, 46% 45%, 57% 51%, 70% 36%, 82% 43%, 100% 30%, 100% 100%, 0 100%)",
-      line: "polygon(0% 78%, 10% 76%, 24% 60%, 34% 65%, 46% 45%, 57% 51%, 70% 36%, 82% 43%, 100% 30%)",
+      line: "polygon(0% 78%, 10% 76%, 24% 60%, 34% 65%, 46% 45%, 57% 51%, 70% 36%, 82% 43%, 100% 30%)"
     },
     "scenario-c": {
       area: "polygon(0% 74%, 14% 69%, 28% 64%, 40% 61%, 52% 57%, 65% 52%, 78% 48%, 90% 42%, 100% 39%, 100% 100%, 0 100%)",
-      line: "polygon(0% 74%, 14% 69%, 28% 64%, 40% 61%, 52% 57%, 65% 52%, 78% 48%, 90% 42%, 100% 39%)",
-    },
+      line: "polygon(0% 74%, 14% 69%, 28% 64%, 40% 61%, 52% 57%, 65% 52%, 78% 48%, 90% 42%, 100% 39%)"
+    }
   };
 
   scenarioMiniChart.style.setProperty("--area-clip", chartVariants[active.id].area);
   scenarioMiniChart.style.setProperty("--line-clip", chartVariants[active.id].line);
 }
 
-function render() {
-  renderCarousel();
-  renderSelectedScenario();
+function animateCarousel(direction) {
+  if (state.isAnimating) {
+    return;
+  }
+
+  state.isAnimating = true;
+  prevButton.disabled = true;
+  nextButton.disabled = true;
+
+  const enteringScenarioIndex = getWindowScenarioIndex(direction > 0 ? 3 : -3);
+  const enteringCard = createCardElement(enteringScenarioIndex);
+  applyCardVisual(enteringCard, direction > 0 ? 2 : -2);
+  carouselStage.appendChild(enteringCard);
+
+  requestAnimationFrame(() => {
+    [...carouselStage.children].forEach((card) => {
+      const currentSlot = Number(card.dataset.slot);
+      applyCardVisual(card, currentSlot - direction);
+    });
+  });
+
+  window.setTimeout(() => {
+    state.focusIndex = normalizeIndex(state.focusIndex + direction);
+    state.selectedId = scenarios[state.focusIndex].id;
+    mountCarouselWindow();
+    renderSelectedScenario();
+    state.isAnimating = false;
+    prevButton.disabled = false;
+    nextButton.disabled = false;
+  }, TRANSITION_MS + 30);
 }
 
 prevButton.addEventListener("click", () => {
-  state.focusIndex = normalizeIndex(state.focusIndex - 1);
-  render();
+  animateCarousel(-1);
 });
 
 nextButton.addEventListener("click", () => {
-  state.focusIndex = normalizeIndex(state.focusIndex + 1);
-  render();
+  animateCarousel(1);
 });
 
 chatComposer.addEventListener("focus", () => {
@@ -215,17 +274,16 @@ carouselStage.addEventListener("pointerdown", (event) => {
 });
 
 carouselStage.addEventListener("pointerup", (event) => {
-  if (pointerStartX === null) {
+  if (pointerStartX === null || state.isAnimating) {
+    pointerStartX = null;
     return;
   }
 
   const deltaX = event.clientX - pointerStartX;
   if (deltaX > 40) {
-    state.focusIndex = normalizeIndex(state.focusIndex - 1);
-    render();
+    animateCarousel(-1);
   } else if (deltaX < -40) {
-    state.focusIndex = normalizeIndex(state.focusIndex + 1);
-    render();
+    animateCarousel(1);
   }
   pointerStartX = null;
 });
@@ -234,5 +292,5 @@ carouselStage.addEventListener("pointerleave", () => {
   pointerStartX = null;
 });
 
-render();
-
+mountCarouselWindow();
+renderSelectedScenario();
