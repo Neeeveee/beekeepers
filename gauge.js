@@ -69,9 +69,9 @@ function createGaugeMarkup({ value, label }) {
       <svg class="gauge-svg" viewBox="0 0 185 122" aria-hidden="true">
         ${createTickMarkup({ cx, cy, radius, tickCount: 48, activeCount: activeTickCount })}
         ${createIndicatorMarkup({ cx, cy, radius, value: normalized })}
-        <text class="gauge-min" x="18" y="107">0</text>
+        <text class="gauge-min" x="24" y="107">0</text>
         <text class="gauge-mid" x="88" y="62">50</text>
-        <text class="gauge-max" x="146" y="107">100</text>
+        <text class="gauge-max" x="140" y="107">100</text>
       </svg>
       <div class="gauge-value">${Math.round(normalized)}</div>
     </div>
