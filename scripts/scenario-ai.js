@@ -2,47 +2,17 @@
   {
     id: "scenario-a",
     shortLabel: "A",
-    title: "Scenario A",
-    subtitle: "Balanced placeholder direction",
-    description: "A calm default strategy shell for future AI output and data injection.",
-    statusMode: "Focused",
-    statusVersion: "Draft 01",
-    metrics: [
-      { label: "Coverage", value: "74", fill: 74 },
-      { label: "Cost", value: "42", fill: 42 },
-      { label: "Stability", value: "81", fill: 81 },
-      { label: "Impact", value: "+12%", fill: 68 }
-    ]
+    title: "Scenario A"
   },
   {
     id: "scenario-b",
     shortLabel: "B",
-    title: "Scenario B",
-    subtitle: "Intervention-heavy placeholder direction",
-    description: "A more active strategy shell with stronger placeholder metric changes.",
-    statusMode: "Testing",
-    statusVersion: "Draft 02",
-    metrics: [
-      { label: "Coverage", value: "63", fill: 63 },
-      { label: "Cost", value: "68", fill: 68 },
-      { label: "Stability", value: "58", fill: 58 },
-      { label: "Impact", value: "+19%", fill: 76 }
-    ]
+    title: "Scenario B"
   },
   {
     id: "scenario-c",
     shortLabel: "C",
-    title: "Scenario C",
-    subtitle: "Conservative placeholder direction",
-    description: "A restrained strategy shell intended for low-risk comparison views.",
-    statusMode: "Reviewing",
-    statusVersion: "Draft 03",
-    metrics: [
-      { label: "Coverage", value: "52", fill: 52 },
-      { label: "Cost", value: "27", fill: 27 },
-      { label: "Stability", value: "88", fill: 88 },
-      { label: "Impact", value: "+7%", fill: 49 }
-    ]
+    title: "Scenario C"
   }
 ];
 
@@ -63,22 +33,19 @@ const state = {
   focusIndex: 0,
   selectedId: scenarios[0].id,
   overlayVisible: true,
-  isAnimating: false
+  isAnimating: false,
+  detailOpen: false
 };
 
 const overlay = document.getElementById("scenarioOverlay");
 const carouselStage = document.getElementById("carouselStage");
-const metricCardList = document.getElementById("metricCardList");
 const chatComposer = document.getElementById("chatComposer");
 const overlayRecallButton = document.getElementById("overlayRecallButton");
-const contentTitle = document.getElementById("contentTitle");
-const contentSubtitle = document.getElementById("contentSubtitle");
-const panelBadge = document.getElementById("panelBadge");
-const statusMode = document.getElementById("statusMode");
-const statusVersion = document.getElementById("statusVersion");
-const scenarioMiniChart = document.getElementById("scenarioMiniChart");
 const prevButton = document.getElementById("carouselPrev");
 const nextButton = document.getElementById("carouselNext");
+const detailOverlay = document.getElementById("detailOverlay");
+const detailBackdrop = document.getElementById("detailBackdrop");
+const detailCloseButton = document.getElementById("detailCloseButton");
 
 function normalizeIndex(index) {
   const total = scenarios.length;
@@ -95,16 +62,10 @@ function setOverlayVisible(visible) {
   overlayRecallButton.style.opacity = visible ? "0.72" : "1";
 }
 
-function buildMetricCard(metric) {
-  return `
-    <article class="metric-card">
-      <div class="metric-topline">
-        <span class="metric-label">${metric.label}</span>
-        <strong class="metric-value">${metric.value}</strong>
-      </div>
-      <div class="metric-line" style="--fill: ${metric.fill}%"></div>
-    </article>
-  `;
+function setDetailOpen(open) {
+  state.detailOpen = open;
+  detailOverlay.classList.toggle("is-visible", open);
+  detailOverlay.setAttribute("aria-hidden", open ? "false" : "true");
 }
 
 function createCardElement(scenarioIndex) {
@@ -155,6 +116,12 @@ function mountCarouselWindow() {
   bindCardEvents();
 }
 
+function syncSelectedCardState() {
+  carouselStage.querySelectorAll(".scenario-card").forEach((card) => {
+    card.classList.toggle("is-selected", card.dataset.scenarioId === state.selectedId);
+  });
+}
+
 function bindCardEvents() {
   carouselStage.querySelectorAll(".scenario-card").forEach((card) => {
     card.onclick = () => {
@@ -166,7 +133,6 @@ function bindCardEvents() {
       if (clickedIndex === state.focusIndex) {
         state.selectedId = card.dataset.scenarioId;
         syncSelectedCardState();
-        renderSelectedScenario();
         return;
       }
 
@@ -177,42 +143,16 @@ function bindCardEvents() {
         animateCarousel(-1);
       }
     };
+
+    card.ondblclick = () => {
+      if (state.isAnimating) {
+        return;
+      }
+      state.selectedId = card.dataset.scenarioId;
+      syncSelectedCardState();
+      setDetailOpen(true);
+    };
   });
-}
-
-function syncSelectedCardState() {
-  carouselStage.querySelectorAll(".scenario-card").forEach((card) => {
-    card.classList.toggle("is-selected", card.dataset.scenarioId === state.selectedId);
-  });
-}
-
-function renderSelectedScenario() {
-  const active = scenarios.find((item) => item.id === state.selectedId) || scenarios[state.focusIndex];
-
-  contentTitle.textContent = active.title;
-  contentSubtitle.textContent = active.description;
-  panelBadge.textContent = active.shortLabel;
-  statusMode.textContent = active.statusMode;
-  statusVersion.textContent = active.statusVersion;
-  metricCardList.innerHTML = active.metrics.map(buildMetricCard).join("");
-
-  const chartVariants = {
-    "scenario-a": {
-      area: "polygon(0% 72%, 12% 68%, 26% 62%, 37% 66%, 48% 55%, 61% 49%, 72% 52%, 83% 39%, 100% 34%, 100% 100%, 0 100%)",
-      line: "polygon(0% 72%, 12% 68%, 26% 62%, 37% 66%, 48% 55%, 61% 49%, 72% 52%, 83% 39%, 100% 34%)"
-    },
-    "scenario-b": {
-      area: "polygon(0% 78%, 10% 76%, 24% 60%, 34% 65%, 46% 45%, 57% 51%, 70% 36%, 82% 43%, 100% 30%, 100% 100%, 0 100%)",
-      line: "polygon(0% 78%, 10% 76%, 24% 60%, 34% 65%, 46% 45%, 57% 51%, 70% 36%, 82% 43%, 100% 30%)"
-    },
-    "scenario-c": {
-      area: "polygon(0% 74%, 14% 69%, 28% 64%, 40% 61%, 52% 57%, 65% 52%, 78% 48%, 90% 42%, 100% 39%, 100% 100%, 0 100%)",
-      line: "polygon(0% 74%, 14% 69%, 28% 64%, 40% 61%, 52% 57%, 65% 52%, 78% 48%, 90% 42%, 100% 39%)"
-    }
-  };
-
-  scenarioMiniChart.style.setProperty("--area-clip", chartVariants[active.id].area);
-  scenarioMiniChart.style.setProperty("--line-clip", chartVariants[active.id].line);
 }
 
 function animateCarousel(direction) {
@@ -240,7 +180,6 @@ function animateCarousel(direction) {
     state.focusIndex = normalizeIndex(state.focusIndex + direction);
     state.selectedId = scenarios[state.focusIndex].id;
     mountCarouselWindow();
-    renderSelectedScenario();
     state.isAnimating = false;
     prevButton.disabled = false;
     nextButton.disabled = false;
@@ -268,6 +207,20 @@ chatComposer.addEventListener("input", () => {
   chatComposer.style.height = `${Math.min(chatComposer.scrollHeight, 140)}px`;
 });
 
+detailCloseButton.addEventListener("click", () => {
+  setDetailOpen(false);
+});
+
+detailBackdrop.addEventListener("click", () => {
+  setDetailOpen(false);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.detailOpen) {
+    setDetailOpen(false);
+  }
+});
+
 let pointerStartX = null;
 carouselStage.addEventListener("pointerdown", (event) => {
   pointerStartX = event.clientX;
@@ -293,4 +246,3 @@ carouselStage.addEventListener("pointerleave", () => {
 });
 
 mountCarouselWindow();
-renderSelectedScenario();
