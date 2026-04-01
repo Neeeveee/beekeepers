@@ -87,6 +87,7 @@ function mountGauge(element, options = {}) {
     return null;
   }
   const label = options.label ?? element.dataset.gaugeLabel ?? "Gauge";
+  const initialValue = clampGaugeValue(options.initialValue ?? 0);
   let currentValue = 0;
   let animationFrameId = null;
 
@@ -130,8 +131,8 @@ function mountGauge(element, options = {}) {
     animationFrameId = requestAnimationFrame(step);
   }
 
-  render(0);
-  animateTo(options.value ?? element.dataset.gaugeValue ?? 0, 1000);
+  currentValue = initialValue;
+  render(currentValue);
 
   return {
     setValue(nextValue) {

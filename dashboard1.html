@@ -728,7 +728,7 @@
       gaugeSlots.forEach(slot => {
         const instance = window.BeeGauge.mountGauge(slot, {
           label: slot.dataset.gaugeLabel,
-          value: Number(slot.dataset.gaugeValue)
+          initialValue: 0
         });
         gaugeInstances.set(slot, instance);
       });
