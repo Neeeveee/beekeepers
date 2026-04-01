@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scenario Strategy Page</title>
+  <link rel="stylesheet" href="./styles/scenario.css" />
+</head>
+<body>
+  <main class="scenario-shell">
+    <section class="scenario-hero panel-glass">
+      <div class="hero-copy">
+        <p class="hero-eyebrow">Strategy Overview</p>
+        <h1 class="hero-title">Scenario（策略）方案页</h1>
+        <p class="hero-description">
+          通过中心聚焦卡片切换不同策略方案，联动查看策略趋势与关键指标变化。
+        </p>
+      </div>
+      <div class="carousel-controls">
+        <button id="carouselPrev" class="carousel-nav" type="button" aria-label="上一方案">‹</button>
+        <button id="carouselNext" class="carousel-nav" type="button" aria-label="下一方案">›</button>
+      </div>
+    </section>
+
+    <section class="scenario-carousel-section">
+      <div class="carousel-shell">
+        <div id="scenarioCarousel" class="scenario-carousel" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="scenario-content">
+      <section class="scenario-chart-panel panel-glass">
+        <header class="panel-header">
+          <div>
+            <p class="panel-eyebrow">Scenario Curve</p>
+            <h2 id="chartTitle" class="panel-title">Scenario A 趋势曲线</h2>
+          </div>
+          <div class="panel-tag-group">
+            <span class="panel-tag">Mock Data</span>
+            <span id="scenarioStateTag" class="panel-tag panel-tag-active">Scenario A</span>
+          </div>
+        </header>
+        <div class="chart-card">
+          <svg id="scenarioChart" class="scenario-chart" viewBox="0 0 760 320" preserveAspectRatio="none" aria-label="策略曲线展示图"></svg>
+        </div>
+      </section>
+
+      <aside class="scenario-metrics-panel panel-glass">
+        <header class="panel-header">
+          <div>
+            <p class="panel-eyebrow">Key Metrics</p>
+            <h2 class="panel-title">指标变化</h2>
+          </div>
+        </header>
+        <div id="metricsGrid" class="metrics-grid"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="./scripts/scenario.js"></script>
+</body>
+</html>
