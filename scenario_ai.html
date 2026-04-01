@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scenario + AI Interface</title>
+  <link rel="stylesheet" href="./styles/scenario-ai.css" />
+</head>
+<body>
+  <div class="scenario-ai-page">
+    <button class="overlay-recall-button" id="overlayRecallButton" type="button" aria-label="Show scenarios">
+      <span class="overlay-recall-icon"></span>
+    </button>
+
+    <div class="scenario-overlay" id="scenarioOverlay">
+      <div class="scenario-overlay-backdrop"></div>
+      <section class="scenario-carousel" aria-label="Scenario Carousel">
+        <div class="carousel-toolbar">
+          <div class="carousel-heading-block">
+            <span class="eyebrow-placeholder"></span>
+            <div class="heading-placeholder-group">
+              <span class="heading-placeholder heading-placeholder-lg"></span>
+              <span class="heading-placeholder heading-placeholder-sm"></span>
+            </div>
+          </div>
+          <div class="carousel-actions">
+            <button class="carousel-nav" id="carouselPrev" type="button" aria-label="Previous scenario">‹</button>
+            <button class="carousel-nav" id="carouselNext" type="button" aria-label="Next scenario">›</button>
+          </div>
+        </div>
+
+        <div class="carousel-stage" id="carouselStage"></div>
+      </section>
+    </div>
+
+    <main class="chat-shell">
+      <section class="chat-content" id="chatContent">
+        <div class="content-header glass-panel">
+          <div class="content-header-left">
+            <span class="panel-kicker">Scenario Workspace</span>
+            <h1 class="content-title" id="contentTitle">Scenario A</h1>
+            <p class="content-subtitle" id="contentSubtitle">Placeholder strategy summary for the currently selected scenario.</p>
+          </div>
+          <div class="content-status-cluster">
+            <div class="status-pill"><span></span><strong id="statusMode">Focused</strong></div>
+            <div class="status-pill status-pill-soft"><span></span><strong id="statusVersion">Draft 01</strong></div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <section class="showcase-panel glass-panel">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Content Placeholder</span>
+                <h2 class="panel-title">Selected Scenario View</h2>
+              </div>
+              <div class="panel-badge" id="panelBadge">A</div>
+            </div>
+
+            <div class="showcase-placeholder">
+              <div class="showcase-block showcase-block-wide"></div>
+              <div class="showcase-row">
+                <div class="showcase-block"></div>
+                <div class="showcase-block"></div>
+                <div class="showcase-block"></div>
+              </div>
+              <div class="showcase-chart" id="scenarioMiniChart"></div>
+            </div>
+          </section>
+
+          <aside class="insight-panel glass-panel">
+            <div class="panel-head panel-head-compact">
+              <div>
+                <span class="panel-kicker">Placeholder Metrics</span>
+                <h2 class="panel-title">Scenario Signals</h2>
+              </div>
+            </div>
+            <div class="metric-card-list" id="metricCardList"></div>
+          </aside>
+        </div>
+      </section>
+
+      <footer class="composer-shell">
+        <div class="composer-panel glass-panel">
+          <div class="composer-input-wrap">
+            <textarea
+              id="chatComposer"
+              class="chat-composer"
+              rows="1"
+              placeholder="Type to continue this scenario conversation..."
+            ></textarea>
+          </div>
+          <div class="composer-actions">
+            <span class="composer-tip">Placeholder only</span>
+            <button class="send-placeholder" type="button" aria-label="Send placeholder">
+              <span class="send-placeholder-icon"></span>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="./scripts/scenario-ai.js"></script>
+</body>
+</html>
