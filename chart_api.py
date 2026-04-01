@@ -1325,12 +1325,6 @@ def get_mismatch_overview():
         # 不再只用历史最大值，而是用“历史 + 未来”共同最大值
         # 否则未来值一旦超过历史最大值，就会全部被压成 1
         # =========================
-        all_behavior_values = [
-            row["behavior_index_raw"]
-            for row in hist_rows
-            if row["behavior_index_raw"] is not None
-        ]
-
         future_days = build_future_daily_weather(conn)
         for row in future_days:
             behavior_index_raw = row["behavior_index_raw"]
@@ -1342,13 +1336,6 @@ def get_mismatch_overview():
                     row["precip_mm"],
                 )
                 row["behavior_index_raw"] = behavior_index_raw
-            if behavior_index_raw is not None:
-                all_behavior_values.append(behavior_index_raw)
-
-        max_behavior = max(all_behavior_values) if all_behavior_values else 1.0
-        if max_behavior <= 0:
-            max_behavior = 1.0
-
         actual = []
         history_info = []
         for row in hist_rows:
@@ -1356,7 +1343,7 @@ def get_mismatch_overview():
             if behavior_index_raw is None:
                 behavior_index_norm = None
             else:
-                behavior_index_norm = round(clamp(behavior_index_raw / max_behavior), 3)
+                behavior_index_norm = round(clamp(behavior_index_raw), 3)
 
             raw_gap = calc_mismatch_gap(row["nectar_supply_index"], behavior_index_norm)
             mismatch_gap = calc_mismatch_risk(raw_gap)
@@ -1432,7 +1419,7 @@ def get_mismatch_overview():
             if behavior_index_raw is None:
                 behavior_index_norm = None
             else:
-                behavior_index_norm = round(clamp(behavior_index_raw / max_behavior), 3)
+                behavior_index_norm = round(clamp(behavior_index_raw), 3)
 
             # 推未来综合蜜源供给
             total_weight = 0.0

@@ -228,23 +228,14 @@ def load_daily_behavior(cur):
 
 
 def normalize_behavior(daily_behavior_dict):
-    valid_values = [value for value in daily_behavior_dict.values() if value is not None]
-
-    if not valid_values:
-        return {}, None
-
-    max_behavior = max(valid_values)
-    if max_behavior <= 0:
-        max_behavior = 1.0
-
     normalized = {}
     for model_date, raw_value in daily_behavior_dict.items():
         if raw_value is None:
             normalized[model_date] = None
         else:
-            normalized[model_date] = round(clamp(raw_value / max_behavior), 3)
+            normalized[model_date] = round(clamp(raw_value), 3)
 
-    return normalized, round(max_behavior, 3)
+    return normalized, 1.0
 
 
 def main():
@@ -324,7 +315,7 @@ def main():
     conn.commit()
     conn.close()
 
-    print(f"Updated mismatch_index_daily for {processed_count} dates. max_behavior={max_behavior}")
+    print(f"Updated mismatch_index_daily for {processed_count} dates. behavior_scale=raw_clamped")
 
 
 if __name__ == "__main__":
