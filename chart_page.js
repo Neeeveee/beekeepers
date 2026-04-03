@@ -12,6 +12,7 @@ const FUTURE_DAYS_VISIBLE = 7;
 const CHART_COLORS = {
     history: "#bfbfbf",
     forecast: "#f6e200",
+    forecastBand: "rgba(246, 226, 0, 0.18)",
     historyFillTop: "rgba(191, 191, 191, 0.28)",
     historyFillBottom: "rgba(191, 191, 191, 0.02)",
     forecastFillTop: "rgba(246, 226, 0, 0.32)",
@@ -164,7 +165,9 @@ function filterBridgeData(dataObj) {
     return {
         ...dataObj,
         actual: filterSeriesByWindow(dataObj.actual, "actual"),
-        forecast: filterSeriesByWindow(dataObj.forecast, "forecast")
+        forecast: filterSeriesByWindow(dataObj.forecast, "forecast"),
+        forecast_lower: filterSeriesByWindow(dataObj.forecast_lower, "forecast"),
+        forecast_upper: filterSeriesByWindow(dataObj.forecast_upper, "forecast")
     };
 }
 
@@ -278,6 +281,41 @@ function buildBridgeSeries(dataObj, maxGapMs = 6 * 3600 * 1000) {
         forecastSeries: uniqueTimes.map(time => (
             Object.prototype.hasOwnProperty.call(forecastMap, time) ? forecastMap[time] : null
         ))
+    };
+}
+
+function buildBeeBridgeSeries(dataObj, maxGapMs = 6 * 3600 * 1000) {
+    const built = buildBridgeSeries(dataObj, maxGapMs);
+    const forecastLowerMap = {};
+    const forecastUpperMap = {};
+
+    (dataObj.forecast_lower || []).forEach(item => {
+        forecastLowerMap[item.time] = item.value;
+    });
+
+    (dataObj.forecast_upper || []).forEach(item => {
+        forecastUpperMap[item.time] = item.value;
+    });
+
+    const forecastLowerSeries = built.xData.map(time => (
+        Object.prototype.hasOwnProperty.call(forecastLowerMap, time) ? forecastLowerMap[time] : null
+    ));
+    const forecastUpperSeries = built.xData.map(time => (
+        Object.prototype.hasOwnProperty.call(forecastUpperMap, time) ? forecastUpperMap[time] : null
+    ));
+
+    return {
+        ...built,
+        forecastLowerSeries,
+        forecastUpperSeries,
+        forecastBandSpanSeries: built.xData.map((_, index) => {
+            const lower = forecastLowerSeries[index];
+            const upper = forecastUpperSeries[index];
+            if (typeof lower !== "number" || typeof upper !== "number") {
+                return null;
+            }
+            return roundValue(Math.max(0, upper - lower));
+        })
     };
 }
 
@@ -486,6 +524,98 @@ function buildSharedLineOption(built, seriesNames) {
     };
 }
 
+function buildBeeLineOption(built, seriesNames) {
+    const option = buildSharedLineOption(built, seriesNames);
+
+    option.tooltip.formatter = params => {
+        if (!Array.isArray(params) || !params.length) {
+            return "";
+        }
+
+        const axisValue = params[0]?.axisValue || "";
+        const lines = [formatDateLabel(axisValue)];
+        const historyItem = params.find(item => item.seriesName === seriesNames[0] && typeof item.data === "number");
+        const forecastItem = params.find(item => item.seriesName === seriesNames[1] && typeof item.data === "number");
+        const dataIndex = params[0]?.dataIndex ?? -1;
+        const lower = dataIndex >= 0 ? built.forecastLowerSeries?.[dataIndex] : null;
+        const upper = dataIndex >= 0 ? built.forecastUpperSeries?.[dataIndex] : null;
+
+        if (historyItem) {
+            lines.push(`${seriesNames[0]}: ${Math.round(historyItem.data * 100)}%`);
+        }
+        if (forecastItem) {
+            lines.push(`${seriesNames[1]}: ${Math.round(forecastItem.data * 100)}%`);
+        }
+        if (typeof lower === "number" && typeof upper === "number") {
+            lines.push(`Expected range: ${Math.round(lower * 100)}%-${Math.round(upper * 100)}%`);
+        }
+
+        return lines.join("<br/>");
+    };
+
+    option.series = [
+        option.series[0],
+        {
+            name: "forecast-lower",
+            type: "line",
+            data: built.forecastLowerSeries,
+            stack: "forecast-envelope",
+            smooth: true,
+            connectNulls: false,
+            showSymbol: false,
+            lineStyle: {
+                width: 0,
+                opacity: 0
+            },
+            areaStyle: {
+                opacity: 0
+            },
+            emphasis: {
+                disabled: true
+            },
+            tooltip: {
+                show: false
+            }
+        },
+        {
+            name: "forecast-band",
+            type: "line",
+            data: built.forecastBandSpanSeries,
+            stack: "forecast-envelope",
+            smooth: true,
+            connectNulls: false,
+            showSymbol: false,
+            lineStyle: {
+                width: 0,
+                opacity: 0
+            },
+            areaStyle: {
+                color: CHART_COLORS.forecastBand,
+                opacity: 1
+            },
+            emphasis: {
+                disabled: true
+            },
+            tooltip: {
+                show: false
+            }
+        },
+        {
+            ...option.series[1],
+            areaStyle: {
+                opacity: 0
+            },
+            lineStyle: {
+                color: CHART_COLORS.forecast,
+                width: 1.8,
+                opacity: 1
+            }
+        }
+    ];
+
+    return option;
+}
+
 function updateBeeButtonState() {
     const hourBtn = document.getElementById("btn-bee-hour");
     const dayBtn = document.getElementById("btn-bee-day");
@@ -525,7 +655,14 @@ function updateEcoButtonState() {
 function getBeeDisplaySeries() {
     if (!beeRawData) {
         return {
-            built: { xData: [], actualSeries: [], forecastSeries: [] },
+            built: {
+                xData: [],
+                actualSeries: [],
+                forecastSeries: [],
+                forecastLowerSeries: [],
+                forecastUpperSeries: [],
+                forecastBandSpanSeries: []
+            },
             seriesNames: ["历史活跃度", "预测活跃度"]
         };
     }
@@ -538,18 +675,28 @@ function getBeeDisplaySeries() {
             dailyActual,
             aggregateBeeDaily(visibleBeeData.forecast || [], beeDailyMetric)
         );
+        const dailyForecastLower = dropOverlappingForecastDays(
+            dailyActual,
+            aggregateBeeDaily(visibleBeeData.forecast_lower || [], beeDailyMetric)
+        );
+        const dailyForecastUpper = dropOverlappingForecastDays(
+            dailyActual,
+            aggregateBeeDaily(visibleBeeData.forecast_upper || [], beeDailyMetric)
+        );
 
         return {
-            built: buildBridgeSeries({
+            built: buildBeeBridgeSeries({
                 actual: dailyActual,
-                forecast: dailyForecast
+                forecast: dailyForecast,
+                forecast_lower: dailyForecastLower,
+                forecast_upper: dailyForecastUpper
             }, 36 * 3600 * 1000),
             seriesNames: ["历史活跃度", "预测活跃度"]
         };
     }
 
     return {
-        built: buildBridgeSeries(visibleBeeData),
+        built: buildBeeBridgeSeries(visibleBeeData),
         seriesNames: ["历史活跃度", "预测活跃度"]
     };
 }
@@ -557,7 +704,7 @@ function getBeeDisplaySeries() {
 function renderBeeChart() {
     const { built, seriesNames } = getBeeDisplaySeries();
     beeChart.clear();
-    beeChart.setOption(buildSharedLineOption(built, seriesNames), true);
+    beeChart.setOption(buildBeeLineOption(built, seriesNames), true);
     beeChart.resize();
 }
 

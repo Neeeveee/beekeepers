@@ -351,9 +351,13 @@ def build_extended_future_hourly_forecast(conn: sqlite3.Connection) -> list[dict
         return []
 
     forecast_data = []
+    anchor_forecast_date = None
 
     for day in future_days:
         forecast_date = day["date"]
+        forecast_day = datetime.strptime(forecast_date, "%Y-%m-%d").date()
+        if anchor_forecast_date is None:
+            anchor_forecast_date = forecast_day
 
         avg_temp_c = day["avg_temp_c"]
         avg_humidity_pct = day["avg_humidity_pct"]
@@ -376,18 +380,37 @@ def build_extended_future_hourly_forecast(conn: sqlite3.Connection) -> list[dict
         hf = calc_behavior_humidity_factor(avg_humidity_pct)
         wf = calc_behavior_wind_factor(wind_speed_ms)
         rf = calc_behavior_rain_factor(precip_mm)
+        weather_modifier = round(0.4 * tf + 0.2 * hf + 0.2 * wf + 0.2 * rf, 4)
+        days_ahead = max(0, (forecast_day - anchor_forecast_date).days)
+        uncertainty_ratio = clamp(
+            0.18
+            + min(0.16, days_ahead * 0.025)
+            + 0.18 * max(0.0, 1.0 - weather_modifier)
+            + 0.08 * max(0.0, 1.0 - resource_factor)
+        )
 
         for hour in range(6, 20):
             base = base_hour_activity(hour)
             if base == 0.0 or tf == 0.0 or wf == 0.0 or rf == 0.0:
                 expected_activity = 0.0
             else:
-                weather_modifier = 0.4 * tf + 0.2 * hf + 0.2 * wf + 0.2 * rf
                 expected_activity = round(base * weather_modifier * resource_factor, 4)
+
+            if expected_activity <= 0:
+                lower_bound = 0.0
+                upper_bound = 0.0
+            else:
+                margin = max(0.03, round(expected_activity * uncertainty_ratio, 4))
+                if precip_mm >= 1:
+                    margin = min(0.25, round(margin + 0.02, 4))
+                lower_bound = round(clamp(expected_activity - margin), 4)
+                upper_bound = round(clamp(expected_activity + margin), 4)
 
             forecast_data.append({
                 "time": f"{forecast_date} {hour:02d}:00:00",
                 "value": expected_activity,
+                "lower": lower_bound,
+                "upper": upper_bound,
             })
 
     forecast_data.sort(key=lambda item: item["time"])
@@ -838,7 +861,18 @@ def get_bee_activity_forecast():
         forecast_data = build_extended_future_hourly_forecast(conn)
         actual_data, forecast_data = split_hourly_actual_forecast(actual_data, forecast_data)
 
-        return jsonify(build_bridge_series(actual_data, forecast_data))
+        result = build_bridge_series(actual_data, forecast_data)
+        result["forecast_lower"] = [
+            {"time": item["time"], "value": item["lower"]}
+            for item in forecast_data
+            if item.get("lower") is not None
+        ]
+        result["forecast_upper"] = [
+            {"time": item["time"], "value": item["upper"]}
+            for item in forecast_data
+            if item.get("upper") is not None
+        ]
+        return jsonify(result)
     finally:
         conn.close()
 
