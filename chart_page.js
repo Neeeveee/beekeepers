@@ -13,6 +13,7 @@ const CHART_COLORS = {
     history: "#bfbfbf",
     forecast: "#f6e200",
     forecastBand: "rgba(246, 226, 0, 0.18)",
+    forecastBandStroke: "#F5EEA2",
     historyFillTop: "rgba(191, 191, 191, 0.28)",
     historyFillBottom: "rgba(191, 191, 191, 0.02)",
     forecastFillTop: "rgba(246, 226, 0, 0.32)",
@@ -560,12 +561,14 @@ function buildBeeLineOption(built, seriesNames) {
             type: "line",
             data: built.forecastLowerSeries,
             stack: "forecast-envelope",
+            z: 2,
             smooth: true,
             connectNulls: false,
             showSymbol: false,
             lineStyle: {
-                width: 0,
-                opacity: 0
+                width: 1,
+                opacity: 0.95,
+                color: CHART_COLORS.forecastBandStroke
             },
             areaStyle: {
                 opacity: 0
@@ -582,6 +585,7 @@ function buildBeeLineOption(built, seriesNames) {
             type: "line",
             data: built.forecastBandSpanSeries,
             stack: "forecast-envelope",
+            z: 1,
             smooth: true,
             connectNulls: false,
             showSymbol: false,
@@ -601,7 +605,31 @@ function buildBeeLineOption(built, seriesNames) {
             }
         },
         {
+            name: "forecast-upper",
+            type: "line",
+            data: built.forecastUpperSeries,
+            z: 2,
+            smooth: true,
+            connectNulls: false,
+            showSymbol: false,
+            lineStyle: {
+                width: 1,
+                opacity: 0.95,
+                color: CHART_COLORS.forecastBandStroke
+            },
+            areaStyle: {
+                opacity: 0
+            },
+            emphasis: {
+                disabled: true
+            },
+            tooltip: {
+                show: false
+            }
+        },
+        {
             ...option.series[1],
+            z: 3,
             areaStyle: {
                 opacity: 0
             },
