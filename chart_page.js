@@ -12,7 +12,8 @@ const FUTURE_DAYS_VISIBLE = 7;
 const CHART_COLORS = {
     history: "#bfbfbf",
     forecast: "#f6e200",
-    forecastBand: "rgba(246, 226, 0, 0.18)",
+    forecastBand: "rgba(246, 226, 0, 0.28)",
+    forecastBandStroke: "rgba(246, 226, 0, 0.72)",
     historyFillTop: "rgba(191, 191, 191, 0.28)",
     historyFillBottom: "rgba(191, 191, 191, 0.02)",
     forecastFillTop: "rgba(246, 226, 0, 0.32)",
@@ -559,13 +560,14 @@ function buildBeeLineOption(built, seriesNames) {
             name: "forecast-lower",
             type: "line",
             data: built.forecastLowerSeries,
-            stack: "forecast-envelope",
             smooth: true,
             connectNulls: false,
             showSymbol: false,
             lineStyle: {
-                width: 0,
-                opacity: 0
+                width: 1.2,
+                opacity: 0.9,
+                color: CHART_COLORS.forecastBandStroke,
+                type: "dashed"
             },
             areaStyle: {
                 opacity: 0
@@ -601,13 +603,36 @@ function buildBeeLineOption(built, seriesNames) {
             }
         },
         {
+            name: "forecast-upper",
+            type: "line",
+            data: built.forecastUpperSeries,
+            smooth: true,
+            connectNulls: false,
+            showSymbol: false,
+            lineStyle: {
+                width: 1.2,
+                opacity: 0.9,
+                color: CHART_COLORS.forecastBandStroke,
+                type: "dashed"
+            },
+            areaStyle: {
+                opacity: 0
+            },
+            emphasis: {
+                disabled: true
+            },
+            tooltip: {
+                show: false
+            }
+        },
+        {
             ...option.series[1],
             areaStyle: {
                 opacity: 0
             },
             lineStyle: {
                 color: CHART_COLORS.forecast,
-                width: 1.8,
+                width: 2.1,
                 opacity: 1
             }
         }
