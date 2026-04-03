@@ -383,10 +383,10 @@ def build_extended_future_hourly_forecast(conn: sqlite3.Connection) -> list[dict
         weather_modifier = round(0.4 * tf + 0.2 * hf + 0.2 * wf + 0.2 * rf, 4)
         days_ahead = max(0, (forecast_day - anchor_forecast_date).days)
         uncertainty_ratio = clamp(
-            0.18
-            + min(0.16, days_ahead * 0.025)
-            + 0.18 * max(0.0, 1.0 - weather_modifier)
-            + 0.08 * max(0.0, 1.0 - resource_factor)
+            0.12
+            + min(0.10, days_ahead * 0.018)
+            + 0.12 * max(0.0, 1.0 - weather_modifier)
+            + 0.05 * max(0.0, 1.0 - resource_factor)
         )
 
         for hour in range(6, 20):
@@ -400,9 +400,9 @@ def build_extended_future_hourly_forecast(conn: sqlite3.Connection) -> list[dict
                 lower_bound = 0.0
                 upper_bound = 0.0
             else:
-                margin = max(0.03, round(expected_activity * uncertainty_ratio, 4))
+                margin = max(0.02, round(expected_activity * uncertainty_ratio, 4))
                 if precip_mm >= 1:
-                    margin = min(0.25, round(margin + 0.02, 4))
+                    margin = min(0.18, round(margin + 0.015, 4))
                 lower_bound = round(clamp(expected_activity - margin), 4)
                 upper_bound = round(clamp(expected_activity + margin), 4)
 
