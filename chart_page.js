@@ -11,9 +11,9 @@ const FUTURE_DAYS_VISIBLE = 7;
 
 const CHART_COLORS = {
     history: "#bfbfbf",
-    forecast: "#f6e200",
-    forecastBand: "rgba(246, 226, 0, 0.28)",
-    forecastBandStroke: "rgba(246, 226, 0, 0.72)",
+    forecast: "#fff27a",
+    forecastBand: "rgba(245, 177, 35, 0.42)",
+    forecastBandStroke: "rgba(214, 124, 0, 0.95)",
     historyFillTop: "rgba(191, 191, 191, 0.28)",
     historyFillBottom: "rgba(191, 191, 191, 0.02)",
     forecastFillTop: "rgba(246, 226, 0, 0.32)",
@@ -563,11 +563,12 @@ function buildBeeLineOption(built, seriesNames) {
             smooth: true,
             connectNulls: false,
             showSymbol: false,
+            z: 3,
             lineStyle: {
-                width: 1.2,
-                opacity: 0.9,
+                width: 2,
+                opacity: 1,
                 color: CHART_COLORS.forecastBandStroke,
-                type: "dashed"
+                type: "solid"
             },
             areaStyle: {
                 opacity: 0
@@ -587,6 +588,7 @@ function buildBeeLineOption(built, seriesNames) {
             smooth: true,
             connectNulls: false,
             showSymbol: false,
+            z: 2,
             lineStyle: {
                 width: 0,
                 opacity: 0
@@ -609,11 +611,12 @@ function buildBeeLineOption(built, seriesNames) {
             smooth: true,
             connectNulls: false,
             showSymbol: false,
+            z: 3,
             lineStyle: {
-                width: 1.2,
-                opacity: 0.9,
+                width: 2,
+                opacity: 1,
                 color: CHART_COLORS.forecastBandStroke,
-                type: "dashed"
+                type: "solid"
             },
             areaStyle: {
                 opacity: 0
@@ -627,12 +630,13 @@ function buildBeeLineOption(built, seriesNames) {
         },
         {
             ...option.series[1],
+            z: 4,
             areaStyle: {
                 opacity: 0
             },
             lineStyle: {
                 color: CHART_COLORS.forecast,
-                width: 2.1,
+                width: 2.4,
                 opacity: 1
             }
         }
