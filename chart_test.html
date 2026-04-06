@@ -42,11 +42,90 @@
         }
 
         .chart-block h2 {
-            margin: 0 0 16px;
+            margin: 0;
             font-size: 20px;
             font-weight: 600;
             line-height: 1.2;
             color: #292e38;
+        }
+
+        .title-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 16px;
+            flex-wrap: wrap;
+        }
+
+        .traceability-wrap {
+            position: relative;
+        }
+
+        .traceability-button {
+            height: 28px;
+            padding: 0 12px;
+            border: 1px solid rgba(117, 128, 148, 0.28);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.72);
+            color: #4f596b;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .traceability-button:hover,
+        .traceability-button[aria-expanded="true"] {
+            background: rgba(246, 226, 0, 0.2);
+            border-color: rgba(246, 226, 0, 0.6);
+            color: #292e38;
+        }
+
+        .traceability-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            z-index: 10;
+            width: min(360px, calc(100vw - 80px));
+            padding: 14px 16px;
+            box-sizing: border-box;
+            border: 1px solid rgba(219, 224, 232, 0.95);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 10px 30px rgba(31, 35, 43, 0.12);
+        }
+
+        .traceability-panel[hidden] {
+            display: none;
+        }
+
+        .traceability-panel-title {
+            margin: 0 0 10px;
+            color: #1f232b;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .traceability-item + .traceability-item {
+            margin-top: 8px;
+        }
+
+        .traceability-label {
+            display: block;
+            margin-bottom: 2px;
+            color: #4f596b;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .traceability-value {
+            margin: 0;
+            color: #5d6779;
+            font-size: 12px;
+            line-height: 1.6;
         }
 
         .eco-layout,
@@ -338,7 +417,7 @@
         </div>
     </div>
 
-    <script src="./chart_page.js?v=20260331v14"></script>
+    <script src="./chart_page.js?v=20260406v15"></script>
 </body>
 
 </html>

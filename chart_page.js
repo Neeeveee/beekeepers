@@ -64,6 +64,27 @@ const BEE_CORE_START_HOUR = 10;
 const BEE_CORE_END_HOUR = 15;
 const MIN_CORE_DAY_SAMPLES = 3;
 const MIN_FALLBACK_DAY_SAMPLES = 6;
+const TRACEABILITY_STATE = {
+    bee: null,
+    eco: null
+};
+const ECO_TRACEABILITY_COPY = {
+    flowering_overview: {
+        source: "时间范围为过去 5 天历史曲线与未来 7 天预测曲线；数据来源于花期指数汇总结果，并按当前可用数据窗口展示，缺失时保留原始空段。",
+        rule: "当前视图展示花期状态综合趋势，并结合主导植物贡献进行解释，帮助判断花期变化来自哪些植物条件。",
+        note: "若曲线与现场感知不一致，建议结合当天开花观察与植物分布进行复核。"
+    },
+    nectar_supply_overview: {
+        source: "时间范围为过去 5 天历史曲线与未来 7 天预测曲线；数据来源于蜜源供给强度汇总结果，并按当前可用数据窗口展示，缺失时保留原始空段。",
+        rule: "当前视图展示蜜源供给强度趋势，并结合主导供给植物信息说明供给变化的主要依据。",
+        note: "若预测供给偏高或偏低，可回看主导植物与近期天气条件，判断是否存在现场差异。"
+    },
+    mismatch_overview: {
+        source: "时间范围为过去 5 天历史曲线与未来 7 天预测曲线；数据来源于生态错配风险汇总结果，并按当前可用数据窗口展示，缺失时保留原始空段。",
+        rule: "当前视图依据蜂群活动与生态供给之间的相对偏离程度生成错配风险，用于提示需要人工关注的阶段。",
+        note: "该风险值用于辅助预警，不替代现场巡查与经验判断。"
+    }
+};
 
 function getDataMode() {
     const params = new URLSearchParams(window.location.search);
@@ -72,6 +93,112 @@ function getDataMode() {
         return mode;
     }
     return DEFAULT_DATA_MODE;
+}
+
+function createTraceabilityControl(blockId, mode) {
+    const block = document.getElementById(blockId);
+    const heading = block?.querySelector(":scope > h2");
+    if (!block || !heading) {
+        return;
+    }
+
+    const row = document.createElement("div");
+    row.className = "title-row";
+
+    const wrap = document.createElement("div");
+    wrap.className = "traceability-wrap";
+
+    const button = document.createElement("button");
+    button.id = `${mode}TraceabilityButton`;
+    button.className = "traceability-button";
+    button.type = "button";
+    button.textContent = "查看依据";
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", `${mode}TraceabilityPanel`);
+    button.addEventListener("click", () => toggleTraceability(mode));
+
+    const panel = document.createElement("div");
+    panel.id = `${mode}TraceabilityPanel`;
+    panel.className = "traceability-panel";
+    panel.hidden = true;
+    panel.innerHTML = `
+        <p class="traceability-panel-title">可回溯信息</p>
+        <div class="traceability-item">
+            <span class="traceability-label">数据时间与来源</span>
+            <p id="${mode}TraceabilitySource" class="traceability-value"></p>
+        </div>
+        <div class="traceability-item">
+            <span class="traceability-label">规则依据</span>
+            <p id="${mode}TraceabilityRule" class="traceability-value"></p>
+        </div>
+        <div class="traceability-item">
+            <span class="traceability-label">简短解释</span>
+            <p id="${mode}TraceabilityNote" class="traceability-value"></p>
+        </div>
+    `;
+
+    heading.parentNode.insertBefore(row, heading);
+    row.appendChild(heading);
+    wrap.appendChild(button);
+    wrap.appendChild(panel);
+    row.appendChild(wrap);
+
+    TRACEABILITY_STATE[mode] = {
+        button,
+        panel,
+        source: panel.querySelector(`#${mode}TraceabilitySource`),
+        rule: panel.querySelector(`#${mode}TraceabilityRule`),
+        note: panel.querySelector(`#${mode}TraceabilityNote`)
+    };
+}
+
+function closeTraceabilityPanels(exceptMode = "") {
+    Object.entries(TRACEABILITY_STATE).forEach(([mode, state]) => {
+        if (!state || mode === exceptMode) {
+            return;
+        }
+        state.panel.hidden = true;
+        state.button.setAttribute("aria-expanded", "false");
+    });
+}
+
+function toggleTraceability(mode) {
+    const state = TRACEABILITY_STATE[mode];
+    if (!state) {
+        return;
+    }
+
+    const nextOpen = state.panel.hidden;
+    closeTraceabilityPanels(nextOpen ? mode : "");
+    state.panel.hidden = !nextOpen;
+    state.button.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+}
+
+function updateBeeTraceability() {
+    const state = TRACEABILITY_STATE.bee;
+    if (!state) {
+        return;
+    }
+
+    const scaleText = beeTimeScale === "day"
+        ? (beeDailyMetric === "peak" ? "按天查看的日峰值" : "按天查看的日均值")
+        : "按小时查看的细粒度曲线";
+
+    state.source.textContent = "时间范围为过去 5 天历史实测与未来 7 天预测；数据来源于蜂箱活跃度记录、预测结果表及其置信区间，缺失数据按当前可用样本直接显示。";
+    state.rule.textContent = `${scaleText}；历史段展示实测结果，未来段展示预测结果，黄色带状区用于提示预测区间范围。`;
+    state.note.textContent = "若预测结果与养蜂经验不一致，可结合天气、花期和异常记录进一步复核，本图用于支持判断而非替代判断。";
+}
+
+function updateEcoTraceability() {
+    const state = TRACEABILITY_STATE.eco;
+    if (!state) {
+        return;
+    }
+
+    const copy = ECO_TRACEABILITY_COPY[currentEcoMetric] || ECO_TRACEABILITY_COPY.flowering_overview;
+    state.source.textContent = copy.source;
+    state.rule.textContent = copy.rule;
+    state.note.textContent = copy.note;
 }
 
 const DATA_MODE = getDataMode();
@@ -773,12 +900,14 @@ async function fetchJson(source) {
 async function loadBeeChart() {
     beeRawData = await fetchJson(DATA_SOURCES.beeActivity);
     updateBeeButtonState();
+    updateBeeTraceability();
     renderBeeChart();
 }
 
 function setBeeTimeScale(scale) {
     beeTimeScale = scale;
     updateBeeButtonState();
+    updateBeeTraceability();
     if (beeRawData) {
         renderBeeChart();
     }
@@ -787,6 +916,7 @@ function setBeeTimeScale(scale) {
 function setBeeDailyMetric(metric) {
     beeDailyMetric = metric;
     updateBeeButtonState();
+    updateBeeTraceability();
     if (beeRawData && beeTimeScale === "day") {
         renderBeeChart();
     }
@@ -836,6 +966,7 @@ async function loadEcoChart() {
     const requestId = ++ecoRequestId;
     const metricConfig = getEcoMetricConfig();
     updateEcoLayout(metricConfig);
+    updateEcoTraceability();
     const data = await fetchJson(metricConfig.source);
     if (requestId !== ecoRequestId) {
         return;
@@ -847,6 +978,7 @@ async function loadEcoChart() {
 function setEcoMetric(metric) {
     currentEcoMetric = metric;
     updateEcoButtonState();
+    updateEcoTraceability();
     loadEcoChart();
 }
 
@@ -855,9 +987,28 @@ async function refreshCharts() {
     await loadEcoChart();
 }
 
+createTraceabilityControl("beeCurveBlock", "bee");
+createTraceabilityControl("flowerCurveBlock", "eco");
+updateBeeTraceability();
+updateEcoTraceability();
+
+document.addEventListener("click", event => {
+    const target = event.target;
+    const clickedInsideTraceability = Object.values(TRACEABILITY_STATE).some(state => (
+        state && state.button.contains(target)
+    ) || (
+        state && state.panel.contains(target)
+    ));
+
+    if (!clickedInsideTraceability) {
+        closeTraceabilityPanels();
+    }
+});
+
 window.setBeeTimeScale = setBeeTimeScale;
 window.setBeeDailyMetric = setBeeDailyMetric;
 window.setEcoMetric = setEcoMetric;
+window.toggleTraceability = toggleTraceability;
 
 refreshCharts();
 setInterval(loadBeeChart, 30000);
