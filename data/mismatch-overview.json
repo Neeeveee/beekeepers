@@ -111,28 +111,28 @@
     {
       "time": "2026-04-06",
       "value": null
+    },
+    {
+      "time": "2026-04-07",
+      "value": 0.064
     }
   ],
   "forecast": [
     {
-      "time": "2026-04-06",
-      "value": null
-    },
-    {
       "time": "2026-04-07",
-      "value": 0.145
+      "value": 0.064
     },
     {
       "time": "2026-04-08",
-      "value": 0.285
+      "value": 0.116
     },
     {
       "time": "2026-04-09",
-      "value": 0.028
+      "value": 0.376
     },
     {
       "time": "2026-04-10",
-      "value": 0.0
+      "value": 0.037
     },
     {
       "time": "2026-04-11",
@@ -140,27 +140,26 @@
     },
     {
       "time": "2026-04-12",
-      "value": 0.29
+      "value": 0.139
     },
     {
       "time": "2026-04-13",
-      "value": 0.279
+      "value": 0.328
+    },
+    {
+      "time": "2026-04-14",
+      "value": 0.337
     }
   ],
   "forecast_info": [
     {
       "mismatch_level": "基本匹配",
       "mismatch_type": "resource_ahead",
-      "time": "2026-04-07"
-    },
-    {
-      "mismatch_level": "轻度错配",
-      "mismatch_type": "resource_ahead",
       "time": "2026-04-08"
     },
     {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "matched",
+      "mismatch_level": "中度错配",
+      "mismatch_type": "resource_ahead",
       "time": "2026-04-09"
     },
     {
@@ -174,14 +173,19 @@
       "time": "2026-04-11"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "基本匹配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-12"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-13"
+    },
+    {
+      "mismatch_level": "中度错配",
+      "mismatch_type": "resource_ahead",
+      "time": "2026-04-14"
     }
   ],
   "history_info": [
@@ -324,6 +328,11 @@
       "mismatch_level": "无数据",
       "mismatch_type": "no_data",
       "time": "2026-04-06"
+    },
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "behavior_ahead",
+      "time": "2026-04-07"
     }
   ]
 }
