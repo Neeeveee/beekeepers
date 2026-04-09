@@ -113,7 +113,7 @@ const fallbackScenarios = [
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(STATIC_ROOT, "scenario_ai.html"));
+  res.sendFile(path.join(STATIC_ROOT, "dashboard1.html"));
 });
 
 app.use(express.static(STATIC_ROOT, { index: false }));
