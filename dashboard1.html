@@ -748,7 +748,7 @@
           <img class="mode-icon" src="./images/image 25.png" alt="" aria-hidden="true" />
           <span class="mode-label">行为</span>
         </button>
-        <button class="mode-button mode-plan" type="button" data-toggle-group="mode-switch">
+        <button class="mode-button mode-plan" type="button" data-toggle-group="mode-switch" data-nav-target="./scenario_ai.html">
           <img class="mode-icon" src="./images/image 24.png" alt="" aria-hidden="true" />
           <span class="mode-label">策略</span>
         </button>
@@ -1151,6 +1151,11 @@
 
     modeButtons.forEach(button => {
       button.addEventListener("click", () => {
+        if (button.dataset.navTarget) {
+          window.location.href = button.dataset.navTarget;
+          return;
+        }
+
         const isAlreadyActive = button.classList.contains("active");
 
         modeButtons.forEach(item => item.classList.remove("active"));

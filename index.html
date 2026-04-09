@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bee Project Dashboard</title>
+  <link rel="stylesheet" href="./styles/site-shell.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <main class="dashboard-layout" aria-label="Bee dashboard layout">
+      <section class="panel panel-map" aria-labelledby="map-panel-title">
+        <header class="panel-header">
+          <h2 id="map-panel-title" class="panel-title">地图区域</h2>
+        </header>
+        <div
+          id="map-module-container"
+          class="panel-body module-slot module-slot-placeholder"
+          data-module-slot="map"
+          aria-label="地图模块占位容器"
+        >
+          <span class="module-slot-text">等待接入地图模块</span>
+        </div>
+      </section>
+
+      <section class="panel panel-metrics" aria-labelledby="metrics-panel-title">
+        <header class="panel-header">
+          <h2 id="metrics-panel-title" class="panel-title">仪表盘区域</h2>
+        </header>
+        <div class="metrics-grid" id="metrics-grid"></div>
+      </section>
+
+      <section class="panel panel-curve" aria-labelledby="curve-panel-title">
+        <header class="panel-header">
+          <h2 id="curve-panel-title" class="panel-title">曲线图区域</h2>
+        </header>
+        <div
+          id="curve-module-container"
+          class="panel-body module-slot module-slot-placeholder"
+          data-module-slot="curve"
+          aria-label="曲线图模块接入容器"
+        >
+          <span class="module-slot-text">预留曲线图模块容器</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./scripts/site-shell.js"></script>
+</body>
+</html>

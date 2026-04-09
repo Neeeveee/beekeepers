@@ -8,8 +8,69 @@
 </head>
 <body>
   <div class="scenario-ai-page">
-    <button class="overlay-recall-button" id="overlayRecallButton" type="button" aria-label="Show scenarios">
-      <span class="overlay-recall-icon"></span>
+    <button class="back-dashboard-button" id="backDashboardButton" type="button" aria-label="返回主界面">
+      <img class="back-dashboard-icon" src="./images/image 31.png" alt="" aria-hidden="true" />
+    </button>
+
+    <header class="top-right-info-bar" aria-label="右上信息栏">
+      <img class="top-right-info-line" src="./images/image 29.png" alt="" aria-hidden="true" />
+      <div class="info-chip-list">
+        <button class="info-chip info-chip-site" id="siteInfoToggle" type="button" aria-expanded="false" aria-controls="siteDetailCard">
+          <span class="info-chip-label">场地</span>
+          <span class="info-chip-value info-chip-site-text">临平归蜜农场</span>
+          <span class="info-chip-chevron" aria-hidden="true"></span>
+        </button>
+        <div class="info-chip">
+          <span class="info-chip-label">日期</span>
+          <span class="info-chip-value" id="infoDate">--</span>
+        </div>
+        <div class="info-chip">
+          <span class="info-chip-label">时间</span>
+          <span class="info-chip-value" id="infoTime">--</span>
+        </div>
+        <div class="info-chip">
+          <span class="info-chip-label">天气</span>
+          <span class="info-chip-value" id="infoWeather">--</span>
+        </div>
+        <div class="info-chip">
+          <span class="info-chip-label">温度</span>
+          <span class="info-chip-value" id="infoTemp">--</span>
+        </div>
+        <div class="info-chip">
+          <span class="info-chip-label">湿度</span>
+          <span class="info-chip-value" id="infoHumidity">--</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="site-detail-card" id="siteDetailCard" aria-label="场地信息卡">
+      <h3 class="site-detail-title">场地信息</h3>
+      <div class="site-detail-grid">
+        <div class="site-detail-row">
+          <div class="site-detail-label">场地名称</div>
+          <div class="site-detail-value">临平归蜜农场</div>
+        </div>
+        <div class="site-detail-row">
+          <div class="site-detail-label">蜂种</div>
+          <div class="site-detail-value">中华蜂</div>
+        </div>
+        <div class="site-detail-row">
+          <div class="site-detail-label">数据起止日期</div>
+          <div class="site-detail-value" id="siteDateRange">--</div>
+        </div>
+        <div class="site-detail-row">
+          <div class="site-detail-label">主要数据来源</div>
+          <div class="site-detail-value">环境传感、蜂群行为观测、花期与蜜源模型</div>
+        </div>
+        <div class="site-detail-row">
+          <div class="site-detail-label">采集说明</div>
+          <div class="site-detail-value">数据按日更新，部分指标由规则模型推导生成</div>
+        </div>
+      </div>
+    </section>
+
+    <button class="overlay-recall-button" id="overlayRecallButton" type="button" aria-label="查看建议策略">
+      查看建议策略
     </button>
 
     <div class="scenario-overlay" id="scenarioOverlay">
@@ -35,38 +96,50 @@
 
     <div class="detail-overlay" id="detailOverlay" aria-hidden="true">
       <div class="detail-backdrop" id="detailBackdrop"></div>
-      <section class="detail-modal glass-panel" aria-label="Scenario Detail Placeholder">
+      <section class="detail-modal glass-panel" aria-label="Scenario Detail">
         <div class="detail-header">
           <div class="detail-heading-group">
-            <span class="detail-kicker"></span>
-            <span class="detail-title-placeholder"></span>
-            <span class="detail-text-placeholder detail-text-medium"></span>
+            <span class="detail-kicker" id="detailKicker"></span>
+            <h2 class="detail-title" id="detailTitle"></h2>
+            <p class="detail-summary" id="detailSummary"></p>
           </div>
-          <button class="detail-close-button" id="detailCloseButton" type="button" aria-label="Close detail overlay">
-            <span class="detail-close-icon"></span>
-          </button>
+
+          <div class="detail-header-side">
+            <div class="detail-inline-highlights" id="detailMetrics"></div>
+            <button class="detail-close-button" id="detailCloseButton" type="button" aria-label="Close detail overlay">
+              <span class="detail-close-icon"></span>
+            </button>
+          </div>
         </div>
 
         <div class="detail-content-grid">
           <div class="detail-main-block glass-subpanel">
-            <span class="detail-section-title"></span>
-            <span class="detail-text-placeholder detail-text-long"></span>
-            <span class="detail-text-placeholder detail-text-long"></span>
-            <span class="detail-text-placeholder detail-text-short"></span>
+            <span class="detail-section-title" id="detailSectionTitle"></span>
+            <div class="detail-copy" id="detailCopy"></div>
           </div>
+        </div>
 
-          <div class="detail-side-stack">
-            <div class="detail-metric-card glass-subpanel"></div>
-            <div class="detail-metric-card glass-subpanel"></div>
-            <div class="detail-metric-card glass-subpanel"></div>
-          </div>
+        <div class="detail-action-row">
+          <button class="detail-primary-action" id="detailPrimaryAction" type="button">
+            Continue This Scenario
+          </button>
+          <span class="detail-action-note">Select a card to open its scenario brief.</span>
         </div>
       </section>
     </div>
 
     <main class="chat-shell">
-      <section class="chat-stage" aria-hidden="true">
+      <section class="chat-stage">
         <div class="chat-stage-wash"></div>
+        <section class="chat-context-panel glass-panel is-hidden" id="chatContextPanel" aria-live="polite">
+          <div class="chat-context-head">
+            <span class="chat-context-kicker" id="chatContextKicker">Strategy Context</span>
+            <button class="chat-context-clear" id="chatContextClear" type="button">Clear</button>
+          </div>
+          <h3 class="chat-context-title" id="chatContextTitle"></h3>
+          <p class="chat-context-summary" id="chatContextSummary"></p>
+          <div class="chat-context-points" id="chatContextPoints"></div>
+        </section>
       </section>
 
       <footer class="composer-shell">
@@ -80,7 +153,7 @@
             ></textarea>
           </div>
           <div class="composer-actions">
-            <span class="composer-tip">Placeholder only</span>
+            <span class="composer-tip" id="composerTip">Placeholder only</span>
             <button class="send-placeholder" type="button" aria-label="Send placeholder">
               <span class="send-placeholder-icon"></span>
             </button>
@@ -90,6 +163,10 @@
     </main>
   </div>
 
-  <script src="./scripts/scenario-ai.js"></script>
-</body>
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <script src="./scripts/scenario-ai.js"></script></body>
 </html>
+
+
+
+

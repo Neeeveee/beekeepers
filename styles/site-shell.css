@@ -1,0 +1,152 @@
+:root {
+  --page-bg: #f3f6f8;
+  --panel-bg: #ffffff;
+  --panel-border: #d7dde3;
+  --panel-title: #1f2933;
+  --panel-text: #52606d;
+  --slot-bg: #f8fafb;
+  --slot-border: #c7d0d9;
+  --metric-value: #102a43;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: var(--page-bg);
+  color: var(--panel-text);
+}
+
+.site-shell {
+  width: 100vw;
+  height: 100vh;
+  padding: 16px;
+}
+
+.dashboard-layout {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1.9fr 1fr;
+  grid-template-rows: 1fr 0.92fr;
+  gap: 16px;
+}
+
+.panel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+}
+
+.panel-map {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+.panel-metrics {
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+}
+
+.panel-curve {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+.panel-header {
+  flex: 0 0 auto;
+  margin-bottom: 12px;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--panel-title);
+}
+
+.panel-body,
+.metrics-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.module-slot {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.module-slot-placeholder {
+  border: 1px dashed var(--slot-border);
+  background: var(--slot-bg);
+}
+
+.module-slot-text {
+  font-size: 15px;
+  color: var(--panel-text);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.metric-card {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  border: 1px solid var(--panel-border);
+  background: var(--slot-bg);
+}
+
+.metric-card-label {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--panel-text);
+}
+
+.metric-card-value {
+  margin: 8px 0 0;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--metric-value);
+}
+
+.metric-card-unit {
+  margin-left: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--panel-text);
+}
+
+.metric-card-meta {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--panel-text);
+}

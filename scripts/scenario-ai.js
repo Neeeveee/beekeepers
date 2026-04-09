@@ -1,248 +1,43 @@
-﻿const scenarios = [
-  {
-    id: "scenario-a",
-    shortLabel: "A",
-    title: "Scenario A"
-  },
-  {
-    id: "scenario-b",
-    shortLabel: "B",
-    title: "Scenario B"
-  },
-  {
-    id: "scenario-c",
-    shortLabel: "C",
-    title: "Scenario C"
-  }
-];
-
-const SLOT_CONFIG = {
-  "-3": { x: -760, scale: 0.68, opacity: 0, blur: 8, z: 0 },
-  "-2": { x: -510, scale: 0.78, opacity: 0, blur: 5, z: 0 },
-  "-1": { x: -255, scale: 0.88, opacity: 0.44, blur: 1.4, z: 2 },
-  "0": { x: 0, scale: 1, opacity: 1, blur: 0, z: 4 },
-  "1": { x: 255, scale: 0.88, opacity: 0.44, blur: 1.4, z: 2 },
-  "2": { x: 510, scale: 0.78, opacity: 0, blur: 5, z: 0 },
-  "3": { x: 760, scale: 0.68, opacity: 0, blur: 8, z: 0 }
-};
-
-const ACTIVE_OFFSETS = [-2, -1, 0, 1, 2];
-const TRANSITION_MS = 460;
-
-const state = {
-  focusIndex: 0,
-  selectedId: scenarios[0].id,
-  overlayVisible: true,
-  isAnimating: false,
-  detailOpen: false
-};
-
-const overlay = document.getElementById("scenarioOverlay");
-const carouselStage = document.getElementById("carouselStage");
-const chatComposer = document.getElementById("chatComposer");
-const overlayRecallButton = document.getElementById("overlayRecallButton");
-const prevButton = document.getElementById("carouselPrev");
-const nextButton = document.getElementById("carouselNext");
-const detailOverlay = document.getElementById("detailOverlay");
-const detailBackdrop = document.getElementById("detailBackdrop");
-const detailCloseButton = document.getElementById("detailCloseButton");
-
-function normalizeIndex(index) {
-  const total = scenarios.length;
-  return ((index % total) + total) % total;
-}
-
-function getWindowScenarioIndex(offsetFromFocus) {
-  return normalizeIndex(state.focusIndex + offsetFromFocus);
-}
-
-function setOverlayVisible(visible) {
-  state.overlayVisible = visible;
-  overlay.classList.toggle("is-hidden", !visible);
-  overlayRecallButton.style.opacity = visible ? "0.72" : "1";
-}
-
-function setDetailOpen(open) {
-  state.detailOpen = open;
-  detailOverlay.classList.toggle("is-visible", open);
-  detailOverlay.setAttribute("aria-hidden", open ? "false" : "true");
-}
-
-function createCardElement(scenarioIndex) {
-  const scenario = scenarios[scenarioIndex];
-  const card = document.createElement("button");
-  card.type = "button";
-  card.className = "scenario-card";
-  card.dataset.scenarioId = scenario.id;
-  card.dataset.scenarioIndex = String(scenarioIndex);
-  card.setAttribute("aria-label", scenario.title);
-  card.innerHTML = `
-    <div class="card-topline">
-      <span class="card-chip"></span>
-      <span class="card-kpi"></span>
-    </div>
-    <span class="card-title-placeholder"></span>
-    <span class="card-text-placeholder"></span>
-    <span class="card-text-placeholder short"></span>
-    <div class="card-number-row">
-      <span class="card-number-placeholder"></span>
-      <span class="card-number-placeholder"></span>
-    </div>
-    <span class="card-footer-placeholder"></span>
-  `;
-  return card;
-}
-
-function applyCardVisual(card, slot) {
-  const config = SLOT_CONFIG[String(slot)];
-  card.dataset.slot = String(slot);
-  card.style.transform = `translateX(calc(-50% + ${config.x}px)) scale(${config.scale})`;
-  card.style.opacity = String(config.opacity);
-  card.style.filter = `blur(${config.blur}px)`;
-  card.style.zIndex = String(config.z);
-  card.classList.toggle("is-center", slot === 0);
-  card.classList.toggle("is-side", slot === -1 || slot === 1);
-  card.classList.toggle("is-selected", card.dataset.scenarioId === state.selectedId);
-}
-
-function mountCarouselWindow() {
-  carouselStage.innerHTML = "";
-  ACTIVE_OFFSETS.forEach((offset) => {
-    const scenarioIndex = getWindowScenarioIndex(offset);
-    const card = createCardElement(scenarioIndex);
-    applyCardVisual(card, offset);
-    carouselStage.appendChild(card);
-  });
-  bindCardEvents();
-}
-
-function syncSelectedCardState() {
-  carouselStage.querySelectorAll(".scenario-card").forEach((card) => {
-    card.classList.toggle("is-selected", card.dataset.scenarioId === state.selectedId);
-  });
-}
-
-function bindCardEvents() {
-  carouselStage.querySelectorAll(".scenario-card").forEach((card) => {
-    card.onclick = () => {
-      if (state.isAnimating) {
-        return;
-      }
-
-      const clickedIndex = Number(card.dataset.scenarioIndex);
-      if (clickedIndex === state.focusIndex) {
-        state.selectedId = card.dataset.scenarioId;
-        syncSelectedCardState();
-        return;
-      }
-
-      const delta = (clickedIndex - state.focusIndex + scenarios.length) % scenarios.length;
-      if (delta === 1) {
-        animateCarousel(1);
-      } else if (delta === scenarios.length - 1) {
-        animateCarousel(-1);
-      }
-    };
-
-    card.ondblclick = () => {
-      if (state.isAnimating) {
-        return;
-      }
-      state.selectedId = card.dataset.scenarioId;
-      syncSelectedCardState();
-      setDetailOpen(true);
-    };
-  });
-}
-
-function animateCarousel(direction) {
-  if (state.isAnimating) {
-    return;
-  }
-
-  state.isAnimating = true;
-  prevButton.disabled = true;
-  nextButton.disabled = true;
-
-  const enteringScenarioIndex = getWindowScenarioIndex(direction > 0 ? 3 : -3);
-  const enteringCard = createCardElement(enteringScenarioIndex);
-  applyCardVisual(enteringCard, direction > 0 ? 2 : -2);
-  carouselStage.appendChild(enteringCard);
-
-  requestAnimationFrame(() => {
-    [...carouselStage.children].forEach((card) => {
-      const currentSlot = Number(card.dataset.slot);
-      applyCardVisual(card, currentSlot - direction);
-    });
-  });
-
-  window.setTimeout(() => {
-    state.focusIndex = normalizeIndex(state.focusIndex + direction);
-    state.selectedId = scenarios[state.focusIndex].id;
-    mountCarouselWindow();
-    state.isAnimating = false;
-    prevButton.disabled = false;
-    nextButton.disabled = false;
-  }, TRANSITION_MS + 30);
-}
-
-prevButton.addEventListener("click", () => {
-  animateCarousel(-1);
-});
-
-nextButton.addEventListener("click", () => {
-  animateCarousel(1);
-});
-
-chatComposer.addEventListener("focus", () => {
-  setOverlayVisible(false);
-});
-
-overlayRecallButton.addEventListener("click", () => {
-  setOverlayVisible(true);
-});
-
-chatComposer.addEventListener("input", () => {
-  chatComposer.style.height = "auto";
-  chatComposer.style.height = `${Math.min(chatComposer.scrollHeight, 140)}px`;
-});
-
-detailCloseButton.addEventListener("click", () => {
-  setDetailOpen(false);
-});
-
-detailBackdrop.addEventListener("click", () => {
-  setDetailOpen(false);
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && state.detailOpen) {
-    setDetailOpen(false);
-  }
-});
-
-let pointerStartX = null;
-carouselStage.addEventListener("pointerdown", (event) => {
-  pointerStartX = event.clientX;
-});
-
-carouselStage.addEventListener("pointerup", (event) => {
-  if (pointerStartX === null || state.isAnimating) {
-    pointerStartX = null;
-    return;
-  }
-
-  const deltaX = event.clientX - pointerStartX;
-  if (deltaX > 40) {
-    animateCarousel(-1);
-  } else if (deltaX < -40) {
-    animateCarousel(1);
-  }
-  pointerStartX = null;
-});
-
-carouselStage.addEventListener("pointerleave", () => {
-  pointerStartX = null;
-});
-
-mountCarouselWindow();
+const S=[{id:"scenario-a",shortLabel:"A",title:"稳态授粉策略",kicker:"Pollination Outlook",summary:"当前花期与蜂群活跃较匹配，建议稳定监测。",sectionTitle:"策略详情",detailPoints:["当前风险较低。","优先保持蜂箱稳定。","持续观察温度与花蜜变化。"],detailSections:[{label:"应对问题",value:"当前场地处于低风险稳态期。"},{label:"建议类型",value:"战略性建议。"},{label:"建议内容",value:"以稳定监测为主。"},{label:"具体操作",value:"保持蜂箱位置不变；每日两次巡查；异常天气时轻度调整。"},{label:"成本",value:"低成本。"},{label:"效果",value:"维持当前授粉效率。"},{label:"收益导向",value:"生态稳定与管理效率。"}],detailHighlights:[{label:"成本",value:"低",note:"以巡查记录为主"},{label:"效果",value:"稳态维持",note:"优先保持当前效率"},{label:"收益导向",value:"生态/管理",note:"强调稳定低扰动"}],metrics:[{label:"花蜂匹配",value:"82%",note:"匹配度较高"},{label:"风险等级",value:"低",note:"暂无明显风险"}]},{id:"scenario-b",shortLabel:"B",title:"高温应对策略",kicker:"Heat Adjustment",summary:"高温会压缩蜂群有效活动时段，需要遮阴和补水。",sectionTitle:"策略详情",detailPoints:["午间活动会下降。","加强场地补水和遮阴。","适合短时天气压力调整。"],detailSections:[{label:"应对问题",value:"高温压缩授粉有效时段。"},{label:"建议类型",value:"临时性建议。"},{label:"建议内容",value:"把重点观察前移到上午。"},{label:"具体操作",value:"设置遮阴点；增加补水；调整巡查到清晨和傍晚。"},{label:"成本",value:"中成本。"},{label:"效果",value:"缓解高温造成的活动下降。"},{label:"收益导向",value:"保护短期经济收益。"}],detailHighlights:[{label:"成本",value:"中",note:"需要临时物资"},{label:"效果",value:"热压缓解",note:"保住上午窗口"},{label:"收益导向",value:"经济/健康",note:"减少热损失"}],metrics:[{label:"花蜂匹配",value:"64%",note:"开始出现漂移"},{label:"风险等级",value:"中",note:"需提前调整"}]},{id:"scenario-c",shortLabel:"C",title:"错配恢复策略",kicker:"Recovery Strategy",summary:"花期与蜂群活动存在明显错配，建议进入恢复模式。",sectionTitle:"策略详情",detailPoints:["当前整体效率偏低。","评估补充花源或调整蜂箱位置。","适合作为 AI 重点讨论上下文。"],detailSections:[{label:"应对问题",value:"花期与蜂群活动峰值错位。"},{label:"建议类型",value:"战略性建议。"},{label:"建议内容",value:"围绕花源补充与作业重排建立新匹配。"},{label:"具体操作",value:"评估补充花源；重新布置蜂箱；按新高峰重排巡查时间。"},{label:"成本",value:"高成本。"},{label:"效果",value:"逐步恢复花蜂匹配度。"},{label:"收益导向",value:"兼顾生态恢复与长期经济回报。"}],detailHighlights:[{label:"成本",value:"高",note:"涉及重配置"},{label:"效果",value:"恢复匹配",note:"面向中长期纠偏"},{label:"收益导向",value:"生态/经济",note:"强调长期恢复"}],metrics:[{label:"花蜂匹配",value:"43%",note:"错配较明显"},{label:"风险等级",value:"高",note:"建议尽快恢复"}]}];
+const W={"100":"晴","101":"多云","102":"少云","103":"晴间多云","104":"阴","300":"阵雨","301":"强阵雨","302":"雷阵雨","305":"小雨","306":"中雨","307":"大雨","308":"极端降雨","309":"毛毛雨","399":"雨","400":"小雪","401":"中雪","402":"大雪","404":"雨夹雪"};
+const F={hourly:[{fxTime:"2026-04-03T12:00+08:00",temp:"14",humidity:"93",icon:"305",text:"小雨"}]};
+const st={scenarios:[...S],focusIndex:0,selectedId:S[0].id,overlayVisible:true,isAnimating:false,detailOpen:false,activeScenarioId:null,messages:[],isSending:false,eventsBound:false,shouldAutoScroll:true};
+const $=id=>document.getElementById(id),overlay=$("scenarioOverlay"),stage=$("carouselStage"),composer=$("chatComposer"),recall=$("overlayRecallButton"),prev=$("carouselPrev"),next=$("carouselNext"),detailOverlay=$("detailOverlay"),detailBackdrop=$("detailBackdrop"),detailClose=$("detailCloseButton"),detailKicker=$("detailKicker"),detailTitle=$("detailTitle"),detailSummary=$("detailSummary"),detailSectionTitle=$("detailSectionTitle"),detailCopy=$("detailCopy"),detailMetrics=$("detailMetrics"),detailPrimary=$("detailPrimaryAction"),send=document.querySelector(".send-placeholder"),back=$("backDashboardButton"),siteToggle=$("siteInfoToggle"),siteCard=$("siteDetailCard"),infoDate=$("infoDate"),infoTime=$("infoTime"),infoWeather=$("infoWeather"),infoTemp=$("infoTemp"),infoHumidity=$("infoHumidity"),siteDateRange=$("siteDateRange");
+const ctx={panel:$("chatContextPanel"),kicker:$("chatContextKicker"),title:$("chatContextTitle"),summary:$("chatContextSummary"),points:$("chatContextPoints"),clear:$("chatContextClear")};
+let list=$("chatMessageList"),status=$("chatStatusBar"); if(!list){list=document.createElement("div");list.id="chatMessageList";list.className="chat-message-list";document.querySelector(".chat-stage").appendChild(list);} if(!status){status=document.createElement("div");status.id="chatStatusBar";status.className="chat-status-bar";document.querySelector(".chat-stage").appendChild(status);} 
+(function(){const s=document.createElement("style");s.textContent='.chat-message-list{position:relative;z-index:2;width:min(820px,calc(100% - 80px));margin:18px auto 0;display:grid;gap:14px;padding-bottom:24px}.chat-message{max-width:82%;padding:14px 16px;border-radius:20px;box-shadow:0 14px 28px rgba(23,30,48,.08);line-height:1.6;white-space:pre-wrap}.chat-message.user{margin-left:auto;background:rgba(255,241,122,.9);color:#1f2430}.chat-message.assistant{margin-right:auto;background:rgba(255,255,255,.78);color:#1f2430}.chat-message.system{margin-right:auto;background:rgba(255,255,255,.62);color:#6e7688;border:1px dashed rgba(31,36,48,.08)}.chat-status-bar{width:min(820px,calc(100% - 80px));margin:0 auto 18px;color:#6e7688;font-size:13px;line-height:1.5}.chat-status-bar.is-error{color:#be4d4d}.chat-context-point{margin:0;color:#6e7688;line-height:1.7}.detail-field-label{display:block;margin-bottom:8px;font-size:12px;font-weight:700;letter-spacing:.08em;color:#6e7688;text-transform:uppercase}.detail-field-text,.detail-step-text{margin:0;line-height:1.7;color:#1f2430}.detail-step-list{display:grid;gap:10px}.detail-step-item{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}.detail-step-index{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,241,122,.78);font-size:13px;font-weight:700;color:#1f2430}.detail-metric-card{min-height:92px;padding:14px 14px 12px;display:grid;gap:6px}.detail-metric-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6e7688}.detail-metric-value{font-size:20px;line-height:1.05;color:#1f2430}.detail-metric-note{margin:0;font-size:12px;line-height:1.4;color:#6e7688}';document.head.appendChild(s)})();
+const n=i=>((i%(st.scenarios.length||1))+(st.scenarios.length||1))%(st.scenarios.length||1),cur=()=>st.scenarios[n(st.focusIndex)],byId=id=>st.scenarios.find(x=>x.id===id)||st.scenarios[0],offsets=()=>st.scenarios.length<=1?[0]:st.scenarios.length===2?[-1,0]:[-1,0,1];
+function card(i){const s=st.scenarios[n(i)],b=document.createElement('button');b.type='button';b.className='scenario-card';b.dataset.scenarioId=s.id;b.dataset.scenarioIndex=String(i);b.innerHTML=`<div class="card-topline"><span class="card-chip">${s.shortLabel}</span><span class="card-kpi"></span></div><strong class="card-title">${s.title}</strong><span class="card-text">${s.summary}</span><span class="card-text short">${s.kicker}</span><div class="card-number-row"><span class="card-number-placeholder">${s.metrics[0]?s.metrics[0].value:'--'}</span><span class="card-number-placeholder">${s.metrics[1]?s.metrics[1].value:'--'}</span></div><span class="card-footer">${s.sectionTitle}</span>`;return b}
+function visual(el,slot){const c=slot===0?{x:0,scale:1,opacity:1,blur:0,z:4}:{x:slot<0?-255:255,scale:.88,opacity:.44,blur:1.4,z:2};el.dataset.slot=String(slot);el.style.transform=`translateX(calc(-50% + ${c.x}px)) scale(${c.scale})`;el.style.opacity=String(c.opacity);el.style.filter=`blur(${c.blur}px)`;el.style.zIndex=String(c.z);el.classList.toggle('is-center',slot===0);el.classList.toggle('is-side',slot===-1||slot===1);el.classList.toggle('is-selected',el.dataset.scenarioId===st.selectedId)}
+function mount(){stage.innerHTML='';offsets().forEach(o=>{const i=n(st.focusIndex+o),el=card(i);visual(el,o);stage.appendChild(el)});stage.querySelectorAll('.scenario-card').forEach(el=>el.addEventListener('click',async()=>{if(st.isAnimating)return;const i=Number(el.dataset.scenarioIndex);if(i===st.focusIndex){openDetail(i);return}await toIndex(i)}))}
+function overlayVisible(v){st.overlayVisible=v;overlay.classList.toggle('is-hidden',!v);recall.classList.toggle('is-active',v);recall.classList.toggle('is-muted',!v)}
+function detailOpen(v){st.detailOpen=v;detailOverlay.classList.toggle('is-visible',v);detailOverlay.setAttribute('aria-hidden',v?'false':'true')}
+function sec(s,l,f=''){const m=(s.detailSections||[]).find(x=>x.label===l);return m&&m.value?m.value:f}
+function renderDetail(s){if(!s)return;detailKicker.textContent=`${s.shortLabel} / ${s.kicker}`;detailTitle.textContent=s.title;detailSummary.textContent=s.summary;detailSectionTitle.textContent='策略说明';detailPrimary.textContent=`Continue ${s.title}`;const steps=String(sec(s,'具体操作',s.detailPoints.join('；'))).split(/[；。]/).map(x=>x.trim()).filter(Boolean).slice(0,4),hs=(s.detailHighlights&&s.detailHighlights.length)?s.detailHighlights:[{label:'成本',value:sec(s,'成本','待补充'),note:'待补充'},{label:'效果',value:sec(s,'效果','待补充'),note:'待补充'},{label:'收益导向',value:sec(s,'收益导向','待补充'),note:'待补充'}];detailCopy.innerHTML=`<article class="detail-layout-card"><span class="detail-field-label">应对问题</span><p class="detail-field-text">${sec(s,'应对问题',s.summary)}</p></article><article class="detail-layout-card"><span class="detail-field-label">建议类型</span><p class="detail-field-text">${sec(s,'建议类型','待补充')}</p></article><article class="detail-layout-card"><span class="detail-field-label">建议内容</span><p class="detail-field-text">${sec(s,'建议内容',s.detailPoints[0]||'待补充')}</p></article><article class="detail-layout-card"><span class="detail-field-label">具体操作</span><div class="detail-step-list">${steps.map((x,i)=>`<div class="detail-step-item"><span class="detail-step-index">${i+1}</span><p class="detail-step-text">${x}</p></div>`).join('')}</div></article>`;detailMetrics.innerHTML='';hs.forEach(x=>{const a=document.createElement('article');a.className='detail-metric-card glass-subpanel';a.innerHTML=`<span class="detail-metric-label">${x.label}</span><strong class="detail-metric-value">${x.value}</strong><p class="detail-metric-note">${x.note}</p>`;detailMetrics.appendChild(a)})}
+function openDetail(i){st.selectedId=st.scenarios[n(i)].id;renderDetail(st.scenarios[n(i)]);detailOpen(true)}
+function shortest(t){const total=st.scenarios.length;if(total<=1)return 0;const f=(t-st.focusIndex+total)%total,b=f-total;return Math.abs(f)<=Math.abs(b)?f:b}
+async function toIndex(t){const c=shortest(t);if(!c)return;const d=Math.sign(c);for(let i=0;i<Math.abs(c);i+=1)await move(d)}
+function move(d){if(st.isAnimating||!st.scenarios.length)return Promise.resolve();st.isAnimating=true;prev.disabled=true;next.disabled=true;return new Promise(r=>setTimeout(()=>{st.focusIndex=n(st.focusIndex+d);st.selectedId=cur().id;mount();st.isAnimating=false;prev.disabled=false;next.disabled=false;r()},460))}
+function chatCtx(s){if(!s){ctx.panel.classList.add('is-hidden');ctx.title.textContent='';ctx.summary.textContent='';ctx.points.innerHTML='';document.getElementById('composerTip').textContent='Placeholder only';composer.placeholder='Type to continue this scenario conversation...';return}ctx.panel.classList.remove('is-hidden');ctx.kicker.textContent=`${s.shortLabel} / Active Strategy Context`;ctx.title.textContent=s.title;ctx.summary.textContent=s.summary;ctx.points.innerHTML='';s.detailPoints.forEach(p=>{const el=document.createElement('p');el.className='chat-context-point';el.textContent=p;ctx.points.appendChild(el)});document.getElementById('composerTip').textContent=`Context locked: ${s.title}`;composer.placeholder=`Ask AI about ${s.title}...`}
+function activate(i){const s=st.scenarios[n(i)],sw=st.activeScenarioId!==s.id;st.activeScenarioId=s.id;if(sw){st.messages=[];list.innerHTML='';statusText(`已切换到 ${s.title}，历史对话已重置。`)}chatCtx(s);st.shouldAutoScroll=true;scroll(true)}
+function clearCtx(){st.activeScenarioId=null;st.messages=[];list.innerHTML='';chatCtx(null);msg({role:'system',content:'已清除当前策略上下文，并重置对话历史。'});statusText('当前没有激活的策略上下文。');st.shouldAutoScroll=true;scroll(true)}
+function msg(x){const el=document.createElement('article');el.className=`chat-message ${x.role}`;el.textContent=x.content;list.appendChild(el);scroll();return el}
+function statusText(t,e){status.textContent=t||'';status.classList.toggle('is-error',!!e)}
+function resize(){composer.style.height='auto';composer.style.height=`${Math.min(composer.scrollHeight,140)}px`}
+function onScroll(){const d=document.documentElement.scrollHeight-window.innerHeight-window.scrollY;st.shouldAutoScroll=d<=160}
+function scroll(force){if(!force&&!st.shouldAutoScroll)return;requestAnimationFrame(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:force?'auto':'smooth'}))}
+async function sendMsg(){const m=composer.value.trim();if(!m||st.isSending)return;const ctxData=st.activeScenarioId?byId(st.activeScenarioId):null;st.isSending=true;st.shouldAutoScroll=true;msg({role:'user',content:m});st.messages.push({role:'user',content:m});composer.value='';resize();const pending=msg({role:'assistant',content:'正在思考...'});statusText('AI 正在生成回复...');try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m,history:st.messages,scenarioContext:ctxData})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||`发送失败，HTTP ${res.status}`);pending.textContent=data.reply||'AI 没有返回内容。';pending.classList.remove('system');pending.classList.add('assistant');st.messages.push({role:'assistant',content:pending.textContent});statusText('AI 回复完成。');scroll(true)}catch(error){pending.textContent=error.message||'Failed to fetch';pending.classList.remove('assistant');pending.classList.add('system');statusText(error.message||'对话失败。',true)}finally{st.isSending=false}}
+function fmtD(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`} function fmtT(d){return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+function parseT(v){if(!v)return null;const p=new Date((v.length===10?`${v}T00:00:00`:v.replace(' ','T')));return Number.isNaN(p.getTime())?null:p}
+function clock(){const now=new Date();infoDate.textContent=fmtD(now);infoTime.textContent=fmtT(now)}
+function weatherText(x){return x?(W[String(x.icon||'')]||x.text||'--'):'--'}
+function nearHour(items){const now=new Date(),arr=(items||[]).map(x=>({...x,parsedTime:parseT(x.fxTime)})).filter(x=>x.parsedTime);if(!arr.length)return null;return arr.find(x=>x.parsedTime>=now)||arr[arr.length-1]}
+async function loadWeather(){try{const r=await fetch(`${WEATHER_SOURCE_URL}?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error();return await r.json()}catch{return F}}
+async function refreshWeather(){try{const d=await loadWeather(),h=nearHour(d.hourly);infoWeather.textContent=weatherText(h);infoTemp.textContent=h&&h.temp?`${h.temp}°C`:'--';infoHumidity.textContent=h&&h.humidity?`${h.humidity}%`:'--'}catch{infoWeather.textContent='--';infoTemp.textContent='--';infoHumidity.textContent='--'}}
+function bounds(items){return (items||[]).filter(x=>x&&x.time).map(x=>parseT(x.time)).filter(Boolean).sort((a,b)=>a-b)}
+async function refreshRange(){try{const t=Date.now(),[f,n,m,a]=await Promise.all([fetch(`./data/flowering-overview.json?t=${t}`,{cache:'no-store'}).then(r=>r.json()),fetch(`./data/nectar-supply-overview.json?t=${t}`,{cache:'no-store'}).then(r=>r.json()),fetch(`./data/mismatch-overview.json?t=${t}`,{cache:'no-store'}).then(r=>r.json()),fetch(`./data/bee-activity-forecast.json?t=${t}`,{cache:'no-store'}).then(r=>r.json())]),all=[...bounds(f.actual),...bounds(f.forecast),...bounds(n.actual),...bounds(n.forecast),...bounds(m.actual),...bounds(m.forecast),...bounds(a.actual),...bounds(a.forecast)].sort((x,y)=>x-y);siteDateRange.textContent=all.length?`${fmtD(all[0])} 至 ${fmtD(all[all.length-1])}`:'--'}catch{siteDateRange.textContent='--'}}
+function siteVisible(v){siteToggle.classList.toggle('is-expanded',v);siteToggle.setAttribute('aria-expanded',String(v));siteCard.classList.toggle('is-visible',v)}
+async function initInfo(){clock();await Promise.all([refreshWeather(),refreshRange()]);setInterval(clock,60000)}
+window.addEventListener('scroll',onScroll,{passive:true});back.addEventListener('click',()=>window.location.href='./dashboard1.html');siteToggle.addEventListener('click',e=>{e.stopPropagation();siteVisible(!siteCard.classList.contains('is-visible'))});document.addEventListener('click',e=>{if(!siteCard.classList.contains('is-visible'))return;if(siteCard.contains(e.target)||siteToggle.contains(e.target))return;siteVisible(false)});prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));composer.addEventListener('focus',()=>overlayVisible(false));recall.addEventListener('click',()=>overlayVisible(true));composer.addEventListener('input',resize);composer.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});send.addEventListener('click',sendMsg);detailPrimary.addEventListener('click',()=>{activate(st.focusIndex);detailOpen(false);overlayVisible(false);msg({role:'system',content:`已载入策略上下文：${cur().title}`});composer.focus()});ctx.clear.addEventListener('click',()=>{clearCtx();overlayVisible(true)});detailClose.addEventListener('click',()=>detailOpen(false));detailBackdrop.addEventListener('click',()=>detailOpen(false));document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(st.detailOpen)detailOpen(false);else siteVisible(false)}});let sx=null;stage.addEventListener('pointerdown',e=>sx=e.clientX);stage.addEventListener('pointerup',e=>{if(sx===null||st.isAnimating){sx=null;return}const dx=e.clientX-sx;if(dx>40)move(-1);else if(dx<-40)move(1);sx=null});stage.addEventListener('pointerleave',()=>sx=null);
+clock();mount();renderDetail(cur());chatCtx(null);initInfo().catch(err=>console.error('初始化右上信息栏失败：',err));
+fetchScenarios().then(r=>{st.scenarios=r.scenarios;st.focusIndex=0;st.selectedId=st.scenarios[0]?st.scenarios[0].id:null;mount();renderDetail(cur());statusText(r.source==='deepseek'?'已加载 DeepSeek 生成的策略。':'已加载本地兜底策略。')}).catch(err=>{console.error(err);st.scenarios=[...S];st.focusIndex=0;st.selectedId=st.scenarios[0].id;mount();renderDetail(cur());statusText('策略加载失败，已切换为本地兜底方案。',true)}); statusText('正在生成建议策略...');

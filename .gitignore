@@ -206,6 +206,16 @@ cython_debug/
 *.db-wal
 *.uploading.cfg
 
+# Node / deployment
+node_modules/
+.push-temp/
+.push-temp-2/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+scripts/scenario-ai.tmp.js
+scripts/scenario-ai.repair*.js
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
