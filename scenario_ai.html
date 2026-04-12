@@ -7,6 +7,25 @@
   <link rel="stylesheet" href="./styles/scenario-ai.css" />
 </head>
 <body>
+  <svg class="orb-filter-defs" aria-hidden="true" focusable="false" width="0" height="0">
+    <defs>
+      <filter id="orb-goo" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"></feGaussianBlur>
+        <feColorMatrix
+          in="blur"
+          mode="matrix"
+          values="
+            1 0 0 0 0
+            0 1 0 0 0
+            0 0 1 0 0
+            0 0 0 22 -10"
+          result="goo"
+        ></feColorMatrix>
+        <feBlend in="SourceGraphic" in2="goo"></feBlend>
+      </filter>
+    </defs>
+  </svg>
+
   <div class="scenario-ai-page">
     <button class="back-dashboard-button" id="backDashboardButton" type="button" aria-label="返回主界面">
       <img class="back-dashboard-icon" src="./images/image 31.png" alt="" aria-hidden="true" />
@@ -77,20 +96,32 @@
       <div class="scenario-overlay-backdrop"></div>
       <section class="scenario-carousel" aria-label="Scenario Carousel">
         <div class="carousel-toolbar">
-          <div class="carousel-heading-block">
-            <span class="eyebrow-placeholder"></span>
-            <div class="heading-placeholder-group">
-              <span class="heading-placeholder heading-placeholder-lg"></span>
-              <span class="heading-placeholder heading-placeholder-sm"></span>
-            </div>
-          </div>
           <div class="carousel-actions">
-            <button class="carousel-nav" id="carouselPrev" type="button" aria-label="Previous scenario">‹</button>
-            <button class="carousel-nav" id="carouselNext" type="button" aria-label="Next scenario">›</button>
+            <button class="carousel-nav" id="carouselPrev" type="button" aria-label="Previous scenario">
+              <img class="carousel-nav-icon" src="./images/image%2032.png" alt="" aria-hidden="true" />
+            </button>
+            <button class="carousel-nav" id="carouselNext" type="button" aria-label="Next scenario">
+              <img class="carousel-nav-icon" src="./images/image%2033.png" alt="" aria-hidden="true" />
+            </button>
           </div>
         </div>
 
         <div class="carousel-stage" id="carouselStage"></div>
+        <div class="carousel-heading-block">
+          <span class="hero-orb" aria-hidden="true">
+            <span class="hero-orb-core"></span>
+            <span class="hero-orb-blob hero-orb-blob-a"></span>
+            <span class="hero-orb-blob hero-orb-blob-b"></span>
+            <span class="hero-orb-blob hero-orb-blob-c"></span>
+          </span>
+          <div class="hero-copy-block">
+            <p class="hero-intro">
+              你好呀，<br />
+              我是你的<strong>专属助手</strong><br />
+              有什么问题，我们可以<strong>共同面对~</strong>
+            </p>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -161,10 +192,12 @@
         </div>
       </footer>
     </main>
+
   </div>
 
   <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
-  <script src="./scripts/scenario-ai.js"></script></body>
+  <script src="./scripts/scenario-ai.js"></script>
+</body>
 </html>
 
 
