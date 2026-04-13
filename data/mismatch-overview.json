@@ -123,24 +123,24 @@
     {
       "time": "2026-04-10",
       "value": 0.164
+    },
+    {
+      "time": "2026-04-12",
+      "value": null
+    },
+    {
+      "time": "2026-04-13",
+      "value": null
     }
   ],
   "forecast": [
     {
-      "time": "2026-04-10",
-      "value": 0.164
-    },
-    {
-      "time": "2026-04-12",
-      "value": 0.115
-    },
-    {
       "time": "2026-04-13",
-      "value": 0.452
+      "value": null
     },
     {
       "time": "2026-04-14",
-      "value": 0.236
+      "value": 0.5
     },
     {
       "time": "2026-04-15",
@@ -152,26 +152,25 @@
     },
     {
       "time": "2026-04-17",
-      "value": 0.172
+      "value": 0.307
     },
     {
       "time": "2026-04-18",
-      "value": 0.242
+      "value": 0.307
+    },
+    {
+      "time": "2026-04-19",
+      "value": 0.307
     }
   ],
   "forecast_info": [
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-04-12"
-    },
     {
       "mismatch_level": "中度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-13"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "显著错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-14"
     },
@@ -186,14 +185,19 @@
       "time": "2026-04-16"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-17"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-18"
+    },
+    {
+      "mismatch_level": "中度错配",
+      "mismatch_type": "resource_ahead",
+      "time": "2026-04-19"
     }
   ],
   "history_info": [
@@ -351,6 +355,16 @@
       "mismatch_level": "轻度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-04-10"
+    },
+    {
+      "mismatch_level": "无数据",
+      "mismatch_type": "no_data",
+      "time": "2026-04-12"
+    },
+    {
+      "mismatch_level": "无数据",
+      "mismatch_type": "no_data",
+      "time": "2026-04-13"
     }
   ]
 }
