@@ -12,11 +12,8 @@ html, body {
 
 #map {
   position: fixed;
-  top: 0;
-  right: -72px;
-  bottom: 0;
-  left: -72px;
-  width: calc(100vw + 144px);
+  inset: 0;
+  width: 100vw;
   height: 100vh;
 }
 
@@ -81,17 +78,4 @@ html, body {
 .mini-popup-row strong {
   text-align: right;
   font-weight: 500;
-}
-
-.leaflet-control-zoom {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.leaflet-control-zoom a {
-  border-radius: 0 !important;
-  background: rgba(255, 255, 255, 0.82) !important;
-  color: #0f172a !important;
-  border: 1px solid rgba(15, 23, 42, 0.12) !important;
-  box-shadow: none !important;
 }

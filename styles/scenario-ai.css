@@ -199,6 +199,7 @@ button {
 .scenario-carousel {
   --carousel-stage-top: 32px;
   --carousel-stage-height: 376px;
+  --carousel-nav-offset-y: -26px;
   position: relative;
   overflow: visible;
   min-height: 400px;
@@ -532,7 +533,7 @@ button {
 
 .carousel-nav {
   position: absolute;
-  top: calc(var(--carousel-stage-top) + (var(--carousel-stage-height) / 2));
+  top: calc(var(--carousel-stage-top) + (var(--carousel-stage-height) / 2) + var(--carousel-nav-offset-y));
   width: 48px;
   height: 48px;
   display: inline-flex;
@@ -1368,6 +1369,7 @@ button {
   .scenario-carousel {
     --carousel-stage-top: 24px;
     --carousel-stage-height: 316px;
+    --carousel-nav-offset-y: -24px;
   }
 
   .back-dashboard-button {

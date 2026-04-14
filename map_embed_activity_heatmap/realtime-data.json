@@ -1,0 +1,85 @@
+{
+  "points": [
+    {
+      "id": "S0",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.92,
+      "in": 44,
+      "out": 48,
+      "daily_in": 318,
+      "daily_out": 331
+    },
+    {
+      "id": "S1",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.58,
+      "in": 21,
+      "out": 25,
+      "daily_in": 166,
+      "daily_out": 173
+    },
+    {
+      "id": "S2",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.64,
+      "in": 28,
+      "out": 31,
+      "daily_in": 201,
+      "daily_out": 205
+    },
+    {
+      "id": "S3",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.71,
+      "in": 35,
+      "out": 36,
+      "daily_in": 228,
+      "daily_out": 232
+    },
+    {
+      "id": "S4",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.47,
+      "in": 16,
+      "out": 18,
+      "daily_in": 140,
+      "daily_out": 147
+    },
+    {
+      "id": "S5",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.82,
+      "in": 39,
+      "out": 41,
+      "daily_in": 267,
+      "daily_out": 271
+    },
+    {
+      "id": "S6",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.39,
+      "in": 12,
+      "out": 14,
+      "daily_in": 118,
+      "daily_out": 122
+    },
+    {
+      "id": "S7",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.68,
+      "in": 30,
+      "out": 33,
+      "daily_in": 214,
+      "daily_out": 218
+    },
+    {
+      "id": "S8",
+      "time": "2026-04-10 13:00:00",
+      "activityNormalized": 0.26,
+      "in": 8,
+      "out": 9,
+      "daily_in": 77,
+      "daily_out": 79
+    }
+  ]
+}

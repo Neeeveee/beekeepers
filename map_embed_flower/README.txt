@@ -1,0 +1,1 @@
+将你的瓦片放入 qgis tiles 02 文件夹内，保持 z/x/y.png 结构，然后打开 index.html。

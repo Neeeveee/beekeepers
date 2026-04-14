@@ -9,6 +9,7 @@ const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 const STATIC_ROOT = __dirname;
 const DATA_ROOT = path.join(__dirname, "data");
+const DATA_RAW_ROOT = path.join(__dirname, "data_raw");
 
 // 兜底场景数据：当 DeepSeek 不可用时，页面仍然能正常展示。
 const fallbackScenarios = [
@@ -120,6 +121,16 @@ app.use(express.static(STATIC_ROOT, { index: false }));
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, hasDeepSeekKey: Boolean(DEEPSEEK_API_KEY) });
+});
+
+app.get("/api/current-weather", (req, res) => {
+  const latestWeather = readLatestWeatherFile();
+  if (!latestWeather) {
+    return res.status(404).json({ error: "Latest weather snapshot not found." });
+  }
+
+  res.set("Cache-Control", "no-store");
+  res.json(latestWeather);
 });
 
 // 获取策略卡片数据。
@@ -422,6 +433,33 @@ function readJsonFile(fileName) {
     return JSON.parse(raw);
   } catch (error) {
     console.warn(`[analysis] 读取 ${fileName} 失败:`, error.message);
+    return null;
+  }
+}
+
+function readLatestWeatherFile() {
+  try {
+    const candidates = fs
+      .readdirSync(DATA_RAW_ROOT)
+      .filter((fileName) => /^qweather_24h_\d{8}_\d{6}\.json$/.test(fileName))
+      .sort()
+      .reverse();
+
+    for (const fileName of candidates) {
+      const filePath = path.join(DATA_RAW_ROOT, fileName);
+      const raw = fs.readFileSync(filePath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed?.hourly) && parsed.hourly.length) {
+        return {
+          ...parsed,
+          sourceFile: fileName
+        };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.warn("[weather] 璇诲彇鏈€鏂板ぉ姘旀枃浠跺け璐:", error.message);
     return null;
   }
 }

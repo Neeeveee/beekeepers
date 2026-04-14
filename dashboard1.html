@@ -78,7 +78,48 @@
       margin-left: 0px;
     }
 
-    .map-module-container.heatmap-active::after {
+    .heatmap-layer-container {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.18s ease, visibility 0.18s ease;
+    }
+
+    .map-module-container.heatmap-active .heatmap-layer-container {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .heatmap-layer-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.18s ease, visibility 0.18s ease;
+    }
+
+    .map-module-container.heatmap-active[data-heatmap-mode="flower"] .heatmap-layer-frame[data-heatmap-frame="flower"] {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .map-module-container.heatmap-active[data-heatmap-mode="bee"] .heatmap-layer-frame[data-heatmap-frame="bee"] {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .map-module-container.heatmap-active[data-heatmap-mode=""] .heatmap-layer-container::after {
       content: "heatmap-layer-placeholder";
       position: absolute;
       left: 32px;
@@ -95,33 +136,6 @@
       color: #8a7a00;
       font-size: 13px;
       pointer-events: none;
-    }
-
-    .flower-layer-container,
-    .bee-layer-container {
-      position: absolute;
-      top: 20px;
-      left: 197px;
-      width: 220px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px dashed rgba(255, 255, 255, 0.14);
-      border-radius: var(--radius-sm);
-      background: var(--overlay);
-      color: var(--text-muted);
-      font-size: 14px;
-      z-index: 2;
-    }
-
-    .bee-layer-container {
-      top: 88px;
-      left: 120px;
-    }
-
-    .layer-hidden {
-      display: none;
     }
 
     .top-right-info-bar {
@@ -377,10 +391,6 @@
       font-weight: 700;
     }
 
-    .overlay-hidden {
-      display: none;
-    }
-
     .mode-button.mode-flower {
       top: 150px;
     }
@@ -418,6 +428,18 @@
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(4px);
       z-index: 3;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    }
+
+    .bottom-left-layer-toggle.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      transform: translateY(0);
     }
 
     .toggle-button {
@@ -689,10 +711,25 @@
           title="Bee map module"
         ></iframe>
       </div>
+      <div class="heatmap-layer-container" aria-hidden="true">
+        <iframe
+          class="heatmap-layer-frame"
+          data-heatmap-frame="flower"
+          data-src="./map_embed_flower/index.html"
+          loading="lazy"
+          frameborder="0"
+          title="Environment heatmap module"
+        ></iframe>
+        <iframe
+          class="heatmap-layer-frame"
+          data-heatmap-frame="bee"
+          data-src="./map_embed_activity_heatmap/index.html?t=20260413v1"
+          loading="lazy"
+          frameborder="0"
+          title="Behavior heatmap module"
+        ></iframe>
+      </div>
     </div>
-
-    <div class="flower-layer-container overlay-hidden">flower-layer-container</div>
-    <div class="bee-layer-container layer-hidden">bee-layer-container</div>
 
     <header class="top-right-info-bar" aria-label="右上信息栏">
       <img class="top-right-info-line" src="./images/image 29.png" alt="" aria-hidden="true" />
@@ -815,9 +852,10 @@
     const appShell = document.querySelector(".app-shell");
     const modeButtons = document.querySelectorAll(".mode-button[data-toggle-group='mode-switch']");
     const independentButtons = document.querySelectorAll(".toggle-button[data-toggle-mode='independent']");
+    const heatmapToggleButton = document.querySelector(".heatmap-toggle");
+    const heatmapFrames = document.querySelectorAll(".heatmap-layer-frame");
+    const bottomLeftLayerToggle = document.querySelector(".bottom-left-layer-toggle");
     const curvePanel = document.querySelector(".bottom-curve-panel");
-    const flowerLayer = document.querySelector(".flower-layer-container");
-    const beeLayer = document.querySelector(".bee-layer-container");
     const mapModuleContainer = document.querySelector(".map-module-container");
     const curveModuleFrame = document.getElementById("curveModuleFrame");
     const curveModuleHint = document.getElementById("curveModuleHint");
@@ -831,7 +869,7 @@
     const infoTemp = document.getElementById("infoTemp");
     const infoHumidity = document.getElementById("infoHumidity");
     const siteDateRange = document.getElementById("siteDateRange");
-    const WEATHER_SOURCE_URL = "https://neeeveee.github.io/beekeepers/data_raw/qweather_24h_20260403_034738.json";
+    const WEATHER_API_URL = "./api/current-weather";
     const WEATHER_FALLBACK_SNAPSHOT = {
       updateTime: "2026-04-03T11:36+08:00",
       hourly: [
@@ -971,13 +1009,28 @@
         return null;
       }
 
-      const upcoming = parsedItems.find(item => item.parsedTime >= now);
-      return upcoming || parsedItems[parsedItems.length - 1];
+      return parsedItems.reduce((closest, item) => {
+        if (!closest) {
+          return item;
+        }
+
+        const itemDiff = Math.abs(item.parsedTime.getTime() - now.getTime());
+        const closestDiff = Math.abs(closest.parsedTime.getTime() - now.getTime());
+        if (itemDiff < closestDiff) {
+          return item;
+        }
+
+        if (itemDiff === closestDiff && item.parsedTime >= now && closest.parsedTime < now) {
+          return item;
+        }
+
+        return closest;
+      }, null);
     }
 
     async function loadWeatherInfo() {
       try {
-        const response = await fetch(`${WEATHER_SOURCE_URL}?t=${Date.now()}`, { cache: "no-store" });
+        const response = await fetch(`${WEATHER_API_URL}?t=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) {
           throw new Error(`Weather fetch failed: ${response.status}`);
         }
@@ -1114,18 +1167,6 @@
       }
     }
 
-    function setLayerVisibility(showFlower) {
-      flowerLayer.classList.remove("overlay-hidden");
-      flowerLayer.classList.toggle("layer-hidden", !showFlower);
-      beeLayer.classList.toggle("layer-hidden", showFlower);
-    }
-
-    function clearLayerVisibility() {
-      flowerLayer.classList.add("overlay-hidden");
-      flowerLayer.classList.add("layer-hidden");
-      beeLayer.classList.add("layer-hidden");
-    }
-
     function getCurrentCurveMode() {
       const activeModeButton = document.querySelector(".mode-button.active[data-layer-target]");
       return activeModeButton ? activeModeButton.dataset.layerTarget : null;
@@ -1163,6 +1204,44 @@
       }
     }
 
+    function ensureHeatmapFrameLoaded(mode) {
+      if (mode !== "flower" && mode !== "bee") {
+        return;
+      }
+
+      const frame = document.querySelector(`.heatmap-layer-frame[data-heatmap-frame="${mode}"]`);
+      if (!frame || frame.dataset.loaded === "true") {
+        return;
+      }
+
+      const nextSrc = frame.dataset.src;
+      if (!nextSrc) {
+        return;
+      }
+
+      frame.src = nextSrc;
+      frame.dataset.loaded = "true";
+    }
+
+    function setHeatmapToggleState(active, mode = "") {
+      if (!heatmapToggleButton) {
+        return;
+      }
+      if (active) {
+        ensureHeatmapFrameLoaded(mode);
+      }
+      heatmapToggleButton.classList.toggle("active", active);
+      mapModuleContainer.classList.toggle("heatmap-active", active);
+      mapModuleContainer.dataset.heatmapMode = active ? mode : "";
+    }
+
+    function setBottomLeftLayerToggleVisible(visible) {
+      if (!bottomLeftLayerToggle) {
+        return;
+      }
+      bottomLeftLayerToggle.classList.toggle("is-visible", visible);
+    }
+
     modeButtons.forEach(button => {
       button.addEventListener("click", () => {
         if (button.dataset.navTarget) {
@@ -1175,7 +1254,8 @@
         modeButtons.forEach(item => item.classList.remove("active"));
 
         if (isAlreadyActive) {
-          clearLayerVisibility();
+          setBottomLeftLayerToggleVisible(false);
+          setHeatmapToggleState(false);
           applyCurveModuleView();
           return;
         }
@@ -1183,18 +1263,21 @@
         button.classList.add("active");
 
         if (button.dataset.layerTarget === "flower") {
-          setLayerVisibility(true);
+          setBottomLeftLayerToggleVisible(true);
+          setHeatmapToggleState(true, "flower");
           applyCurveModuleView();
           return;
         }
 
         if (button.dataset.layerTarget === "bee") {
-          setLayerVisibility(false);
+          setBottomLeftLayerToggleVisible(true);
+          setHeatmapToggleState(true, "bee");
           applyCurveModuleView();
           return;
         }
 
-        clearLayerVisibility();
+        setBottomLeftLayerToggleVisible(false);
+        setHeatmapToggleState(false);
         applyCurveModuleView();
       });
     });
@@ -1205,7 +1288,12 @@
 
         if (button.dataset.panelTarget === "heatmap") {
           const shouldShowHeatmap = button.classList.contains("active");
+          const currentMode = getCurrentCurveMode();
+          if (shouldShowHeatmap) {
+            ensureHeatmapFrameLoaded(currentMode);
+          }
           mapModuleContainer.classList.toggle("heatmap-active", shouldShowHeatmap);
+          mapModuleContainer.dataset.heatmapMode = shouldShowHeatmap ? (currentMode || "") : "";
         }
 
         if (button.dataset.panelTarget === "curve") {
