@@ -4,12 +4,36 @@ const path = require("path");
 const fetch = require("node-fetch");
 
 const app = express();
+loadLocalEnv();
 const PORT = process.env.PORT || 3000;
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 const STATIC_ROOT = __dirname;
 const DATA_ROOT = path.join(__dirname, "data");
 const DATA_RAW_ROOT = path.join(__dirname, "data_raw");
+
+function loadLocalEnv() {
+  const envPath = path.join(__dirname, ".env");
+  if (!fs.existsSync(envPath)) {
+    return;
+  }
+
+  const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || !trimmed.includes("=")) {
+      return;
+    }
+
+    const separatorIndex = trimmed.indexOf("=");
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const rawValue = trimmed.slice(separatorIndex + 1).trim();
+    if (!key || process.env[key]) {
+      return;
+    }
+    process.env[key] = rawValue.replace(/^["']|["']$/g, "");
+  });
+}
 
 // 兜底场景数据：当 DeepSeek 不可用时，页面仍然能正常展示。
 const fallbackScenarios = [
@@ -107,6 +131,38 @@ const fallbackScenarios = [
       { label: "花蜂匹配", value: "43%", note: "错配较明显" },
       { label: "风险等级", value: "高", note: "建议尽快采取恢复措施" },
       { label: "建议动作", value: "恢复", note: "优先讨论补救与替代方案" }
+    ]
+  },
+  {
+    id: "scenario-d",
+    shortLabel: "D",
+    title: "协同优化策略",
+    kicker: "Collaborative Plan",
+    summary: "当既有方案都不完全满意时，可把多种措施组合成可讨论的协同方案。",
+    sectionTitle: "策略详情",
+    detailPoints: [
+      "整合稳态监测、高温应对和错配恢复的关键动作。",
+      "适合多因素叠加、现场不确定性较高的管理情境。",
+      "可作为进入自由 AI 对话前的开放式方案。"
+    ],
+    detailSections: [
+      { label: "应对问题", value: "单一策略难以覆盖所有现场变化，需要更灵活的组合决策。" },
+      { label: "建议类型", value: "组合型建议。适合继续与 AI 共同细化。" },
+      { label: "建议内容", value: "把低成本监测、短期天气应对和中长期恢复动作组合为分阶段方案。" },
+      { label: "具体操作", value: "先确认主要风险；再选择低成本动作；最后评估是否需要高投入恢复。" },
+      { label: "成本", value: "可控成本。根据风险级别逐步投入。" },
+      { label: "效果", value: "提升策略适配性和执行弹性，避免过度依赖单一路径。" },
+      { label: "收益导向", value: "兼顾管理效率、生态稳定和经济回报。" }
+    ],
+    detailHighlights: [
+      { label: "成本", value: "可控", note: "按风险分层投入" },
+      { label: "效果", value: "弹性优化", note: "支持组合决策" },
+      { label: "收益导向", value: "综合", note: "适合继续对话细化" }
+    ],
+    metrics: [
+      { label: "花蜂匹配", value: "--", note: "需结合当前选择判断" },
+      { label: "风险等级", value: "待评估", note: "适合 AI 继续分析" },
+      { label: "建议动作", value: "协同", note: "进入组合讨论" }
     ]
   }
 ];

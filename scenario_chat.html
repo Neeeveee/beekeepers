@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bee Strategy Chat</title>
+  <link rel="stylesheet" href="./styles/scenario-ai.css?v=20260422-chat-page" />
+</head>
+<body class="is-free-chat">
+  <div class="scenario-chat-page">
+    <button class="back-dashboard-button" id="backScenarioButton" type="button" aria-label="返回策略页">
+      <img class="back-dashboard-icon" src="./images/image%2032.png" alt="" aria-hidden="true" />
+    </button>
+
+    <main class="chat-shell">
+      <section class="chat-stage">
+        <div class="chat-stage-wash"></div>
+        <section class="chat-context-panel glass-panel is-hidden" id="chatContextPanel" aria-live="polite">
+          <div class="chat-context-head">
+            <span class="chat-context-kicker" id="chatContextKicker">Strategy Context</span>
+            <button class="chat-context-clear" id="chatContextClear" type="button">返回策略</button>
+          </div>
+          <h3 class="chat-context-title" id="chatContextTitle"></h3>
+          <p class="chat-context-summary" id="chatContextSummary"></p>
+          <div class="chat-context-points" id="chatContextPoints"></div>
+        </section>
+      </section>
+
+      <footer class="composer-shell">
+        <div class="composer-panel glass-panel">
+          <div class="composer-input-wrap">
+            <textarea
+              id="chatComposer"
+              class="chat-composer"
+              rows="1"
+              placeholder="输入你的问题..."
+            ></textarea>
+          </div>
+          <div class="composer-actions">
+            <span class="composer-tip" id="composerTip">自由对话模式</span>
+            <button class="send-placeholder" type="button" aria-label="发送">
+              <span class="send-placeholder-icon"></span>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="./scripts/scenario-chat.js"></script>
+</body>
+</html>

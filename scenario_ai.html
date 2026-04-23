@@ -6,7 +6,7 @@
   <title>Scenario + AI Interface</title>
   <link rel="stylesheet" href="./styles/scenario-ai.css" />
 </head>
-<body>
+<body class="is-scenario-overlay-open">
   <svg class="orb-filter-defs" aria-hidden="true" focusable="false" width="0" height="0">
     <defs>
       <filter id="orb-goo" x="-40%" y="-40%" width="180%" height="180%">
@@ -95,6 +95,25 @@
     <div class="scenario-overlay" id="scenarioOverlay">
       <div class="scenario-overlay-backdrop"></div>
       <section class="scenario-carousel" aria-label="Scenario Carousel">
+        <div class="hero-copy-block">
+          <p class="hero-intro">
+            您好 我是您的<strong>专属助手</strong><br />
+            有什么问题<br />
+            我们可以<strong>共同面对</strong>
+          </p>
+        </div>
+
+        <div class="free-chat-intro">
+          <p>或许下列这些方案您都不满意？</p>
+          <p>我不只是助手，</p>
+          <p>还是与您可以一起合作的伙伴</p>
+        </div>
+
+        <button class="free-chat-button" id="freeChatButton" type="button">
+          <span>聊聊别的</span>
+          <span class="free-chat-arrow" aria-hidden="true"></span>
+        </button>
+
         <div class="carousel-toolbar">
           <div class="carousel-actions">
             <button class="carousel-nav" id="carouselPrev" type="button" aria-label="Previous scenario">
@@ -107,21 +126,6 @@
         </div>
 
         <div class="carousel-stage" id="carouselStage"></div>
-        <div class="carousel-heading-block">
-          <span class="hero-orb" aria-hidden="true">
-            <span class="hero-orb-core"></span>
-            <span class="hero-orb-blob hero-orb-blob-a"></span>
-            <span class="hero-orb-blob hero-orb-blob-b"></span>
-            <span class="hero-orb-blob hero-orb-blob-c"></span>
-          </span>
-          <div class="hero-copy-block">
-            <p class="hero-intro">
-              你好呀，<br />
-              我是你的<strong>专属助手</strong><br />
-              有什么问题，我们可以<strong>共同面对~</strong>
-            </p>
-          </div>
-        </div>
       </section>
     </div>
 
@@ -152,9 +156,9 @@
 
         <div class="detail-action-row">
           <button class="detail-primary-action" id="detailPrimaryAction" type="button">
-            Continue This Scenario
+            采用该策略
           </button>
-          <span class="detail-action-note">Select a card to open its scenario brief.</span>
+          <span class="detail-action-note">如果需要更个性化的方案，也可以返回后点击上方“聊聊别的”。</span>
         </div>
       </section>
     </div>
