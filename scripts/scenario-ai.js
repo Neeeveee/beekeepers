@@ -127,8 +127,11 @@ const state = {
   selectedIndex: 0,
   activeScenario: null,
   messages: [],
-  isSending: false
+  isSending: false,
+  source: "default"
 };
+
+const SCENARIO_CACHE_KEY = "beeScenarioCardsCache";
 
 function fmtDate(d) {
   const y = d.getFullYear();
@@ -389,15 +392,59 @@ function closeDetail() {
   }
 }
 
-async function fetchScenarios() {
+function readScenarioCache() {
   try {
-    const res = await fetch("/api/scenarios", { cache: "no-store" });
+    const raw = localStorage.getItem(SCENARIO_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed?.scenarios) || !parsed.scenarios.length) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeScenarioCache(payload) {
+  try {
+    localStorage.setItem(
+      SCENARIO_CACHE_KEY,
+      JSON.stringify({
+        source: payload.source || "unknown",
+        cachedAt: payload.cachedAt || new Date().toISOString(),
+        scenarios: payload.scenarios
+      })
+    );
+  } catch {
+    // Ignore cache write failures; rendering can continue.
+  }
+}
+
+function applyScenarioPayload(payload) {
+  if (!payload || !Array.isArray(payload.scenarios) || !payload.scenarios.length) return;
+  state.scenarios = payload.scenarios;
+  state.source = payload.source || "unknown";
+  renderCards();
+  renderDetail(state.selectedIndex || 0);
+}
+
+async function fetchScenarios() {
+  let timeout;
+  try {
+    const controller = new AbortController();
+    timeout = setTimeout(() => controller.abort(), 6500);
+    const res = await fetch("/api/scenarios", { cache: "no-store", signal: controller.signal });
     if (!res.ok) throw new Error("bad response");
     const data = await res.json();
     if (!Array.isArray(data?.scenarios) || !data.scenarios.length) throw new Error("empty");
-    return data.scenarios;
+    return {
+      source: data.source || "server",
+      cachedAt: data.cachedAt || new Date().toISOString(),
+      scenarios: data.scenarios
+    };
   } catch {
-    return [...DEFAULT_SCENARIOS];
+    return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -440,9 +487,19 @@ async function init() {
   setInterval(updateClock, 60000);
   bindEvents();
 
-  state.scenarios = await fetchScenarios();
   renderCards();
   renderDetail(0);
+
+  const cached = readScenarioCache();
+  if (cached) {
+    applyScenarioPayload(cached);
+  }
+
+  const remote = await fetchScenarios();
+  if (remote) {
+    applyScenarioPayload(remote);
+    writeScenarioCache(remote);
+  }
 
   const params = new URLSearchParams(window.location.search);
   const returnScenarioId = params.get("scenario");

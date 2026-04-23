@@ -11,6 +11,10 @@ const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 const STATIC_ROOT = __dirname;
 const DATA_ROOT = path.join(__dirname, "data");
 const DATA_RAW_ROOT = path.join(__dirname, "data_raw");
+const CACHE_ROOT = path.join(__dirname, ".cache");
+const SCENARIO_CACHE_FILE = path.join(CACHE_ROOT, "scenarios.json");
+const SCENARIO_CACHE_TTL_MS = 30 * 60 * 1000;
+const DEEPSEEK_TIMEOUT_MS = 12000;
 
 function loadLocalEnv() {
   const envPath = path.join(__dirname, ".env");
@@ -192,16 +196,53 @@ app.get("/api/current-weather", (req, res) => {
 // 获取策略卡片数据。
 app.get("/api/scenarios", async (req, res) => {
   const analysisContext = buildAnalysisContext();
+  const cachedScenarios = readScenarioCache();
 
   if (!DEEPSEEK_API_KEY) {
-    return res.json({ source: "fallback", scenarios: fallbackScenarios, analysisContext });
+    if (cachedScenarios) {
+      return res.json({
+        source: "cache",
+        scenarios: cachedScenarios.scenarios,
+        analysisContext,
+        cachedAt: cachedScenarios.cachedAt,
+        warning: "DeepSeek API key is unavailable, serving the last cached AI scenarios."
+      });
+    }
+
+    return res.json({
+      source: "fallback",
+      scenarios: fallbackScenarios,
+      analysisContext,
+      warning: "DeepSeek API key is unavailable, serving local fallback scenarios."
+    });
+  }
+
+  if (cachedScenarios && !isScenarioCacheExpired(cachedScenarios.cachedAt)) {
+    return res.json({
+      source: "cache",
+      scenarios: cachedScenarios.scenarios,
+      analysisContext,
+      cachedAt: cachedScenarios.cachedAt
+    });
   }
 
   try {
     const scenarios = await generateScenariosWithDeepSeek(analysisContext);
+    writeScenarioCache(scenarios);
     res.json({ source: "deepseek", scenarios, analysisContext });
   } catch (error) {
     console.error("[scenario] DeepSeek 生成失败，已回退到本地数据:\n", error);
+
+    if (cachedScenarios) {
+      return res.json({
+        source: "cache",
+        scenarios: cachedScenarios.scenarios,
+        analysisContext,
+        cachedAt: cachedScenarios.cachedAt,
+        warning: "DeepSeek failed, serving the last cached AI scenarios."
+      });
+    }
+
     res.json({
       source: "fallback",
       scenarios: fallbackScenarios,
@@ -333,22 +374,37 @@ async function chatWithDeepSeek({ message, history, scenarioContext, analysisCon
 
 // 统一的 DeepSeek 请求函数。
 async function requestDeepSeek(messages, options = {}) {
-  const response = await fetch(DEEPSEEK_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${DEEPSEEK_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.max_tokens ?? 1200,
-      ...(options.response_format ? { response_format: options.response_format } : {})
-    })
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DEEPSEEK_TIMEOUT_MS);
+  let response;
+  let data;
 
-  const data = await response.json().catch(() => ({}));
+  try {
+    response = await fetch(DEEPSEEK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages,
+        temperature: options.temperature ?? 0.7,
+        max_tokens: options.max_tokens ?? 1200,
+        ...(options.response_format ? { response_format: options.response_format } : {})
+      }),
+      signal: controller.signal
+    });
+
+    data = await response.json().catch(() => ({}));
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error(`DeepSeek request timed out after ${options.timeoutMs ?? DEEPSEEK_TIMEOUT_MS}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!response.ok) {
     const errorMessage = data?.error?.message || `DeepSeek 请求失败，HTTP ${response.status}`;
@@ -465,6 +521,62 @@ function stripCodeFence(text) {
     .replace(/^```\s*/i, "")
     .replace(/```$/i, "")
     .trim();
+}
+
+function readScenarioCache() {
+  try {
+    if (!fs.existsSync(SCENARIO_CACHE_FILE)) {
+      return null;
+    }
+
+    const raw = fs.readFileSync(SCENARIO_CACHE_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+
+    if (!Array.isArray(parsed?.scenarios) || !parsed.scenarios.length) {
+      return null;
+    }
+
+    return {
+      scenarios: normalizeScenarioList(parsed.scenarios),
+      cachedAt: parsed.cachedAt || null
+    };
+  } catch (error) {
+    console.warn("[scenario] 读取缓存失败:", error.message);
+    return null;
+  }
+}
+
+function writeScenarioCache(scenarios) {
+  try {
+    fs.mkdirSync(CACHE_ROOT, { recursive: true });
+    fs.writeFileSync(
+      SCENARIO_CACHE_FILE,
+      JSON.stringify(
+        {
+          cachedAt: new Date().toISOString(),
+          scenarios
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+  } catch (error) {
+    console.warn("[scenario] 写入缓存失败:", error.message);
+  }
+}
+
+function isScenarioCacheExpired(cachedAt) {
+  if (!cachedAt) {
+    return true;
+  }
+
+  const timestamp = new Date(cachedAt).getTime();
+  if (Number.isNaN(timestamp)) {
+    return true;
+  }
+
+  return Date.now() - timestamp > SCENARIO_CACHE_TTL_MS;
 }
 
 function buildAnalysisContext() {
