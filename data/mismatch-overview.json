@@ -163,60 +163,59 @@
     {
       "time": "2026-04-22",
       "value": null
+    },
+    {
+      "time": "2026-04-23",
+      "value": 0.0
     }
   ],
   "forecast": [
     {
-      "time": "2026-04-22",
-      "value": null
-    },
-    {
       "time": "2026-04-23",
-      "value": 0.181
+      "value": 0.0
     },
     {
       "time": "2026-04-24",
-      "value": 0.506
+      "value": 0.503
     },
     {
       "time": "2026-04-25",
-      "value": 0.363
+      "value": 0.678
     },
     {
       "time": "2026-04-26",
-      "value": 0.297
+      "value": 0.307
     },
     {
       "time": "2026-04-27",
-      "value": 0.26
+      "value": 0.201
     },
     {
       "time": "2026-04-28",
-      "value": 0.413
+      "value": 0.249
     },
     {
       "time": "2026-04-29",
-      "value": 0.501
+      "value": 0.321
+    },
+    {
+      "time": "2026-04-30",
+      "value": 0.555
     }
   ],
   "forecast_info": [
-    {
-      "mismatch_level": "轻度错配",
-      "mismatch_type": "resource_ahead",
-      "time": "2026-04-23"
-    },
     {
       "mismatch_level": "显著错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-24"
     },
     {
-      "mismatch_level": "中度错配",
+      "mismatch_level": "显著错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-25"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-26"
     },
@@ -226,14 +225,19 @@
       "time": "2026-04-27"
     },
     {
-      "mismatch_level": "中度错配",
+      "mismatch_level": "轻度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-28"
     },
     {
-      "mismatch_level": "显著错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-04-29"
+    },
+    {
+      "mismatch_level": "显著错配",
+      "mismatch_type": "resource_ahead",
+      "time": "2026-04-30"
     }
   ],
   "history_info": [
@@ -441,6 +445,11 @@
       "mismatch_level": "无数据",
       "mismatch_type": "no_data",
       "time": "2026-04-22"
+    },
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "matched",
+      "time": "2026-04-23"
     }
   ]
 }
