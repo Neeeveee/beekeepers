@@ -48,7 +48,6 @@
     }
 
     .status-box {
-      display: none !important;
       position: absolute;
       top: 14px;
       right: 14px;
@@ -153,7 +152,7 @@
     let lastSourceText = '示例数据';
 
     const map = L.map('map', {
-      zoomControl: false,
+      zoomControl: true,
       maxZoom: tileMaxZoom,
       maxBounds: mapBounds,
       maxBoundsViscosity: 1.0,

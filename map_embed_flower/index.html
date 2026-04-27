@@ -71,13 +71,13 @@
     };
 
     const FLOWER_COLOR_MAP = {
-      "冬青": "#6d63d6",
+      "冬青": "#f3ea2a",
       "果梅": "#c557a1",
       "梅": "#c557a1",
       "苦槠": "#a8c9d7",
       "柃木": "#f09a95",
       "栾树": "#a9d07a",
-      "枇杷": "#e6de37",
+      "枇杷": "#f39c12",
       "五倍子": "#c9ab3a",
       "油菜": "#82d8c4"
     };
@@ -88,7 +88,7 @@
     );
 
     const map = L.map('map', {
-      zoomControl: false,
+      zoomControl: true,
       maxZoom: CONFIG.TILE_MAX_ZOOM,
       maxBounds: bounds,
       maxBoundsViscosity: 1.0,
