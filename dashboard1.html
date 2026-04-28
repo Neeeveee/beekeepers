@@ -165,7 +165,7 @@
     .info-chip-list {
       position: relative;
       display: grid;
-      grid-template-columns: 156px 104px 82px 76px 76px 76px;
+      grid-template-columns: 148px 84px 64px 96px 62px 62px 62px;
       gap: 0;
       align-items: stretch;
       padding: 4px 0 2px;
@@ -204,6 +204,11 @@
       color: var(--text-subtle);
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .info-chip-saturation .info-chip-label {
+      font-size: 9px;
+      letter-spacing: 0;
     }
 
     .info-chip-site {
@@ -271,12 +276,6 @@
       opacity: 1;
       pointer-events: auto;
       transform: translateY(0);
-    }
-
-    /* Temporarily hide the top-right info bar and its expandable site card. */
-    .top-right-info-bar,
-    .site-detail-card {
-      display: none !important;
     }
 
     .site-detail-title {
@@ -500,6 +499,10 @@
       z-index: 3;
       transition: transform 0.2s ease;
       overflow: hidden;
+    }
+
+    .right-information.is-hidden {
+      display: none;
     }
 
     .app-shell.curve-panel-open .right-information {
@@ -753,6 +756,10 @@
           <span class="info-chip-label">时间</span>
           <span class="info-chip-value" id="infoTime">--</span>
         </div>
+        <div class="info-chip info-chip-saturation">
+          <span class="info-chip-label">蜂群饱和度</span>
+          <span class="info-chip-value">92%</span>
+        </div>
         <div class="info-chip">
           <span class="info-chip-label">天气</span>
           <span class="info-chip-value" id="infoWeather">--</span>
@@ -821,7 +828,7 @@
       </button>
     </section>
 
-    <aside class="right-information" aria-label="右侧信息区">
+    <aside class="right-information is-hidden" aria-label="右侧信息区">
       <div class="dashboard-panel-title">
         <img class="dashboard-panel-title-icon" src="./images/image 30.png" alt="" aria-hidden="true" />
         <span>指数仪表盘</span>

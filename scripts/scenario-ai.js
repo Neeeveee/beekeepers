@@ -119,8 +119,20 @@ const detailSectionTitle = $("detailSectionTitle");
 const detailCopy = $("detailCopy");
 const detailMetrics = $("detailMetrics");
 const detailPrimary = $("detailPrimaryAction");
+const siteInfoToggle = $("siteInfoToggle");
+const siteDetailCard = $("siteDetailCard");
 const infoDate = $("infoDate");
 const infoTime = $("infoTime");
+const infoActivity = $("infoActivity");
+const infoNectar = $("infoNectar");
+const infoMismatch = $("infoMismatch");
+const siteDateRange = $("siteDateRange");
+
+const GAUGE_DATA_BASE_URL = "https://neeeveee.github.io/beekeepers/data";
+const BEE_CORE_START_HOUR = 10;
+const BEE_CORE_END_HOUR = 15;
+const MIN_CORE_DAY_SAMPLES = 3;
+const MIN_FALLBACK_DAY_SAMPLES = 6;
 
 const state = {
   scenarios: [...DEFAULT_SCENARIOS],
@@ -146,11 +158,150 @@ function fmtTime(d) {
   return `${h}:${m}`;
 }
 
+function parseGaugeTime(value) {
+  if (!value) return null;
+  const normalized = value.length === 10 ? `${value}T00:00:00` : value.replace(" ", "T");
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 function updateClock() {
   if (!infoDate || !infoTime) return;
   const now = new Date();
   infoDate.textContent = fmtDate(now);
   infoTime.textContent = fmtTime(now);
+}
+
+function aggregateBeeDaily(items, metric) {
+  const groups = {};
+  (items || []).forEach(item => {
+    if (!item || item.value == null || !item.time) return;
+    const day = item.time.slice(0, 10);
+    if (!groups[day]) groups[day] = [];
+    const hour = Number(item.time.slice(11, 13));
+    groups[day].push({
+      value: Number(item.value),
+      hour: Number.isFinite(hour) ? hour : null
+    });
+  });
+
+  return Object.keys(groups).sort().map(day => {
+    const entries = groups[day].filter(entry => Number.isFinite(entry.value));
+    const coreEntries = entries.filter(entry => (
+      entry.hour != null
+      && entry.hour >= BEE_CORE_START_HOUR
+      && entry.hour <= BEE_CORE_END_HOUR
+    ));
+    const metricEntries = coreEntries.length >= MIN_CORE_DAY_SAMPLES
+      ? coreEntries
+      : entries.length >= MIN_FALLBACK_DAY_SAMPLES
+        ? entries
+        : [];
+
+    if (!metricEntries.length) return null;
+    const values = metricEntries.map(entry => entry.value);
+    if (metric === "peak") {
+      return { time: day, value: Math.max(...values) };
+    }
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    return { time: day, value: mean };
+  }).filter(Boolean);
+}
+
+function getLatestActualEntry(items) {
+  return (items || [])
+    .filter(item => item && item.value != null && item.time)
+    .map(item => ({ ...item, parsedTime: parseGaugeTime(item.time) }))
+    .filter(item => item.parsedTime)
+    .sort((a, b) => a.parsedTime - b.parsedTime)
+    .pop() || null;
+}
+
+function normalizeGaugeValue(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(0, Math.min(100, Math.round(numeric * 100)));
+}
+
+function getTimeBounds(items) {
+  return (items || [])
+    .filter(item => item && item.time)
+    .map(item => parseGaugeTime(item.time))
+    .filter(Boolean)
+    .sort((a, b) => a - b);
+}
+
+async function refreshScenarioMetrics() {
+  if (!infoActivity || !infoNectar || !infoMismatch) return;
+
+  try {
+    const cacheBust = Date.now();
+    const [nectarData, mismatchData, activityData] = await Promise.all([
+      fetch(`${GAUGE_DATA_BASE_URL}/nectar-supply-overview.json?t=${cacheBust}`, { cache: "no-store" }).then(response => response.json()),
+      fetch(`${GAUGE_DATA_BASE_URL}/mismatch-overview.json?t=${cacheBust}`, { cache: "no-store" }).then(response => response.json()),
+      fetch(`${GAUGE_DATA_BASE_URL}/bee-activity-forecast.json?t=${cacheBust}`, { cache: "no-store" }).then(response => response.json())
+    ]);
+
+    const latestNectar = getLatestActualEntry(nectarData.actual);
+    const latestMismatch = getLatestActualEntry(mismatchData.actual);
+    const latestActivity = getLatestActualEntry(aggregateBeeDaily(activityData.actual, "mean"));
+
+    infoActivity.textContent = `${normalizeGaugeValue(latestActivity?.value ?? 0)}%`;
+    infoNectar.textContent = `${normalizeGaugeValue(latestNectar?.value ?? 0)}%`;
+    infoMismatch.textContent = `${normalizeGaugeValue(latestMismatch?.value ?? 0)}%`;
+  } catch (error) {
+    console.error("Failed to refresh scenario metrics:", error);
+    infoActivity.textContent = "--";
+    infoNectar.textContent = "--";
+    infoMismatch.textContent = "--";
+  }
+}
+
+function setSiteCardVisible(visible) {
+  if (!siteInfoToggle || !siteDetailCard) return;
+  siteInfoToggle.classList.toggle("is-expanded", visible);
+  siteInfoToggle.setAttribute("aria-expanded", String(visible));
+  siteDetailCard.classList.toggle("is-visible", visible);
+}
+
+async function refreshSiteDateRange() {
+  if (!siteDateRange) return;
+
+  try {
+    const cacheBust = Date.now();
+    const [floweringData, nectarData, mismatchData, activityData] = await Promise.all([
+      fetch(`${GAUGE_DATA_BASE_URL}/flowering-overview.json?t=${cacheBust}`, { cache: "no-store" }).then(response => response.json()),
+      fetch(`${GAUGE_DATA_BASE_URL}/nectar-supply-overview.json?t=${cacheBust}`, { cache: "no-store" }).then(response => response.json()),
+      fetch(`${GAUGE_DATA_BASE_URL}/mismatch-overview.json?t=${cacheBust}`, { cache: "no-store" }).then(response => response.json()),
+      fetch(`${GAUGE_DATA_BASE_URL}/bee-activity-forecast.json?t=${cacheBust}`, { cache: "no-store" }).then(response => response.json())
+    ]);
+
+    const allDates = [
+      ...getTimeBounds(floweringData.actual),
+      ...getTimeBounds(floweringData.forecast),
+      ...getTimeBounds(nectarData.actual),
+      ...getTimeBounds(nectarData.forecast),
+      ...getTimeBounds(mismatchData.actual),
+      ...getTimeBounds(mismatchData.forecast),
+      ...getTimeBounds(activityData.actual),
+      ...getTimeBounds(activityData.forecast)
+    ].sort((a, b) => a - b);
+
+    if (!allDates.length) {
+      siteDateRange.textContent = "--";
+      return;
+    }
+
+    siteDateRange.textContent = `${fmtDate(allDates[0])} 至 ${fmtDate(allDates[allDates.length - 1])}`;
+  } catch (error) {
+    console.error("Failed to refresh site date range:", error);
+    siteDateRange.textContent = "--";
+  }
+}
+
+async function initializeInfoPanel() {
+  updateClock();
+  await Promise.all([refreshScenarioMetrics(), refreshSiteDateRange()]);
 }
 
 function ensureChatElements() {
@@ -451,6 +602,12 @@ async function fetchScenarios() {
 function bindEvents() {
   if (backButton) backButton.addEventListener("click", () => { window.location.href = "./dashboard1.html"; });
   if (freeChatButton) freeChatButton.addEventListener("click", () => { window.location.href = "./scenario_chat.html?mode=free"; });
+  if (siteInfoToggle && siteDetailCard) {
+    siteInfoToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setSiteCardVisible(!siteDetailCard.classList.contains("is-visible"));
+    });
+  }
   if (detailClose) detailClose.addEventListener("click", closeDetail);
   if (detailBackdrop) detailBackdrop.addEventListener("click", closeDetail);
   if (detailPrimary) detailPrimary.addEventListener("click", () => enterStrategyChat(state.selectedIndex));
@@ -480,12 +637,20 @@ function bindEvents() {
       closeDetail();
     }
   });
+
+  document.addEventListener("click", (event) => {
+    if (!siteDetailCard || !siteInfoToggle || !siteDetailCard.classList.contains("is-visible")) return;
+    if (siteDetailCard.contains(event.target) || siteInfoToggle.contains(event.target)) return;
+    setSiteCardVisible(false);
+  });
 }
 
 async function init() {
   updateClock();
   setInterval(updateClock, 60000);
   bindEvents();
+  await initializeInfoPanel();
+  setInterval(initializeInfoPanel, 300000);
 
   renderCards();
   renderDetail(0);
