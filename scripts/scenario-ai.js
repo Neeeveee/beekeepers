@@ -143,7 +143,7 @@ const state = {
   source: "default"
 };
 
-const SCENARIO_CACHE_KEY = "beeScenarioCardsCache";
+const SCENARIO_CACHE_KEY = "beeScenarioCardsCache:v2";
 
 function fmtDate(d) {
   const y = d.getFullYear();
@@ -334,6 +334,7 @@ function scenarioContext(scenario) {
     summary: scenario.summary,
     kicker: scenario.kicker,
     sectionTitle: scenario.sectionTitle,
+    detailPoints: scenario.detailPoints || [],
     metrics: scenario.metrics || [],
     detailSections: scenario.detailSections || [],
     detailHighlights: scenario.detailHighlights || []

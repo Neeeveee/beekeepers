@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const fetch = require("node-fetch");
+const { createContextualScenarios } = require("./scenario-strategy");
 
 const app = express();
 loadLocalEnv();
@@ -199,21 +200,11 @@ app.get("/api/scenarios", async (req, res) => {
   const cachedScenarios = readScenarioCache();
 
   if (!DEEPSEEK_API_KEY) {
-    if (cachedScenarios) {
-      return res.json({
-        source: "cache",
-        scenarios: cachedScenarios.scenarios,
-        analysisContext,
-        cachedAt: cachedScenarios.cachedAt,
-        warning: "DeepSeek API key is unavailable, serving the last cached AI scenarios."
-      });
-    }
-
     return res.json({
       source: "fallback",
-      scenarios: fallbackScenarios,
+      scenarios: createContextualScenarios(analysisContext, readLatestWeatherFile()),
       analysisContext,
-      warning: "DeepSeek API key is unavailable, serving local fallback scenarios."
+      warning: "DeepSeek API key is unavailable, serving data-driven local scenarios."
     });
   }
 
@@ -245,7 +236,7 @@ app.get("/api/scenarios", async (req, res) => {
 
     res.json({
       source: "fallback",
-      scenarios: fallbackScenarios,
+      scenarios: createContextualScenarios(analysisContext, readLatestWeatherFile()),
       analysisContext,
       warning: "DeepSeek 生成失败，已使用本地兜底方案。"
     });
@@ -437,9 +428,9 @@ function parseScenarioPayload(content) {
 
 // 标准化 scenario 列表，确保前端字段齐全。
 function normalizeScenarioList(items) {
-  const normalized = items.slice(0, 3).map((item, index) => ({
-    id: ["scenario-a", "scenario-b", "scenario-c"][index],
-    shortLabel: ["A", "B", "C"][index],
+  const normalized = items.slice(0, 4).map((item, index) => ({
+    id: ["scenario-a", "scenario-b", "scenario-c", "scenario-d"][index],
+    shortLabel: ["A", "B", "C", "D"][index],
     title: safeString(item.title, `方案 ${index + 1}`),
     kicker: safeString(item.kicker, "Strategy"),
     summary: safeString(item.summary, "该方案用于当前授粉与蜂群场景的策略分析。"),
@@ -450,8 +441,9 @@ function normalizeScenarioList(items) {
     metrics: normalizeMetrics(item.metrics)
   }));
 
-  while (normalized.length < 3) {
-    normalized.push(fallbackScenarios[normalized.length]);
+  const localFallback = createContextualScenarios(buildAnalysisContext(), readLatestWeatherFile());
+  while (normalized.length < 4) {
+    normalized.push(localFallback[normalized.length]);
   }
 
   return normalized;
