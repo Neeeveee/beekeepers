@@ -656,11 +656,6 @@ async function init() {
   renderCards();
   renderDetail(0);
 
-  const cached = readScenarioCache();
-  if (cached) {
-    applyScenarioPayload(cached);
-  }
-
   const remote = await fetchScenarios();
   if (remote) {
     applyScenarioPayload(remote);

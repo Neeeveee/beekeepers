@@ -40,6 +40,218 @@ function loadLocalEnv() {
   });
 }
 
+// ---- Current-data DeepSeek scenario overrides ----
+// These definitions intentionally override the older mojibake prompt helpers below.
+generateScenariosWithDeepSeek = async function(analysisContext) {
+  const systemPrompt = [
+    "你是一个农业授粉与蜂群管理策略设计助手。",
+    "请严格基于系统提供的当前监测数据、预测数据和最新天气生成 4 个前端策略卡片方案。",
+    "必须保留现有卡片框架：标题、摘要、策略说明、详情字段，以及 metrics 中的“匹配度 / 风险等级 / 建议动作”形式。",
+    "只返回 JSON 对象，格式为 {\"scenarios\":[...]}，不要输出 Markdown，不要输出解释。",
+    "scenarios 长度必须为 4，对应 scenario-a、scenario-b、scenario-c、scenario-d，shortLabel 分别为 A、B、C、D。",
+    "detailSections 的 label 固定为：应对问题、建议类型、建议内容、具体操作、成本、效果、收益导向。",
+    "detailHighlights 的 label 固定为：成本、效果、收益导向。",
+    "metrics 必须是长度为 3 的数组，label 固定为：匹配度、风险等级、建议动作。",
+    "匹配度用百分比表达，结合花期指数、蜜源指数、蜂群活跃度和错配风险估算；风险等级只能使用低、中、高或待评估。",
+    "内容使用简体中文。不要写泛泛而谈的模板文案；每张卡至少引用一个当前数据事实。"
+  ].join("\n");
+
+  const userPrompt = [
+    "项目背景：这是一个蜜蜂授粉、花期匹配、蜜源供给和生态错配分析界面。",
+    "请输出 4 个彼此区分但保持原卡片格式的策略方案：稳态授粉、天气/活跃时段应对、错配恢复、未来资源窗口。",
+    "",
+    "当前监测分析结果：",
+    formatAnalysisContextForPrompt(analysisContext)
+  ].join("\n");
+
+  const content = await requestDeepSeek([
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt }
+  ], {
+    temperature: 0.65,
+    max_tokens: 2600,
+    response_format: { type: "json_object" }
+  });
+
+  return normalizeScenarioList(parseScenarioPayload(content), analysisContext);
+};
+
+normalizeScenarioList = function(items, analysisContext = buildAnalysisContext()) {
+  const source = Array.isArray(items) ? items : [];
+  const localFallback = createContextualScenarios(analysisContext, readLatestWeatherFile());
+  const ids = ["scenario-a", "scenario-b", "scenario-c", "scenario-d"];
+  const labels = ["A", "B", "C", "D"];
+
+  return ids.map((id, index) => {
+    const item = source[index] || localFallback[index] || {};
+    return {
+      id,
+      shortLabel: labels[index],
+      title: cleanString(item.title, localFallback[index]?.title || `方案 ${index + 1}`),
+      kicker: cleanString(item.kicker, localFallback[index]?.kicker || "STRATEGY"),
+      summary: cleanString(item.summary, localFallback[index]?.summary || "该方案基于当前监测数据生成。"),
+      sectionTitle: cleanString(item.sectionTitle, "策略说明"),
+      detailPoints: normalizeStringArray(item.detailPoints, 3, "请结合当前数据继续细化该策略。"),
+      detailSections: normalizeDetailSections(item.detailSections, localFallback[index]?.detailSections),
+      detailHighlights: normalizeHighlights(item.detailHighlights, localFallback[index]?.detailHighlights),
+      metrics: normalizeMetrics(item.metrics, localFallback[index]?.metrics)
+    };
+  });
+};
+
+normalizeDetailSections = function(sections, fallbackSections = []) {
+  const labels = ["应对问题", "建议类型", "建议内容", "具体操作", "成本", "效果", "收益导向"];
+  const list = Array.isArray(sections) ? sections : [];
+  return labels.map((label, index) => ({
+    label,
+    value: cleanString(list[index]?.value, fallbackSections[index]?.value || `待补充：${label}`)
+  }));
+};
+
+normalizeHighlights = function(highlights, fallbackHighlights = []) {
+  const labels = ["成本", "效果", "收益导向"];
+  const list = Array.isArray(highlights) ? highlights : [];
+  return labels.map((label, index) => ({
+    label,
+    value: cleanString(list[index]?.value, fallbackHighlights[index]?.value || "--"),
+    note: cleanString(list[index]?.note, fallbackHighlights[index]?.note || "基于当前数据估算")
+  }));
+};
+
+normalizeMetrics = function(metrics, fallbackMetrics = []) {
+  const labels = ["匹配度", "风险等级", "建议动作"];
+  const list = Array.isArray(metrics) ? metrics : [];
+  return labels.map((label, index) => ({
+    label,
+    value: cleanString(list[index]?.value, fallbackMetrics[index]?.value || "--"),
+    note: cleanString(list[index]?.note, fallbackMetrics[index]?.note || "基于当前数据生成")
+  }));
+};
+
+writeScenarioCache = function(scenarios, analysisContext = buildAnalysisContext()) {
+  try {
+    fs.mkdirSync(CACHE_ROOT, { recursive: true });
+    fs.writeFileSync(
+      SCENARIO_CACHE_FILE,
+      JSON.stringify({ cachedAt: new Date().toISOString(), dataSignature: analysisContext.dataSignature, scenarios }, null, 2),
+      "utf8"
+    );
+  } catch (error) {
+    console.warn("[scenario] 写入缓存失败:", error.message);
+  }
+};
+
+readScenarioCache = function() {
+  try {
+    if (!fs.existsSync(SCENARIO_CACHE_FILE)) return null;
+    const parsed = JSON.parse(fs.readFileSync(SCENARIO_CACHE_FILE, "utf8"));
+    if (!Array.isArray(parsed?.scenarios) || !parsed.scenarios.length) return null;
+    return {
+      scenarios: normalizeScenarioList(parsed.scenarios),
+      cachedAt: parsed.cachedAt || null,
+      dataSignature: parsed.dataSignature || null
+    };
+  } catch (error) {
+    console.warn("[scenario] 读取缓存失败:", error.message);
+    return null;
+  }
+};
+
+buildAnalysisContext = function() {
+  const floweringOverview = readJsonFile("flowering-overview.json");
+  const nectarOverview = readJsonFile("nectar-supply-overview.json");
+  const mismatchOverview = readJsonFile("mismatch-overview.json");
+  const activityForecast = readJsonFile("bee-activity-forecast.json");
+  const latestWeather = readLatestWeatherFile();
+
+  const context = {
+    generatedAt: new Date().toISOString(),
+    flowering: summarizeDailySeries(floweringOverview, "flowering_index"),
+    nectar: summarizeDailySeries(nectarOverview, "nectar_supply_index"),
+    mismatch: summarizeMismatchOverview(mismatchOverview),
+    activity: summarizeActivityForecast(activityForecast),
+    weather: summarizeWeatherSnapshot(latestWeather)
+  };
+
+  context.snapshotDate = latestOf([
+    context.flowering.latestActualDate,
+    context.nectar.latestActualDate,
+    context.mismatch.latestActualDate,
+    context.activity.latestActualTime
+  ]);
+  context.forecastDate = latestOf([
+    context.flowering.latestForecastDate,
+    context.nectar.latestForecastDate,
+    context.mismatch.latestForecastDate,
+    context.activity.latestForecastTime
+  ]);
+  context.dataSignature = JSON.stringify({
+    snapshotDate: context.snapshotDate,
+    forecastDate: context.forecastDate,
+    flowering: context.flowering,
+    nectar: context.nectar,
+    mismatch: context.mismatch,
+    activity: context.activity,
+    weather: context.weather
+  });
+
+  return context;
+};
+
+formatAnalysisContextForPrompt = function(context) {
+  return [
+    `数据快照日期：${context?.snapshotDate || "无日期"}；预测窗口：${context?.forecastDate || "无日期"}。`,
+    `花期指数：最近实测 ${formatNumber(context?.flowering?.latestActualValue)}（${context?.flowering?.latestActualDate || "无日期"}），最近预测 ${formatNumber(context?.flowering?.latestForecastValue)}（${context?.flowering?.latestForecastDate || "无日期"}）。`,
+    `主要花源：${context?.flowering?.topPlantName || "暂无"}，贡献值 ${formatNumber(context?.flowering?.topPlantContribution)}，对应花期指数 ${formatNumber(context?.flowering?.topPlantIndex)}。`,
+    `花蜜量指数：最近实测 ${formatNumber(context?.nectar?.latestActualValue)}（${context?.nectar?.latestActualDate || "无日期"}），最近预测 ${formatNumber(context?.nectar?.latestForecastValue)}（${context?.nectar?.latestForecastDate || "无日期"}）。`,
+    `主要蜜源来源：${context?.nectar?.topPlantName || "暂无"}，贡献值 ${formatNumber(context?.nectar?.topPlantContribution)}，对应花蜜量指数 ${formatNumber(context?.nectar?.topPlantIndex)}。`,
+    `蜂群活跃度：最近实测 ${formatNumber(context?.activity?.latestActualValue)}（${context?.activity?.latestActualTime || "无日期"}），最近预测 ${formatNumber(context?.activity?.latestForecastValue)}（${context?.activity?.latestForecastTime || "无日期"}）。`,
+    `错配风险：最近预测偏差 ${formatNumber(context?.mismatch?.latestForecastGap)}（${context?.mismatch?.latestForecastDate || "无日期"}），等级 ${context?.mismatch?.mismatchLevel || "暂无"}，类型 ${context?.mismatch?.mismatchType || "unknown"}。`,
+    `最新天气：${context?.weather?.text || "暂无"}，温度 ${context?.weather?.temp ?? "--"}°C，降水概率 ${context?.weather?.pop ?? "--"}%，风速 ${context?.weather?.windSpeed ?? "--"}km/h。`
+  ].join("\n");
+};
+
+deriveMismatchLevel = function(gap, rawLevel) {
+  if (typeof rawLevel === "string" && rawLevel.trim()) return rawLevel.trim();
+  if (typeof gap !== "number" || !Number.isFinite(gap)) return "暂无";
+  if (gap < 0.15) return "基本匹配";
+  if (gap < 0.3) return "轻度错配";
+  if (gap < 0.5) return "中度错配";
+  return "显著错配";
+};
+
+deriveMismatchType = function(rawType) {
+  if (rawType === "resource_ahead") return "花源先行";
+  if (rawType === "behavior_ahead") return "蜂群先行";
+  if (rawType === "matched") return "基本匹配";
+  if (rawType === "no_data") return "无数据";
+  return rawType || "unknown";
+};
+
+function summarizeWeatherSnapshot(payload) {
+  const latest = Array.isArray(payload?.hourly) ? payload.hourly[0] : null;
+  return {
+    text: latest?.text || null,
+    temp: toSafeNumber(Number(latest?.temp)),
+    pop: toSafeNumber(Number(latest?.pop)),
+    windSpeed: toSafeNumber(Number(latest?.windSpeed)),
+    sourceFile: payload?.sourceFile || null
+  };
+}
+
+function latestOf(values) {
+  const sorted = values.filter(Boolean).map((value) => String(value)).sort();
+  return sorted.length ? sorted[sorted.length - 1] : null;
+}
+
+function formatNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) ? String(Number(value.toFixed(3))) : "暂无";
+}
+
+function cleanString(value, fallbackValue) {
+  return typeof value === "string" && value.trim() ? value.trim() : fallbackValue;
+}
+
 // 兜底场景数据：当 DeepSeek 不可用时，页面仍然能正常展示。
 const fallbackScenarios = [
   {
@@ -208,23 +420,19 @@ app.get("/api/scenarios", async (req, res) => {
     });
   }
 
-  if (cachedScenarios && !isScenarioCacheExpired(cachedScenarios.cachedAt)) {
-    return res.json({
-      source: "cache",
-      scenarios: cachedScenarios.scenarios,
-      analysisContext,
-      cachedAt: cachedScenarios.cachedAt
-    });
-  }
-
   try {
     const scenarios = await generateScenariosWithDeepSeek(analysisContext);
-    writeScenarioCache(scenarios);
+    writeScenarioCache(scenarios, analysisContext);
     res.json({ source: "deepseek", scenarios, analysisContext });
   } catch (error) {
     console.error("[scenario] DeepSeek 生成失败，已回退到本地数据:\n", error);
 
-    if (cachedScenarios) {
+    if (
+      cachedScenarios
+      && cachedScenarios.dataSignature
+      && cachedScenarios.dataSignature === analysisContext.dataSignature
+      && !isScenarioCacheExpired(cachedScenarios.cachedAt)
+    ) {
       return res.json({
         source: "cache",
         scenarios: cachedScenarios.scenarios,
