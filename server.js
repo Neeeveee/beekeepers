@@ -16,6 +16,7 @@ const CACHE_ROOT = path.join(__dirname, ".cache");
 const SCENARIO_CACHE_FILE = path.join(CACHE_ROOT, "scenarios.json");
 const SCENARIO_CACHE_TTL_MS = 30 * 60 * 1000;
 const DEEPSEEK_TIMEOUT_MS = 45000;
+let scenarioRefreshPromise = null;
 
 function loadLocalEnv() {
   const envPath = path.join(__dirname, ".env");
@@ -156,6 +157,43 @@ readScenarioCache = function() {
     return null;
   }
 };
+
+function isSameScenarioSignature(cachedScenarios, analysisContext) {
+  return Boolean(
+    cachedScenarios
+    && cachedScenarios.dataSignature
+    && cachedScenarios.dataSignature === analysisContext.dataSignature
+  );
+}
+
+function refreshScenarioCacheInBackground(analysisContext) {
+  if (!DEEPSEEK_API_KEY) return null;
+  if (scenarioRefreshPromise) return scenarioRefreshPromise;
+
+  scenarioRefreshPromise = (async () => {
+    try {
+      const scenarios = await generateScenariosWithDeepSeek(analysisContext);
+      writeScenarioCache(scenarios, analysisContext);
+      return scenarios;
+    } catch (error) {
+      console.error("[scenario] background DeepSeek refresh failed:\n", error);
+      return null;
+    } finally {
+      scenarioRefreshPromise = null;
+    }
+  })();
+
+  return scenarioRefreshPromise;
+}
+
+function scenarioFallbackPayload(analysisContext, source, warning) {
+  return {
+    source,
+    scenarios: createContextualScenarios(analysisContext, readLatestWeatherFile()),
+    analysisContext,
+    warning
+  };
+}
 
 buildAnalysisContext = function() {
   const floweringOverview = readJsonFile("flowering-overview.json");
@@ -634,6 +672,29 @@ app.get("/api/scenarios", async (req, res) => {
       warning: "DeepSeek API key is unavailable, serving data-driven local scenarios."
     });
   }
+
+  if (isSameScenarioSignature(cachedScenarios, analysisContext)) {
+    const cacheExpired = isScenarioCacheExpired(cachedScenarios.cachedAt);
+    if (cacheExpired) {
+      refreshScenarioCacheInBackground(analysisContext);
+    }
+
+    return res.json({
+      source: cacheExpired ? "cache-refreshing" : "cache",
+      scenarios: cachedScenarios.scenarios,
+      analysisContext,
+      cachedAt: cachedScenarios.cachedAt,
+      refreshing: cacheExpired,
+      warning: cacheExpired ? "Serving cached AI scenarios while refreshing DeepSeek in the background." : undefined
+    });
+  }
+
+  refreshScenarioCacheInBackground(analysisContext);
+  return res.json(scenarioFallbackPayload(
+    analysisContext,
+    "fallback-refreshing",
+    "Current data changed, serving data-driven local scenarios while DeepSeek refreshes in the background."
+  ));
 
   try {
     const scenarios = await generateScenariosWithDeepSeek(analysisContext);
