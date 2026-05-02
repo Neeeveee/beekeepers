@@ -252,6 +252,221 @@ function cleanString(value, fallbackValue) {
   return typeof value === "string" && value.trim() ? value.trim() : fallbackValue;
 }
 
+// ---- Unified current-stage strategy basis ----
+// All four strategy cards share this same factual basis; only the trade-off changes.
+buildAnalysisContext = function() {
+  const floweringOverview = readJsonFile("flowering-overview.json");
+  const nectarOverview = readJsonFile("nectar-supply-overview.json");
+  const mismatchOverview = readJsonFile("mismatch-overview.json");
+  const activityForecast = readJsonFile("bee-activity-forecast.json");
+  const latestWeather = readLatestWeatherFile();
+
+  const context = {
+    generatedAt: new Date().toISOString(),
+    flowering: summarizeDailySeries(floweringOverview, "flowering_index"),
+    nectar: summarizeDailySeries(nectarOverview, "nectar_supply_index"),
+    mismatch: summarizeMismatchOverview(mismatchOverview),
+    activity: summarizeActivityForecast(activityForecast),
+    weather: summarizeWeatherSnapshot(latestWeather)
+  };
+
+  context.strategyBasis = buildStrategyBasis({
+    floweringOverview,
+    nectarOverview,
+    mismatchOverview,
+    activityForecast,
+    weather: context.weather
+  });
+  context.snapshotDate = context.strategyBasis.date;
+  context.forecastDate = context.strategyBasis.date;
+  context.dataSignature = JSON.stringify({
+    strategyBasis: context.strategyBasis,
+    weather: context.weather
+  });
+
+  return context;
+};
+
+formatAnalysisContextForPrompt = function(context) {
+  const basis = context?.strategyBasis || {};
+  return [
+    "统一事实底座（四张策略卡必须全部基于这一组数据，不允许各自换日期或换口径）：",
+    `基准日期：${basis.date || "无日期"}。`,
+    `主花源：${basis.topFlower || "暂无"}；主要蜜源：${basis.topNectar || "暂无"}。`,
+    `花期指数：${formatNumber(basis.floweringValue)}；花蜜量指数：${formatNumber(basis.nectarValue)}。`,
+    `蜂群核心活跃度：${formatNumber(basis.activityValue)}（${basis.activityWindow || "核心授粉时段"}，峰值 ${formatNumber(basis.activityPeak)}）。`,
+    `错配风险：${formatNumber(basis.mismatchGap)}，等级 ${basis.mismatchLevel || "暂无"}，类型 ${basis.mismatchType || "unknown"}。`,
+    `统一卡面匹配度：${basis.matchPercent || "--"}；统一卡面风险等级：${basis.riskLevel || "待评估"}。`,
+    `最新天气：${context?.weather?.text || "暂无"}，温度 ${context?.weather?.temp ?? "--"}°C，降水概率 ${context?.weather?.pop ?? "--"}%，风速 ${context?.weather?.windSpeed ?? "--"}km/h。`,
+    "",
+    "生成要求：四张卡是同一当下阶段的四种解决方案，数据来源和诊断依据必须完全一致；差异只体现在成本、干预强度、见效速度、长期收益、生态稳健性等策略取向。"
+  ].join("\n");
+};
+
+generateScenariosWithDeepSeek = async function(analysisContext) {
+  const basis = analysisContext?.strategyBasis || {};
+  const systemPrompt = [
+    "你是一个农业授粉与蜂群管理策略设计助手。",
+    "请基于同一个当前事实底座，生成 4 个可供用户自由选择的策略方案。",
+    "四张卡不是四个不同诊断，而是同一真实当下情况的四种取向：低成本保守、天气/时段保护、短期增效、长期收益/生态韧性。",
+    "必须保留现有卡片框架：title, kicker, summary, sectionTitle, detailPoints, detailSections, detailHighlights, metrics。",
+    "只返回 JSON 对象，格式为 {\"scenarios\":[...]}，不要输出 Markdown，不要解释。",
+    "scenarios 长度必须为 4，对应 scenario-a、scenario-b、scenario-c、scenario-d，shortLabel 分别为 A、B、C、D。",
+    "四张卡的 metrics 必须都是 3 项，label 固定为：匹配度、风险等级、建议动作。",
+    `四张卡的“匹配度”必须统一使用 ${basis.matchPercent || "--"}，不要自行改写。`,
+    `四张卡的“风险等级”必须统一使用 ${basis.riskLevel || "待评估"}，note 可解释不同策略对风险的处理方式。`,
+    "detailSections 必须是 7 项，label 固定为：应对问题、建议类型、建议内容、具体操作、成本、效果、收益导向。",
+    "detailHighlights 必须是 3 项，label 固定为：成本、效果、收益导向。",
+    "每张卡都要引用当前事实底座中的至少两个事实，例如基准日期、主花源、花期指数、花蜜量、核心活跃度、错配风险或天气。",
+    "不要写成泛泛模板，不要把其中某张卡改成未来末端预测诊断。"
+  ].join("\n");
+
+  const userPrompt = [
+    "项目背景：这是一个蜜蜂授粉、花期匹配、蜜源供给和生态错配分析界面。",
+    "请输出 4 个侧重不同但依据一致的解决方案：",
+    "A. 低成本稳态维持：少干预、低成本、保持当前效率。",
+    "B. 天气与时段保护：围绕降雨/温度/核心活跃时段安排操作。",
+    "C. 短期增效执行：投入适中、提升近期授粉与采集效率。",
+    "D. 长期收益布局：更重视生态韧性、持续收益和未来窗口承接。",
+    "",
+    formatAnalysisContextForPrompt(analysisContext)
+  ].join("\n");
+
+  const content = await requestDeepSeek([
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt }
+  ], {
+    temperature: 0.55,
+    max_tokens: 2800,
+    response_format: { type: "json_object" }
+  });
+
+  return normalizeScenarioList(parseScenarioPayload(content), analysisContext);
+};
+
+function buildStrategyBasis({ floweringOverview, nectarOverview, mismatchOverview, activityForecast, weather }) {
+  const today = chinaTodayString();
+  const basisDate = chooseStrategyDate(today, floweringOverview, nectarOverview, mismatchOverview, activityForecast);
+  const floweringPoint = findDailyPoint(floweringOverview, basisDate);
+  const nectarPoint = findDailyPoint(nectarOverview, basisDate);
+  const mismatchPoint = findDailyPoint(mismatchOverview, basisDate);
+  const mismatchInfo = findInfoPoint(mismatchOverview, basisDate);
+  const activity = summarizeActivityForDate(activityForecast, basisDate);
+  const topFlower = Array.isArray(floweringOverview?.current_top) ? floweringOverview.current_top[0] : null;
+  const topNectar = Array.isArray(nectarOverview?.current_top) ? nectarOverview.current_top[0] : null;
+  const matchPercent = estimateStrategyMatchPercent(
+    floweringPoint?.value,
+    nectarPoint?.value,
+    activity.value,
+    mismatchPoint?.value
+  );
+  const mismatchLevel = deriveMismatchLevel(mismatchPoint?.value ?? null, mismatchInfo?.mismatch_level);
+  const mismatchType = deriveMismatchType(mismatchInfo?.mismatch_type);
+
+  return {
+    date: basisDate,
+    floweringValue: floweringPoint?.value ?? null,
+    nectarValue: nectarPoint?.value ?? null,
+    activityValue: activity.value,
+    activityPeak: activity.peak,
+    activityWindow: activity.window,
+    mismatchGap: mismatchPoint?.value ?? null,
+    mismatchLevel,
+    mismatchType,
+    topFlower: topFlower?.plant_name || "暂无",
+    topNectar: topNectar?.plant_name || topFlower?.plant_name || "暂无",
+    matchPercent,
+    riskLevel: strategyRiskLevel(mismatchPoint?.value, weather)
+  };
+}
+
+function chinaTodayString() {
+  return new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function chooseStrategyDate(today, ...payloads) {
+  const dates = [];
+  payloads.forEach((payload) => {
+    ["forecast", "actual"].forEach((key) => {
+      (payload?.[key] || []).forEach((item) => {
+        const day = dayPart(item?.time);
+        if (day) dates.push(day);
+      });
+    });
+  });
+  const unique = [...new Set(dates)].sort();
+  if (unique.includes(today)) return today;
+  return unique.find((day) => day > today) || unique[unique.length - 1] || today;
+}
+
+function findDailyPoint(payload, date) {
+  const exactForecast = (payload?.forecast || []).find((item) => dayPart(item?.time) === date && typeof item.value === "number");
+  if (exactForecast) return exactForecast;
+  const exactActual = (payload?.actual || []).find((item) => dayPart(item?.time) === date && typeof item.value === "number");
+  if (exactActual) return exactActual;
+  return getLatestPoint(payload?.forecast) || getLatestPoint(payload?.actual) || null;
+}
+
+function findInfoPoint(payload, date) {
+  const exact = (payload?.forecast_info || []).find((item) => dayPart(item?.time) === date)
+    || (payload?.history_info || []).find((item) => dayPart(item?.time) === date);
+  return exact || getLatestInfoPoint(payload?.forecast_info) || getLatestInfoPoint(payload?.history_info) || null;
+}
+
+function summarizeActivityForDate(payload, date) {
+  const rows = [...(payload?.forecast || []), ...(payload?.actual || [])]
+    .filter((item) => dayPart(item?.time) === date && typeof item.value === "number");
+  const coreRows = rows.filter((item) => {
+    const hour = hourPart(item.time);
+    return hour >= 10 && hour <= 15;
+  });
+  const chosen = coreRows.length >= 3 ? coreRows : rows;
+  if (!chosen.length) {
+    const latest = getLatestPoint(payload?.forecast) || getLatestPoint(payload?.actual);
+    return { value: latest?.value ?? null, peak: latest?.value ?? null, window: latest?.time || "暂无" };
+  }
+  const values = chosen.map((item) => item.value);
+  return {
+    value: round3(values.reduce((sum, value) => sum + value, 0) / values.length),
+    peak: round3(Math.max(...values)),
+    window: coreRows.length >= 3 ? `${date} 10:00-15:00` : `${date} 可用时段`
+  };
+}
+
+function dayPart(value) {
+  return typeof value === "string" && value.length >= 10 ? value.slice(0, 10) : null;
+}
+
+function hourPart(value) {
+  if (typeof value !== "string" || value.length < 13) return NaN;
+  return Number(value.slice(11, 13));
+}
+
+function round3(value) {
+  return typeof value === "number" && Number.isFinite(value) ? Number(value.toFixed(3)) : null;
+}
+
+function estimateStrategyMatchPercent(flowering, nectar, activity, mismatch) {
+  const f = numericOrZero(flowering);
+  const n = numericOrZero(nectar);
+  const a = numericOrZero(activity);
+  const m = numericOrZero(mismatch);
+  const score = f * 0.28 + n * 0.24 + a * 0.28 + (1 - m) * 0.2;
+  return `${Math.round(Math.max(0, Math.min(1, score)) * 100)}%`;
+}
+
+function strategyRiskLevel(mismatch, weather) {
+  const value = numericOrZero(mismatch);
+  const weatherStress = Number(weather?.pop) >= 50 || Number(weather?.windSpeed) >= 20 || Number(weather?.temp) >= 30;
+  if (value >= 0.5) return "高";
+  if (value >= 0.3 || weatherStress) return "中";
+  return "低";
+}
+
+function numericOrZero(value) {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
+}
+
 // 兜底场景数据：当 DeepSeek 不可用时，页面仍然能正常展示。
 const fallbackScenarios = [
   {

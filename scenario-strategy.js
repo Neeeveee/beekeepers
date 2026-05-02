@@ -1,149 +1,137 @@
 "use strict";
 
 function createContextualScenarios(context, latestWeather) {
-  const floweringNow = toRatio(context?.flowering?.latestActualValue);
-  const floweringNext = toRatio(context?.flowering?.latestForecastValue);
-  const nectarNow = toRatio(context?.nectar?.latestActualValue);
-  const nectarNext = toRatio(context?.nectar?.latestForecastValue);
-  const activityNow = toRatio(context?.activity?.latestActualValue);
-  const activityNext = toRatio(context?.activity?.latestForecastValue);
-  const mismatchGap = toRatio(context?.mismatch?.latestForecastGap);
-  const mismatchLabel = safeString(context?.mismatch?.mismatchLevel, "待评估");
-  const mismatchType = safeString(context?.mismatch?.mismatchType, "unknown");
-  const topFlower = safeString(context?.flowering?.topPlantName, "当前主花源");
-  const topNectar = safeString(context?.nectar?.topPlantName, topFlower);
-  const weather = summarizeWeatherForStrategy(latestWeather);
-  const snapshotDate = context?.snapshotDate || context?.generatedAt || "当前数据快照";
-  const forecastDate = context?.forecastDate || context?.flowering?.latestForecastDate || "未来窗口";
-
-  const stableWindow = floweringNow >= 0.65 && nectarNow >= 0.5 && mismatchGap < 0.35;
-  const risingResource = floweringNext > floweringNow + 0.06 || nectarNext > nectarNow + 0.08;
-  const currentStress = activityNow < 0.45 || mismatchGap >= 0.4;
-  const weatherStress = weather.isHeatStress || weather.isRainStress || weather.isWindStress;
-  const isResourceAhead = mismatchType === "resource_ahead" || mismatchType === "花源先行";
-  const isBehaviorAhead = mismatchType === "behavior_ahead" || mismatchType === "蜂群先行";
-  const mismatchDirection = isResourceAhead
-    ? "花源变化快于蜂群节奏"
-    : isBehaviorAhead
-      ? "蜂群活动快于花源释放"
-      : "花源与蜂群节奏仍需复核";
+  const basis = normalizeBasis(context, latestWeather);
+  const commonMetrics = (action, note) => [
+    metric("匹配度", basis.matchPercent, `基于 ${basis.date} 同一组花期、蜜源、活跃度和错配数据`),
+    metric("风险等级", basis.riskLevel, note || `${basis.mismatchLevel}，错配值 ${toPercent(basis.mismatchGap)}`),
+    metric("建议动作", action, `主花源：${basis.topFlower}`)
+  ];
 
   return [
     makeScenario({
       id: "scenario-a",
       shortLabel: "A",
-      title: stableWindow ? "当前授粉窗口维持方案" : "当前授粉窗口纠偏方案",
-      kicker: "CURRENT WINDOW",
-      summary: stableWindow
-        ? `${snapshotDate} 快照显示花期 ${toPercent(floweringNow)}、花蜜量 ${toPercent(nectarNow)}，当前仍可维持低干预运行。`
-        : `${snapshotDate} 快照显示活跃度 ${toPercent(activityNow)}、错配风险 ${toPercent(mismatchGap)}，需要先做日内节奏纠偏。`,
-      metrics: [
-        metric("匹配度", estimateMatchPercent(floweringNow, nectarNow, activityNow, mismatchGap), `主花源：${topFlower}`),
-        metric("风险等级", riskLevel(mismatchGap, currentStress), mismatchLabel),
-        metric("建议动作", stableWindow ? "监测" : "纠偏", `蜜源：${topNectar}`)
-      ],
+      title: "低成本稳态维持方案",
+      kicker: "LOW COST",
+      summary: `${basis.date} 的事实底座显示，${basis.topFlower} 为主花源，花期 ${toPercent(basis.floweringValue)}、花蜜量 ${toPercent(basis.nectarValue)}，当前更适合用低成本动作守住既有授粉窗口。`,
+      metrics: commonMetrics("维持", "风险按统一事实底座评估，本方案用低干预控制额外成本"),
       detailPoints: [
-        stableWindow ? "当前不是大改蜂箱布局的时机，重点是守住已形成的有效授粉窗口。" : "当前不宜沿用静态策略，需要先把巡检和干预集中到更有效的时段。",
-        `蜂群活跃度为 ${toPercent(activityNow)}，日内调度比大规模重配置更划算。`,
-        risingResource ? `到 ${forecastDate} 资源侧有抬升信号，应为后续放大窗口做准备。` : `到 ${forecastDate} 资源增量有限，应优先保住现有投入产出。`
+        `核心活跃窗口为 ${basis.activityWindow}，活跃度 ${toPercent(basis.activityValue)}，优先保护已经有效的时段。`,
+        `错配等级为 ${basis.mismatchLevel}，暂不建议大规模移动蜂箱或追加高成本措施。`,
+        "适合预算有限、希望先保持当前效率并持续观察的用户。"
       ],
       detailSections: sectionList(
-        stableWindow ? "当前花期、蜜源与蜂群活动仍处于可执行窗口。" : "当前蜂群活动与资源释放存在偏差，继续静态维持会放大损失。",
-        stableWindow ? "稳态维持" : "轻量纠偏",
-        stableWindow ? "保持蜂箱位置与巡检频率稳定，只围绕当天窗口做微调。" : "把巡检与辅助动作集中到活跃度更高的时段，先恢复当天效率。",
-        stableWindow ? "早晚各巡检一次；记录花期、花蜜量和蜂群活动变化；当天不做大规模迁移。" : "压缩低效时段开箱；把重点观察移到高活跃时段；当天结束前复核错配变化。",
-        stableWindow ? "低" : "低到中",
-        stableWindow ? "稳住当前产出窗口" : "快速止损并恢复可执行节奏",
-        stableWindow ? "管理效率 / 稳定性" : "短期效率 / 风险控制"
+        `当前 ${basis.topFlower} 与 ${basis.topNectar} 仍可支撑授粉作业，重点是避免过度干预造成成本上升。`,
+        "低成本稳态维持",
+        "保持蜂箱位置和巡检频率稳定，只围绕核心活跃窗口做小幅调整。",
+        "早晚各巡检一次；记录花期、花蜜量和蜂群状态；当天不做大范围迁箱。",
+        "低",
+        "稳定当前产出窗口",
+        "成本控制 / 稳定收益"
       ),
-      detailHighlights: highlightList(stableWindow ? "低" : "低到中", stableWindow ? "稳定窗口" : "轻量纠偏", stableWindow ? "稳态优先" : "先止损再优化")
+      detailHighlights: highlightList("低", "稳住窗口", "成本优先")
     }),
     makeScenario({
       id: "scenario-b",
       shortLabel: "B",
-      title: weatherStress ? "实时天气压力应对方案" : "活跃时段保护方案",
-      kicker: "WEATHER PRESSURE",
-      summary: weatherStress
-        ? `最新天气显示${weather.summary}，应把开箱、巡检和补水等动作前移到更安全的时段。`
-        : `最新天气未见强压力，但当前活跃度为 ${toPercent(activityNow)}，仍需保护高价值作业时段。`,
-      metrics: [
-        metric("匹配度", estimateMatchPercent(floweringNow, nectarNow, activityNow, mismatchGap), `活跃度：${toPercent(activityNow)}`),
-        metric("风险等级", weatherStress ? "中" : riskLevel(mismatchGap, currentStress), weatherStress ? weather.summary : weather.riskNote),
-        metric("建议动作", weatherStress ? "调整" : "保护", `温度：${weather.temperatureText}`)
-      ],
+      title: "天气与时段保护方案",
+      kicker: "WEATHER WINDOW",
+      summary: `同样基于 ${basis.date} 数据，天气为 ${basis.weatherText}，温度 ${basis.tempText}、降水概率 ${basis.popText}，本方案把重点放在保护高活跃时段和降低天气扰动。`,
+      metrics: commonMetrics("保护", "风险等级不另行改写，本方案主要降低天气和作业时段带来的执行风险"),
       detailPoints: [
-        weatherStress ? "天气变量正在直接压缩蜂群活动，不适合沿用平均化巡检节奏。" : "天气看似平稳，但活跃窗口偏窄，时间调度需要更精细。",
-        weather.isHeatStress ? "热压下优先保住上午窗口，并处理补水与遮阴。" : weather.isRainStress ? "降雨风险下优先控制开箱和场地潮湿风险。" : "即使无极端天气，也要减少低效时段干预。",
-        "这张卡关注当天执行节奏，不替代中长期错配修复。"
+        `把开箱、补水、遮阴或防潮操作集中到 ${basis.activityWindow} 前后。`,
+        basis.weatherStress ? "当前天气存在扰动信号，应减少低效时段开箱和长时间暴露。" : "天气压力不高时，也要把关键动作放到蜂群更活跃的小时内。",
+        "适合担心降雨、温度或风速影响当天执行质量的用户。"
       ],
       detailSections: sectionList(
-        weatherStress ? `天气侧出现${weather.summary}，蜂群活动容易被压缩。` : "当前活跃时段偏短，日内作业节奏需要重排。",
-        "天气 / 时段应对",
-        weatherStress ? "把关键观察、补水、遮阴或防潮动作集中到更安全时段。" : "把重点操作集中到活跃度更高的小时内，降低额外扰动。",
-        weatherStress ? weather.actionText : "清晨完成主要巡检；午后只保留必要观察；傍晚复核蜂群状态并记录第二天调整点。",
-        weatherStress ? "中" : "低到中",
-        weatherStress ? "减轻天气压力造成的损失" : "保护有限的高活跃窗口",
-        weatherStress ? "健康 / 风险控制" : "执行效率 / 稳定性"
+        `天气条件会影响蜂群出勤稳定性，当前天气记录为：${basis.weatherText}。`,
+        "天气 / 时段保护",
+        "围绕高活跃时段安排必要操作，减少天气变化对授粉效率的压缩。",
+        basis.weatherStress
+          ? "优先补水、防潮或遮阴；缩短开箱时间；把重点观察留到较安全时段。"
+          : "上午完成主要巡检；午后只保留必要观察；傍晚复核第二天调整点。",
+        "低到中",
+        "减少天气扰动造成的效率损失",
+        "执行稳定 / 风险控制"
       ),
-      detailHighlights: highlightList(weatherStress ? "中" : "低到中", weatherStress ? "抗压保护" : "时段优化", weatherStress ? "蜂群健康" : "作业效率")
+      detailHighlights: highlightList("低到中", "抗扰保护", "稳定优先")
     }),
     makeScenario({
       id: "scenario-c",
       shortLabel: "C",
-      title: "花蜂错配修复方案",
-      kicker: "MISMATCH RECOVERY",
-      summary: `${forecastDate} 预测错配为 ${toPercent(mismatchGap)}（${mismatchLabel}），当前判断为“${mismatchDirection}”。`,
-      metrics: [
-        metric("匹配度", estimateMatchPercent(floweringNext, nectarNext, activityNext, mismatchGap), `节奏：${mismatchTypeLabel(mismatchType)}`),
-        metric("风险等级", riskLevel(mismatchGap, currentStress), mismatchLabel),
-        metric("建议动作", "恢复", `预测错配：${toPercent(mismatchGap)}`)
-      ],
+      title: "短期增效执行方案",
+      kicker: "SHORT TERM GAIN",
+      summary: `${basis.date} 的同一事实底座下，核心活跃度为 ${toPercent(basis.activityValue)}，峰值 ${toPercent(basis.activityPeak)}；本方案用适中投入提升近期授粉和采集效率。`,
+      metrics: commonMetrics("增效", "风险等级保持一致，本方案通过更密集执行换取短期效率"),
       detailPoints: [
-        `这不是单纯天气问题，而是花源与蜂群节奏本身存在 ${mismatchLabel}。`,
-        isResourceAhead ? "花源走在前面，重点是让蜂群尽快跟上资源窗口。" : isBehaviorAhead ? "蜂群走在前面，重点是避免资源不足时继续消耗。" : "当前仍需通过两三天复核确认错配方向。",
-        currentStress ? "当前已经有执行压力，这张卡适合作为主动调整的核心方案。" : "即使今天还撑得住，也应为未来错配上升提前准备。"
+        `围绕 ${basis.topFlower} 的主花源区，把巡检和辅助动作集中到高活跃窗口。`,
+        `花期 ${toPercent(basis.floweringValue)}、花蜜量 ${toPercent(basis.nectarValue)}，具备做短期效率优化的基础。`,
+        "适合愿意增加少量人力和管理频率、希望近期见效的用户。"
       ],
       detailSections: sectionList(
-        `模型预测 ${forecastDate} 存在 ${mismatchLabel}，表现为${mismatchDirection}。`,
-        "节奏修复",
-        isResourceAhead ? "让蜂群活动尽快贴近花源高值时段，减少错过蜜源窗口。" : isBehaviorAhead ? "控制蜂群无效外出和资源空转，把活动拉回花源可支撑区间。" : "先通过短周期复核确认错配方向，再决定推动蜂群还是补足资源侧。",
-        isResourceAhead ? "复核主花源变化；把巡检和辅助动作前移到花源高值期；必要时微调蜂箱朝向或近场布局。" : isBehaviorAhead ? "减少低资源时段开箱；评估补充蜜源或缓冲饲喂；控制无效出勤造成的消耗。" : "连续两天对照花期、花蜜量与活跃度；确认偏差来自资源侧还是行为侧；再决定下一步重配置。",
-        mismatchGap >= 0.5 ? "中到高" : "中",
-        "提升花蜂匹配度",
-        "中期效率 / 中长期收益"
+        "当前资源和蜂群活动已经有可利用窗口，但常规巡检可能无法充分放大短期效率。",
+        "短期增效",
+        "增加关键时段观察密度，微调蜂箱朝向、近场动线和辅助补给。",
+        "高活跃时段前完成路线检查；必要时微调近场布置；当天结束前复盘授粉热点。",
+        "中",
+        "提高近期授粉与采集效率",
+        "短期效率 / 快速反馈"
       ),
-      detailHighlights: highlightList(mismatchGap >= 0.5 ? "中到高" : "中", "恢复匹配", "效率修复")
+      detailHighlights: highlightList("中", "近期增效", "效率优先")
     }),
     makeScenario({
       id: "scenario-d",
       shortLabel: "D",
-      title: risingResource ? "未来资源窗口前置布局方案" : "资源保守配置方案",
-      kicker: "NEXT WINDOW",
-      summary: risingResource
-        ? `${forecastDate} 花期预计由 ${toPercent(floweringNow)} 升至 ${toPercent(floweringNext)}，蜜源也有抬升，应提前承接窗口。`
-        : `${forecastDate} 资源增幅不明显，应控制投入，把蜂群配置到最稳定的窗口。`,
-      metrics: [
-        metric("匹配度", estimateMatchPercent(floweringNext, nectarNext, activityNext, mismatchGap), `${context?.flowering?.latestForecastDate || forecastDate}`),
-        metric("风险等级", riskLevel(mismatchGap, currentStress), risingResource ? "机会窗口" : "保守配置"),
-        metric("建议动作", risingResource ? "布局" : "保守", risingResource ? "准备放大窗口" : "避免过度投入")
-      ],
+      title: "长期收益与生态韧性方案",
+      kicker: "LONG TERM",
+      summary: `仍以 ${basis.date} 的当前数据为基础，错配为 ${toPercent(basis.mismatchGap)}（${basis.mismatchLevel}）；本方案更重视后续花源承接、蜂群健康和持续收益。`,
+      metrics: commonMetrics("布局", "风险等级来自同一事实底座，本方案把风险处理放到中长期韧性建设"),
       detailPoints: [
-        risingResource ? "未来窗口变好时，现在就要为承接更高资源做准备。" : "未来窗口没有明显放大时，盲目加动作会摊薄管理收益。",
-        risingResource ? "这张卡关注未来 2 到 5 天，而不是只救当天。" : "这张卡强调资源节制和优先级，而不是继续叠加动作。",
-        `当前主花源是 ${topFlower}，后续策略要围绕它的持续性安排。`
+        `以 ${basis.topFlower} 和 ${basis.topNectar} 为核心，建立后续花源和蜂群状态的连续记录。`,
+        "不追求当天最大化开箱，而是减少资源断档、蜂群消耗和后续错配放大的概率。",
+        "适合看重持续收益、生态稳定和后续窗口承接的用户。"
       ],
       detailSections: sectionList(
-        risingResource ? "未来几天资源侧正在抬升，需要提前准备承接。" : "未来几天资源侧提升有限，需要先守住投入产出比。",
-        risingResource ? "前置布局" : "保守配置",
-        risingResource ? "提前整理蜂箱周边环境、巡检路线和观察重点，确保资源抬升时能快速放大授粉效率。" : "把精力集中到当前最有效区域与时段，暂停低回报尝试，避免资源分散。",
-        risingResource ? "提前两天建立重点观察清单；复核主花源持续性；把后续高价值时段排进固定巡检表。" : "缩减低回报巡检；只保留关键点位观察；每晚复核第二天是否值得升级干预。",
-        risingResource ? "中" : "低",
-        risingResource ? "放大未来窗口收益" : "守住当前投入产出",
-        risingResource ? "未来收益 / 机会把握" : "资源效率 / 风险控制"
+        "当前阶段不仅要看当天效率，还要为后续花期和蜂群节律变化留下调整空间。",
+        "长期收益布局",
+        "建立连续监测和分区管理，逐步提高花源承接能力与蜂群抗扰能力。",
+        "保留每日同口径记录；标记后续花源区；减少低收益扰动；每 2-3 天复核一次策略等级。",
+        "中到高",
+        "提升持续收益和生态韧性",
+        "长期收益 / 韧性优先"
       ),
-      detailHighlights: highlightList(risingResource ? "中" : "低", risingResource ? "窗口前置" : "保守守住", risingResource ? "机会优先" : "效率优先")
+      detailHighlights: highlightList("中到高", "持续优化", "长期收益")
     })
   ];
+}
+
+function normalizeBasis(context, latestWeather) {
+  const raw = context?.strategyBasis || {};
+  const weather = context?.weather || summarizeLatestWeather(latestWeather);
+  const mismatchGap = toRatio(raw.mismatchGap ?? context?.mismatch?.latestForecastGap);
+  const activityValue = toRatio(raw.activityValue ?? context?.activity?.latestForecastValue ?? context?.activity?.latestActualValue);
+  const floweringValue = toRatio(raw.floweringValue ?? context?.flowering?.latestForecastValue ?? context?.flowering?.latestActualValue);
+  const nectarValue = toRatio(raw.nectarValue ?? context?.nectar?.latestForecastValue ?? context?.nectar?.latestActualValue);
+
+  return {
+    date: safeString(raw.date || context?.snapshotDate || context?.forecastDate, "当前阶段"),
+    topFlower: safeString(raw.topFlower || context?.flowering?.topPlantName, "当前主花源"),
+    topNectar: safeString(raw.topNectar || context?.nectar?.topPlantName, "当前蜜源"),
+    floweringValue,
+    nectarValue,
+    activityValue,
+    activityPeak: toRatio(raw.activityPeak ?? activityValue),
+    activityWindow: safeString(raw.activityWindow, "核心授粉时段"),
+    mismatchGap,
+    mismatchLevel: safeString(raw.mismatchLevel || context?.mismatch?.mismatchLevel, deriveMismatchLevel(mismatchGap)),
+    matchPercent: safeString(raw.matchPercent, estimateMatchPercent(floweringValue, nectarValue, activityValue, mismatchGap)),
+    riskLevel: safeString(raw.riskLevel, riskLevel(mismatchGap, weather)),
+    weatherText: safeString(weather?.text, "暂无天气数据"),
+    tempText: Number.isFinite(Number(weather?.temp)) ? `${Number(weather.temp)}°C` : "--",
+    popText: Number.isFinite(Number(weather?.pop)) ? `${Number(weather.pop)}%` : "--",
+    weatherStress: Number(weather?.pop) >= 50 || Number(weather?.windSpeed) >= 20 || Number(weather?.temp) >= 30
+  };
 }
 
 function makeScenario({ id, shortLabel, title, kicker, summary, metrics, detailPoints, detailSections, detailHighlights }) {
@@ -168,8 +156,8 @@ function metric(label, value, note) {
 function highlightList(cost, effect, orientation) {
   return [
     { label: "成本", value: cost, note: "按当前场地条件估算" },
-    { label: "效果", value: effect, note: "围绕当下风险设计" },
-    { label: "收益导向", value: orientation, note: "服务当前窗口决策" }
+    { label: "效果", value: effect, note: "围绕当下事实底座设计" },
+    { label: "收益导向", value: orientation, note: "用于选择不同管理取向" }
   ];
 }
 
@@ -185,48 +173,14 @@ function sectionList(problem, type, content, operation, cost, effect, orientatio
   ];
 }
 
-function summarizeWeatherForStrategy(payload) {
+function summarizeLatestWeather(payload) {
   const hourly = Array.isArray(payload?.hourly) ? payload.hourly : [];
-  const latest = hourly[0] || null;
-  const temp = Number(latest?.temp);
-  const wind = Number(latest?.windSpeed);
-  const text = safeString(latest?.text, "天气数据不足");
-  const pop = Number(latest?.pop);
-  const isHeatStress = Number.isFinite(temp) && temp >= 30;
-  const isRainStress = (Number.isFinite(pop) && pop >= 50) || /雨|阵雨|雷/.test(text);
-  const isWindStress = Number.isFinite(wind) && wind >= 20;
-
-  let summary = "无明显天气压力";
-  let riskLabel = "低";
-  let riskNote = "可按常规节奏处理";
-  let actionText = "按常规节奏巡检，并继续跟踪天气变化。";
-
-  if (isHeatStress) {
-    summary = `高温 ${Number.isFinite(temp) ? `${temp}°C` : ""}`.trim();
-    riskLabel = "中";
-    riskNote = "热压会压缩活跃窗口";
-    actionText = "将主要巡检前移到上午；补水和遮阴优先处理；午后减少开箱。";
-  } else if (isRainStress) {
-    summary = `降水风险 ${Number.isFinite(pop) ? `${pop}%` : text}`;
-    riskLabel = "中";
-    riskNote = "阴雨会降低外出与采集效率";
-    actionText = "减少无必要开箱；优先处理防潮和场地通行；把关键观察留到较干燥时段。";
-  } else if (isWindStress) {
-    summary = `风速 ${Number.isFinite(wind) ? `${wind}km/h` : ""}`.trim();
-    riskLabel = "中";
-    riskNote = "强风会干扰稳定飞行";
-    actionText = "减少风口方向干预；复核蜂箱周边遮挡；把重点作业转到更稳时段。";
-  }
-
+  const latest = hourly[0] || {};
   return {
-    temperatureText: Number.isFinite(temp) ? `${temp}°C` : "--",
-    riskLabel,
-    riskNote,
-    summary,
-    actionText,
-    isHeatStress,
-    isRainStress,
-    isWindStress
+    text: latest.text,
+    temp: latest.temp,
+    pop: latest.pop,
+    windSpeed: latest.windSpeed
   };
 }
 
@@ -243,25 +197,24 @@ function toPercent(value) {
 }
 
 function estimateMatchPercent(flowering, nectar, activity, mismatch) {
-  const resourceScore = (toRatio(flowering) * 0.35) + (toRatio(nectar) * 0.25);
-  const activityScore = toRatio(activity) * 0.25;
-  const mismatchScore = (1 - toRatio(mismatch)) * 0.15;
-  return toPercent(resourceScore + activityScore + mismatchScore);
+  const score = toRatio(flowering) * 0.28 + toRatio(nectar) * 0.24 + toRatio(activity) * 0.28 + (1 - toRatio(mismatch)) * 0.2;
+  return toPercent(score);
 }
 
-function riskLevel(mismatch, hasStress) {
+function riskLevel(mismatch, weather) {
   const value = toRatio(mismatch);
+  const weatherStress = Number(weather?.pop) >= 50 || Number(weather?.windSpeed) >= 20 || Number(weather?.temp) >= 30;
   if (value >= 0.5) return "高";
-  if (value >= 0.3 || hasStress) return "中";
+  if (value >= 0.3 || weatherStress) return "中";
   return "低";
 }
 
-function mismatchTypeLabel(type) {
-  if (type === "resource_ahead" || type === "花源先行") return "花源先行";
-  if (type === "behavior_ahead" || type === "蜂群先行") return "蜂群先行";
-  if (type === "matched" || type === "基本匹配") return "基本匹配";
-  if (type === "no_data" || type === "无数据") return "无数据";
-  return "待确认";
+function deriveMismatchLevel(value) {
+  const ratio = toRatio(value);
+  if (ratio >= 0.5) return "高错配";
+  if (ratio >= 0.3) return "中度错配";
+  if (ratio >= 0.12) return "轻微错配";
+  return "基本匹配";
 }
 
 module.exports = {
