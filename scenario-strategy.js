@@ -12,7 +12,7 @@ function createContextualScenarios(context, latestWeather) {
     makeScenario({
       id: "scenario-a",
       shortLabel: "A",
-      title: "低成本稳态维持方案",
+      title: "稳态守护策略",
       kicker: "LOW COST",
       summary: `${basis.date} 的事实底座显示，${basis.topFlower} 为主花源，花期 ${toPercent(basis.floweringValue)}、花蜜量 ${toPercent(basis.nectarValue)}，当前更适合用低成本动作守住既有授粉窗口。`,
       metrics: commonMetrics("维持", "风险按统一事实底座评估，本方案用低干预控制额外成本"),
@@ -35,7 +35,7 @@ function createContextualScenarios(context, latestWeather) {
     makeScenario({
       id: "scenario-b",
       shortLabel: "B",
-      title: "天气与时段保护方案",
+      title: "时段防护策略",
       kicker: "WEATHER WINDOW",
       summary: `同样基于 ${basis.date} 数据，天气为 ${basis.weatherText}，温度 ${basis.tempText}、降水概率 ${basis.popText}，本方案把重点放在保护高活跃时段和降低天气扰动。`,
       metrics: commonMetrics("保护", "风险等级不另行改写，本方案主要降低天气和作业时段带来的执行风险"),
@@ -60,7 +60,7 @@ function createContextualScenarios(context, latestWeather) {
     makeScenario({
       id: "scenario-c",
       shortLabel: "C",
-      title: "短期增效执行方案",
+      title: "短期增效策略",
       kicker: "SHORT TERM GAIN",
       summary: `${basis.date} 的同一事实底座下，核心活跃度为 ${toPercent(basis.activityValue)}，峰值 ${toPercent(basis.activityPeak)}；本方案用适中投入提升近期授粉和采集效率。`,
       metrics: commonMetrics("增效", "风险等级保持一致，本方案通过更密集执行换取短期效率"),
@@ -83,7 +83,7 @@ function createContextualScenarios(context, latestWeather) {
     makeScenario({
       id: "scenario-d",
       shortLabel: "D",
-      title: "长期收益与生态韧性方案",
+      title: "韧性提升策略",
       kicker: "LONG TERM",
       summary: `仍以 ${basis.date} 的当前数据为基础，错配为 ${toPercent(basis.mismatchGap)}（${basis.mismatchLevel}）；本方案更重视后续花源承接、蜂群健康和持续收益。`,
       metrics: commonMetrics("布局", "风险等级来自同一事实底座，本方案把风险处理放到中长期韧性建设"),

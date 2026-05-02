@@ -16,6 +16,7 @@ const CACHE_ROOT = path.join(__dirname, ".cache");
 const SCENARIO_CACHE_FILE = path.join(CACHE_ROOT, "scenarios.json");
 const SCENARIO_CACHE_TTL_MS = 30 * 60 * 1000;
 const DEEPSEEK_TIMEOUT_MS = 45000;
+const SCENARIO_PROMPT_VERSION = "strategy-title-v2";
 let scenarioRefreshPromise = null;
 
 function loadLocalEnv() {
@@ -224,6 +225,7 @@ buildAnalysisContext = function() {
     context.activity.latestForecastTime
   ]);
   context.dataSignature = JSON.stringify({
+    promptVersion: SCENARIO_PROMPT_VERSION,
     snapshotDate: context.snapshotDate,
     forecastDate: context.forecastDate,
     flowering: context.flowering,
@@ -318,6 +320,7 @@ buildAnalysisContext = function() {
   context.snapshotDate = context.strategyBasis.date;
   context.forecastDate = context.strategyBasis.date;
   context.dataSignature = JSON.stringify({
+    promptVersion: SCENARIO_PROMPT_VERSION,
     strategyBasis: context.strategyBasis,
     weather: context.weather
   });
@@ -348,6 +351,8 @@ generateScenariosWithDeepSeek = async function(analysisContext) {
     "请基于同一个当前事实底座，生成 4 个可供用户自由选择的策略方案。",
     "四张卡不是四个不同诊断，而是同一真实当下情况的四种取向：低成本保守、天气/时段保护、短期增效、长期收益/生态韧性。",
     "必须保留现有卡片框架：title, kicker, summary, sectionTitle, detailPoints, detailSections, detailHighlights, metrics。",
+    "title 必须是中文短标题，并且必须以“策略”结尾；不要使用“方案”“布局”“执行”“维持”作为标题结尾。",
+    "四张 title 推荐分别体现：稳态守护策略、时段防护策略、短期增效策略、韧性提升策略。可以结合当前事实微调，但必须保持“XX策略”的命名形式。",
     "只返回 JSON 对象，格式为 {\"scenarios\":[...]}，不要输出 Markdown，不要解释。",
     "scenarios 长度必须为 4，对应 scenario-a、scenario-b、scenario-c、scenario-d，shortLabel 分别为 A、B、C、D。",
     "四张卡的 metrics 必须都是 3 项，label 固定为：匹配度、风险等级、建议动作。",
@@ -362,10 +367,10 @@ generateScenariosWithDeepSeek = async function(analysisContext) {
   const userPrompt = [
     "项目背景：这是一个蜜蜂授粉、花期匹配、蜜源供给和生态错配分析界面。",
     "请输出 4 个侧重不同但依据一致的解决方案：",
-    "A. 低成本稳态维持：少干预、低成本、保持当前效率。",
-    "B. 天气与时段保护：围绕降雨/温度/核心活跃时段安排操作。",
-    "C. 短期增效执行：投入适中、提升近期授粉与采集效率。",
-    "D. 长期收益布局：更重视生态韧性、持续收益和未来窗口承接。",
+    "A. 稳态守护策略：少干预、低成本、保持当前效率。",
+    "B. 时段防护策略：围绕降雨/温度/核心活跃时段安排操作。",
+    "C. 短期增效策略：投入适中、提升近期授粉与采集效率。",
+    "D. 韧性提升策略：更重视生态韧性、持续收益和未来窗口承接。",
     "",
     formatAnalysisContextForPrompt(analysisContext)
   ].join("\n");
