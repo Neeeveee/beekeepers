@@ -15,7 +15,7 @@ const DATA_RAW_ROOT = path.join(__dirname, "data_raw");
 const CACHE_ROOT = path.join(__dirname, ".cache");
 const SCENARIO_CACHE_FILE = path.join(CACHE_ROOT, "scenarios.json");
 const SCENARIO_CACHE_TTL_MS = 30 * 60 * 1000;
-const DEEPSEEK_TIMEOUT_MS = 12000;
+const DEEPSEEK_TIMEOUT_MS = 45000;
 
 function loadLocalEnv() {
   const envPath = path.join(__dirname, ".env");

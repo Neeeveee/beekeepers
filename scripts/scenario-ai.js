@@ -583,7 +583,7 @@ async function fetchScenarios() {
   let timeout;
   try {
     const controller = new AbortController();
-    timeout = setTimeout(() => controller.abort(), 6500);
+    timeout = setTimeout(() => controller.abort(), 55000);
     const res = await fetch("/api/scenarios", { cache: "no-store", signal: controller.signal });
     if (!res.ok) throw new Error("bad response");
     const data = await res.json();
