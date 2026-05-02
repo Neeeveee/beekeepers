@@ -251,8 +251,8 @@ function estimateMatchPercent(flowering, nectar, activity, mismatch) {
 
 function riskLevel(mismatch, hasStress) {
   const value = toRatio(mismatch);
-  if (value >= 0.5 || hasStress) return "高";
-  if (value >= 0.3) return "中";
+  if (value >= 0.5) return "高";
+  if (value >= 0.3 || hasStress) return "中";
   return "低";
 }
 

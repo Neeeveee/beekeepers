@@ -57,24 +57,44 @@ def build_future_daily_weather(conn: sqlite3.Connection) -> list[dict]:
             AVG(humidity_pct) AS avg_humidity_pct,
             AVG(wind_speed_ms) AS wind_speed_ms,
             SUM(COALESCE(precip_mm, 0)) AS precip_mm,
-            AVG(expected_activity) AS behavior_index_raw
+            COUNT(
+                CASE
+                    WHEN CAST(strftime('%H', forecast_time) AS INTEGER) BETWEEN 10 AND 15
+                    THEN 1
+                END
+            ) AS core_sample_count,
+            AVG(
+                CASE
+                    WHEN CAST(strftime('%H', forecast_time) AS INTEGER) BETWEEN 10 AND 15
+                    THEN expected_activity
+                END
+            ) AS core_behavior_mean,
+            COUNT(*) AS daytime_sample_count,
+            AVG(expected_activity) AS daytime_behavior_mean
         FROM future_expected_activity_hourly
+        WHERE CAST(strftime('%H', forecast_time) AS INTEGER) BETWEEN 6 AND 19
         GROUP BY forecast_date
         ORDER BY forecast_date ASC
         """
     )
-    merged = {
-        row["date"]: {
+    merged = {}
+    for row in cursor.fetchall():
+        if row["core_sample_count"] is not None and row["core_sample_count"] >= MIN_CORE_HOUR_SAMPLES and row["core_behavior_mean"] is not None:
+            behavior_index_raw = row["core_behavior_mean"]
+        elif row["daytime_sample_count"] is not None and row["daytime_sample_count"] >= 6 and row["daytime_behavior_mean"] is not None:
+            behavior_index_raw = row["daytime_behavior_mean"]
+        else:
+            behavior_index_raw = None
+
+        merged[row["date"]] = {
             "date": row["date"],
             "avg_temp_c": row["avg_temp_c"],
             "avg_humidity_pct": row["avg_humidity_pct"],
             "wind_speed_ms": row["wind_speed_ms"],
             "precip_mm": row["precip_mm"],
-            "behavior_index_raw": row["behavior_index_raw"],
+            "behavior_index_raw": behavior_index_raw,
             "source": "qweather-24h",
         }
-        for row in cursor.fetchall()
-    }
 
     payload = load_latest_qweather_7d_payload()
     if not payload:
@@ -321,7 +341,7 @@ def calc_future_resource_overview(
 
 
 def calc_daily_behavior_value(avg_temp_c, avg_humidity_pct, wind_speed_ms, precip_mm) -> float:
-    daylight_hours = list(range(6, 20))
+    daylight_hours = list(range(CORE_BEE_START_HOUR, CORE_BEE_END_HOUR + 1))
     hourly_values = []
 
     tf = calc_behavior_temp_factor(avg_temp_c)
