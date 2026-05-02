@@ -1932,6 +1932,33 @@ body.is-scenario-overlay-open .scenario-card::before {
   border-radius: 0;
 }
 
+body.is-scenario-overlay-open .scenario-card.is-loading {
+  cursor: wait;
+}
+
+body.is-scenario-overlay-open .scenario-card.is-loading::before {
+  background:
+    linear-gradient(90deg, rgba(244, 244, 244, 0.9), rgba(255, 255, 255, 0.98), rgba(244, 244, 244, 0.9));
+  background-size: 220% 100%;
+  animation: scenarioLoadingSweep 1.4s ease-in-out infinite;
+}
+
+body.is-scenario-overlay-open .scenario-card.is-loading .card-title,
+body.is-scenario-overlay-open .scenario-card.is-loading .card-text,
+body.is-scenario-overlay-open .scenario-card.is-loading .card-text.short,
+body.is-scenario-overlay-open .scenario-card.is-loading .card-number-placeholder {
+  color: #a5abb2;
+}
+
+@keyframes scenarioLoadingSweep {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
 body.is-scenario-overlay-open .card-topline {
   position: absolute;
   top: 8px;

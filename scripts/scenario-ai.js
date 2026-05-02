@@ -454,6 +454,23 @@ function cardHtml(scenario, index) {
   `;
 }
 
+function loadingCardHtml(index) {
+  const serial = String(index + 1).padStart(3, "0");
+  return `
+    <button class="scenario-card is-loading" type="button" disabled aria-busy="true">
+      <div class="card-topline"><span class="card-chip">${serial}</span><span class="card-kpi"></span></div>
+      <strong class="card-title">正在生成策略方案</strong>
+      <span class="card-text">正在读取当下花期、蜜源、蜂群活跃度、错配和天气数据。</span>
+      <span class="card-text short">CURRENT DATA</span>
+      <div class="card-number-row">
+        <span class="card-number-placeholder" data-label="匹配度">--</span>
+        <span class="card-number-placeholder" data-label="风险等级">--</span>
+      </div>
+      <span class="card-footer">请稍候</span>
+    </button>
+  `;
+}
+
 function renderCards() {
   if (!stage) return;
   stage.innerHTML = state.scenarios.slice(0, 4).map((s, i) => cardHtml(s, i)).join("");
@@ -464,6 +481,11 @@ function renderCards() {
       openDetail(idx);
     });
   });
+}
+
+function renderLoadingCards() {
+  if (!stage) return;
+  stage.innerHTML = [0, 1, 2, 3].map(loadingCardHtml).join("");
 }
 
 function renderDetail(index) {
@@ -650,17 +672,24 @@ async function init() {
   updateClock();
   setInterval(updateClock, 60000);
   bindEvents();
-  await initializeInfoPanel();
-  setInterval(initializeInfoPanel, 300000);
+  renderLoadingCards();
 
-  renderCards();
-  renderDetail(0);
+  const infoReady = initializeInfoPanel();
+  setInterval(initializeInfoPanel, 300000);
 
   const remote = await fetchScenarios();
   if (remote) {
     applyScenarioPayload(remote);
     writeScenarioCache(remote);
+  } else {
+    applyScenarioPayload(readScenarioCache() || {
+      source: "default",
+      cachedAt: new Date().toISOString(),
+      scenarios: DEFAULT_SCENARIOS
+    });
   }
+
+  await infoReady;
 
   const params = new URLSearchParams(window.location.search);
   const returnScenarioId = params.get("scenario");
