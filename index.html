@@ -1,59 +1,292 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bee Project Dashboard</title>
-  <link rel="stylesheet" href="./styles/site-shell.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B-CLUE | 蜂群预测支持系统</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="is-loading">
   <div class="site-shell">
-    <main class="dashboard-layout" aria-label="Bee dashboard layout">
-      <section class="panel panel-map" aria-labelledby="map-panel-title">
-        <header class="panel-header">
-          <h2 id="map-panel-title" class="panel-title">地图区域</h2>
-        </header>
-        <div
-          id="map-module-container"
-          class="panel-body module-slot module-slot-placeholder"
-          data-module-slot="map"
-          aria-label="????????"
-        >
-          <div class="map-frame-wrap">
-            <iframe
-              src="./map%20embed/index.html"
-              class="map-frame"
-              frameborder="0"
-              allowfullscreen
-              title="Bee map module"
-            ></iframe>
+    <header class="site-header" data-header>
+      <div class="section-inner nav-inner">
+        <a class="brand" href="#hero" aria-label="返回首页">
+          <span class="brand-title">B-CUE</span>
+          <span class="brand-subtitle">蜂群预测支持系统</span>
+        </a>
+
+        <nav class="nav-links" aria-label="主导航">
+          <a href="#service">预测服务</a>
+          <a href="#system">系统介绍</a>
+          <a href="#value">功能优势</a>
+          <a href="#guide">使用场景</a>
+          <a class="button button-dark nav-button" href="dashboard1.html">进入系统</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="hero" aria-labelledby="hero-title">
+        <div class="section-inner hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow">Phenology / Bee Colony / Decision Support</p>
+            <h1 id="hero-title">B-CUE</h1>
+            <p class="hero-subtitle">蜂群预测支持系统</p>
+            <p class="hero-text">面向养蜂实践的环境变化、蜜源状态与蜂群行为辅助判断工具</p>
+            <div class="hero-actions">
+              <a class="button button-dark" href="dashboard1.html">进入系统</a>
+              <a class="button button-light" href="#background">了解详情</a>
+            </div>
+          </div>
+
+          <div class="hero-illustration" aria-label="蜂场地图视觉">
+            <img src="images/editable line art.png" alt="">
           </div>
         </div>
       </section>
 
-      <section class="panel panel-metrics" aria-labelledby="metrics-panel-title">
-        <header class="panel-header">
-          <h2 id="metrics-panel-title" class="panel-title">仪表盘区域</h2>
-        </header>
-        <div class="metrics-grid" id="metrics-grid"></div>
+      <section class="feature-band" id="service" aria-label="预测服务">
+        <div class="section-inner band-inner">
+          <article>
+            <img class="band-icon-image" src="images/多源数据.png" alt="" aria-hidden="true">
+            <div>
+              <h2>多源数据</h2>
+              <p>多源数据支持整合</p>
+            </div>
+          </article>
+          <article>
+            <img class="band-icon-image" src="images/预测模型.png" alt="" aria-hidden="true">
+            <div>
+              <h2>预测模型</h2>
+              <p>智能算法全域预测</p>
+            </div>
+          </article>
+          <article>
+            <img class="band-icon-image" src="images/生态廊道.png" alt="" aria-hidden="true">
+            <div>
+              <h2>生态廊道</h2>
+              <p>生成蜜源空间连接</p>
+            </div>
+          </article>
+          <article>
+            <img class="band-icon-image" src="images/视觉节点.png" alt="" aria-hidden="true">
+            <div>
+              <h2>视觉节点</h2>
+              <p>标记关键干预位置</p>
+            </div>
+          </article>
+          <article>
+            <img class="band-icon-image" src="images/智能推送.png" alt="" aria-hidden="true">
+            <div>
+              <h2>智能推送</h2>
+              <p>风险预警支持建议</p>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section class="panel panel-curve" aria-labelledby="curve-panel-title">
-        <header class="panel-header">
-          <h2 id="curve-panel-title" class="panel-title">曲线图区域</h2>
-        </header>
-        <div
-          id="curve-module-container"
-          class="panel-body module-slot module-slot-placeholder"
-          data-module-slot="curve"
-          aria-label="曲线图模块接入容器"
-        >
-          <span class="module-slot-text">预留曲线图模块容器</span>
+      <section class="section section-why" id="background" aria-labelledby="why-title">
+        <div class="section-inner">
+          <h2 id="why-title" class="section-title">为什么要做这个系统</h2>
+          <div class="why-timeline is-hidden" data-why-timeline>
+            <div class="timeline-line" aria-hidden="true"></div>
+            <article class="timeline-item left">
+              <span class="timeline-dot" aria-hidden="true"></span>
+              <img class="timeline-image" src="images/1.png" alt="" aria-hidden="true">
+              <h3>气候变化加剧</h3>
+              <p>气温、降雨与极端天气波动，使生态节律更不稳定。</p>
+            </article>
+            <article class="timeline-item right">
+              <span class="timeline-dot" aria-hidden="true"></span>
+              <img class="timeline-image" src="images/2.png" alt="" aria-hidden="true">
+              <h3>蜜源节律不稳</h3>
+              <p>花期提前、延后或缩短，让采蜜窗口变得难以把握。</p>
+            </article>
+            <article class="timeline-item left">
+              <span class="timeline-dot" aria-hidden="true"></span>
+              <img class="timeline-image" src="images/3.png" alt="" aria-hidden="true">
+              <h3>现场判断困难</h3>
+              <p>天气、花期与蜂群状态交织变化，增加了蜂农判断成本。</p>
+            </article>
+            <article class="timeline-item right">
+              <span class="timeline-dot" aria-hidden="true"></span>
+              <img class="timeline-image" src="images/4.png" alt="" aria-hidden="true">
+              <h3>信息分散</h3>
+              <p>多源信息缺少统一组织，难以直接转化为实践判断。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-system" id="system" aria-labelledby="system-title">
+        <div class="section-inner">
+          <h2 id="system-title" class="section-title">系统关注什么</h2>
+          <div class="focus-grid">
+            <article class="system-card" tabindex="0">
+              <div class="system-card-inner">
+                <div class="system-card-front">
+                  <h3><span>01</span> 环境变化</h3>
+                  <p>温度、湿度、降雨、风向等影响蜂群活动与采集效率。</p>
+                  <img class="mini-chart chart-image" src="images/Frame 1.png" alt="" aria-hidden="true">
+                </div>
+                <div class="system-card-back">
+                  <p>系统持续关注温度、湿度、降水、风速等环境条件，帮助判断天气波动是否可能影响花期节律和蜜蜂外出活动。</p>
+                </div>
+              </div>
+            </article>
+            <article class="system-card" tabindex="0">
+              <div class="system-card-inner">
+                <div class="system-card-front">
+                  <h3><span>02</span> 蜜源状态</h3>
+                  <p>蜜源植物开花动态与分布，影响蜂场资源可用性。</p>
+                  <img class="mini-chart chart-image" src="images/Frame 2.png" alt="" aria-hidden="true">
+                </div>
+                <div class="system-card-back">
+                  <p>系统结合花期信息与环境条件，辅助判断当前蜜源资源是否稳定，以及主要蜜源植物是否处于可利用阶段。</p>
+                </div>
+              </div>
+            </article>
+            <article class="system-card" tabindex="0">
+              <div class="system-card-inner">
+                <div class="system-card-front">
+                  <h3><span>03</span> 蜂群行为</h3>
+                  <p>采蜜强度分析、声响状况、蜂群节律等影响因素。</p>
+                  <img class="mini-chart chart-image" src="images/Frame 3.png" alt="" aria-hidden="true">
+                </div>
+                <div class="system-card-back">
+                  <p>系统通过蜂群活跃度变化识别行为节律，辅助判断实际活动是否偏离当前环境下的预期范围。</p>
+                </div>
+              </div>
+            </article>
+            <article class="system-card" tabindex="0">
+              <div class="system-card-inner">
+                <div class="system-card-front">
+                  <h3><span>04</span> 蜂群风险</h3>
+                  <p>结合风险与收益提供策略支持蜂箱全程决策。</p>
+                  <img class="mini-chart chart-image" src="images/Frame 4.png" alt="" aria-hidden="true">
+                </div>
+                <div class="system-card-back">
+                  <p>系统综合环境、蜜源与蜂群行为之间的关系，提示可能出现的物候错配或管理风险，为后续判断提供参考。</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-value" id="value" aria-labelledby="value-title">
+        <div class="section-inner">
+          <h2 id="value-title" class="section-title">它如何支持实践判断</h2>
+
+          <div class="perspective-card-stack" aria-label="实践判断支持卡片">
+            <article class="stack-card card-1" tabindex="0">
+              <div class="stack-card-inner">
+                <div class="stack-card-content">
+                  <h3>01 数据采集</h3>
+                  <img class="stack-card-image" src="images/card01.png" alt="" aria-hidden="true">
+                  <p>通过公开气象 API、微型气象站与自制蜂群传感器，获取环境变化、场地状态及蜜蜂进出巢数据。</p>
+                </div>
+              </div>
+            </article>
+            <article class="stack-card card-2" tabindex="0">
+              <div class="stack-card-inner">
+                <div class="stack-card-content">
+                  <h3>02 数据处理</h3>
+                  <img class="stack-card-image" src="images/card02.png" alt="" aria-hidden="true">
+                  <p>对采集到的气象、花期与蜂群数据进行清洗、对齐和汇总，形成可用于后续分析的统一数据基础。</p>
+                </div>
+              </div>
+            </article>
+            <article class="stack-card card-3" tabindex="0">
+              <div class="stack-card-inner">
+                <div class="stack-card-content">
+                  <h3>03 模型分析</h3>
+                  <img class="stack-card-image" src="images/card03.png" alt="" aria-hidden="true">
+                  <p>结合花期模型、蜜源模型、蜂群行为模型与物候错配模型，推导当前生态状态及可能变化趋势。</p>
+                </div>
+              </div>
+            </article>
+            <article class="stack-card card-4" tabindex="0">
+              <div class="stack-card-inner">
+                <div class="stack-card-content">
+                  <h3>04 风险预警</h3>
+                  <img class="stack-card-image" src="images/card04.png" alt="" aria-hidden="true">
+                  <p>当蜜源供给、蜂群行为与环境条件之间出现明显偏离时，系统提示潜在错配风险和需要关注的变量。</p>
+                </div>
+              </div>
+            </article>
+            <article class="stack-card card-5" tabindex="0">
+              <div class="stack-card-inner">
+                <div class="stack-card-content">
+                  <h3>05 生态廊道</h3>
+                  <img class="stack-card-image" src="images/card05.png" alt="" aria-hidden="true">
+                  <p>根据蜜源分布、蜂箱位置与蜂群活动范围，生成连接蜂箱与蜜源区域的迁飞路径参考。</p>
+                </div>
+              </div>
+            </article>
+            <article class="stack-card card-6" tabindex="0">
+              <div class="stack-card-inner">
+                <div class="stack-card-content">
+                  <h3>06 视觉节点</h3>
+                  <img class="stack-card-image" src="images/card06.png" alt="" aria-hidden="true">
+                  <p>在生态廊道关键位置布设视觉引导装置，通过色彩、形态与空间提示，引导蜜蜂沿廊道迁飞。</p>
+                </div>
+              </div>
+            </article>
+            <article class="stack-card card-7" tabindex="0">
+              <div class="stack-card-inner">
+                <div class="stack-card-content">
+                  <h3>07 方案推送</h3>
+                  <img class="stack-card-image" src="images/card07.png" alt="" aria-hidden="true">
+                  <p>系统根据当前状态生成多种行动参考方案，帮助用户比较不同选择，并保留最终判断的自主性。</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-guide" id="guide" aria-labelledby="guide-title">
+        <div class="section-inner">
+          <h2 id="guide-title" class="section-title">温馨提示</h2>
+          <div class="boundary-layout">
+            <div class="person-illustration" aria-hidden="true">
+              <img src="images/Person illustration editable.png" alt="">
+            </div>
+
+            <ul class="boundary-copy">
+              <li>本系统基于历史数据训练，结果受季节和地域限制影响存在不确定性。</li>
+              <li>建议结合本地经验进行人工判断，灵活应对蜂群与环境变化。</li>
+              <li>系统不替代实践决策，任何输出仅提供辅助。</li>
+            </ul>
+
+          </div>
         </div>
       </section>
     </main>
+
+    <footer class="site-footer" id="footer">
+      <div class="section-inner footer-panel">
+        <div class="footer-top">
+          <div>
+            <h2>有问题或建议？</h2>
+            <p>欢迎联系我们的团队</p>
+            <span>中国美术学院 · 南特设计联合学院</span>
+          </div>
+          <button class="button button-dark contact-button" type="button" data-contact>联系我们</button>
+        </div>
+        <address class="footer-contact">
+          <span>地址：浙江省杭州市西湖区转塘街道象山村352号</span>
+          <span>电话：+86 134-2914-9862</span>
+          <span>邮箱：Nevena9862@163.com</span>
+        </address>
+      </div>
+      <p class="copyright">蜂群预测支持系统 B-CUE © 2025 All Rights Reserved.</p>
+    </footer>
   </div>
 
-  <script src="./scripts/site-shell.js"></script>
+  <div class="toast" role="status" aria-live="polite" data-toast>感谢关注 B-CLUE 项目，可通过项目团队获取更多信息。</div>
+
+  <script src="js/main.js"></script>
 </body>
 </html>
