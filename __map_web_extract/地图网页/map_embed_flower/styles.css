@@ -1,0 +1,124 @@
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: #ffffff;
+}
+
+#map {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.leaflet-container {
+  background: #ffffff;
+}
+
+.leaflet-tile {
+  image-rendering: auto;
+}
+
+.mini-popup .leaflet-popup-content-wrapper {
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: none;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  padding: 0;
+  backdrop-filter: blur(4px);
+}
+
+.mini-popup .leaflet-popup-content {
+  margin: 0;
+}
+
+.mini-popup .leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: none;
+  border-left: 1px solid rgba(15, 23, 42, 0.12);
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.mini-popup-card {
+  min-width: 168px;
+  max-width: 210px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #0f172a;
+}
+
+.mini-popup-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.mini-popup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.mini-popup-row span {
+  color: #475569;
+  white-space: nowrap;
+}
+
+.mini-popup-row strong {
+  text-align: right;
+  font-weight: 500;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.leaflet-control-zoom a {
+  border-radius: 0 !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  box-shadow: none !important;
+}
+
+
+.mini-popup-row-top {
+  align-items: center;
+}
+
+.flower-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.flower-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.flower-swatch {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  flex: 0 0 10px;
+}
+
+.flower-name {
+  display: inline-block;
+}

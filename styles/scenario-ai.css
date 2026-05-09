@@ -132,10 +132,10 @@ button {
   position: absolute;
   top: 32px;
   right: 22px;
-  width: 580px;
+  width: 640px;
   min-height: 46px;
   border: 0.6px solid rgba(180, 185, 194, 0.72);
-  border-radius: 10px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(8px) saturate(180%);
   -webkit-backdrop-filter: blur(8px) saturate(180%);
@@ -147,7 +147,7 @@ button {
   position: absolute;
   top: 0;
   left: 0;
-  width: 580px;
+  width: 640px;
   height: 3px;
   object-fit: cover;
   pointer-events: none;
@@ -156,7 +156,7 @@ button {
 .info-chip-list {
   position: relative;
   display: grid;
-  grid-template-columns: 148px 84px 64px 96px 62px 62px 62px;
+  grid-template-columns: 148px 92px 70px 96px 84px 74px 74px;
   gap: 0;
   align-items: stretch;
   padding: 4px 0 2px;
@@ -170,9 +170,9 @@ button {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 4px 8px;
+  padding: 4px 5px;
   border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 10px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.34);
   color: #66707d;
   font-size: 12px;
@@ -189,8 +189,9 @@ button {
 
 .info-chip-value {
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
   color: #616975;
   font-size: 12px;
   line-height: 1.1;
@@ -1910,11 +1911,9 @@ body.is-scenario-overlay-open .scenario-card {
   width: 100%;
   min-width: 0;
   height: 472px;
-  border: 0;
-  border-left: 1px solid #dbdbdb;
-  border-right: 1px solid #dbdbdb;
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid rgba(42, 47, 56, 0.08);
+  border-radius: 12px;
+  background: #ffffff;
   box-shadow: none;
   padding: 0 18px;
   transition: opacity 220ms ease, transform 220ms ease;
@@ -1929,7 +1928,23 @@ body.is-scenario-overlay-open .scenario-card::before {
   height: 238px;
   background: #ffffff url("../images/image 30.png") center / cover no-repeat;
   border: 1px solid rgba(42, 47, 56, 0.06);
-  border-radius: 0;
+  border-radius: 8px;
+}
+
+body.is-scenario-overlay-open .scenario-card.card-image-1::before {
+  background-image: url("../images/001.png");
+}
+
+body.is-scenario-overlay-open .scenario-card.card-image-2::before {
+  background-image: url("../images/002.png");
+}
+
+body.is-scenario-overlay-open .scenario-card.card-image-3::before {
+  background-image: url("../images/003.png");
+}
+
+body.is-scenario-overlay-open .scenario-card.card-image-4::before {
+  background-image: url("../images/004.png");
 }
 
 body.is-scenario-overlay-open .scenario-card.is-loading {
@@ -2485,7 +2500,8 @@ body.is-scenario-chat-active .composer-shell {
   -webkit-backdrop-filter: blur(5px);
 }
 
-.detail-modal.glass-panel {
+.detail-modal.glass-panel,
+.corridor-modal.glass-panel {
   width: min(920px, calc(100vw - 72px));
   height: min(610px, calc(100vh - 56px));
   min-height: 0;
@@ -2498,6 +2514,11 @@ body.is-scenario-chat-active .composer-shell {
   grid-template-rows: minmax(112px, auto) minmax(0, 1fr) 48px;
   gap: 15px;
   overflow: hidden;
+}
+
+.detail-modal.is-hidden,
+.corridor-modal.is-hidden {
+  display: none;
 }
 
 .detail-header {
@@ -2556,6 +2577,12 @@ body.is-scenario-chat-active .composer-shell {
   grid-template-columns: minmax(0, 416px) 40px;
   align-items: start;
   gap: 12px;
+}
+
+.corridor-header-side {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
 }
 
 .detail-inline-highlights {
@@ -2802,10 +2829,36 @@ body.is-scenario-chat-active .composer-shell {
   white-space: nowrap;
 }
 
+.detail-secondary-action {
+  position: absolute;
+  right: 25px;
+  bottom: 25px;
+  width: auto;
+  min-width: 176px;
+  min-height: 48px;
+  padding: 0 17px;
+  border-radius: 999px;
+  border: 0.8px solid rgba(0, 0, 0, 0.36);
+  background: rgba(0, 0, 0, 0.66);
+  box-shadow: none;
+  color: #ffffff;
+  font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .detail-primary-action:hover {
   transform: none;
   background: rgba(255, 255, 255, 0.38);
   border-color: rgba(22, 22, 22, 0.36);
+}
+
+.detail-secondary-action:hover {
+  background: rgba(0, 0, 0, 0.76);
+  border-color: rgba(0, 0, 0, 0.48);
 }
 
 .detail-action-note {
@@ -2815,8 +2868,52 @@ body.is-scenario-chat-active .composer-shell {
   line-height: 1.5;
 }
 
+.corridor-content-grid {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.36fr) minmax(220px, 0.64fr);
+  gap: 15px;
+  overflow: hidden;
+}
+
+.corridor-map-block,
+.corridor-device-block {
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  border: 0.667px solid rgba(42, 47, 56, 0.05);
+  background: rgba(255, 255, 255, 0.54);
+  overflow: hidden;
+}
+
+.corridor-map-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  background: transparent;
+}
+
+.corridor-device-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.corridor-device-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: contrast(1.02);
+}
+
 @media (max-width: 980px) {
-  .detail-modal.glass-panel {
+  .detail-modal.glass-panel,
+  .corridor-modal.glass-panel {
     width: calc(100vw - 28px);
     height: min(680px, calc(100vh - 28px));
     padding: 18px;
@@ -2837,6 +2934,11 @@ body.is-scenario-chat-active .composer-shell {
     grid-template-columns: 1fr 40px;
   }
 
+  .corridor-content-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(120px, 0.42fr);
+  }
+
   .detail-inline-highlights {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -2849,6 +2951,7 @@ body.is-scenario-chat-active .composer-shell {
   .detail-content-grid {
     height: auto;
   }
+
 }
 
 @media (max-width: 640px) {
@@ -2856,7 +2959,8 @@ body.is-scenario-chat-active .composer-shell {
     padding: 10px;
   }
 
-  .detail-modal.glass-panel {
+  .detail-modal.glass-panel,
+  .corridor-modal.glass-panel {
     width: calc(100vw - 20px);
     height: calc(100vh - 20px);
     padding: 14px;
@@ -2897,4 +3001,11 @@ body.is-scenario-chat-active .composer-shell {
   .detail-primary-action {
     width: 100%;
   }
+
+  .detail-secondary-action {
+    right: 14px;
+    bottom: 14px;
+    min-width: 150px;
+  }
+
 }

@@ -47,24 +47,6 @@
       z-index: 900;
     }
 
-    .status-box {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 1200;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      padding: 8px 10px;
-      line-height: 1.4;
-      font-size: 12px;
-      color: #111;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      user-select: none;
-      pointer-events: none;
-    }
-
     .point-popup {
       font-size: 12px;
       line-height: 1.55;
@@ -92,8 +74,6 @@
 </head>
 <body>
   <div id="map"></div>
-  <div class="status-box" id="statusBox">数据源：初始化中…</div>
-
   <script src="./bee-config.js"></script>
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -110,7 +90,6 @@
     const tileMinZoom = 13;
     const tileMaxZoom = 17;
     const mapBounds = L.latLngBounds([south, west], [north, east]);
-    const statusBox = document.getElementById('statusBox');
 
     const defaultConfig = {
       tileFolder: 'qgis tiles 03',
@@ -152,7 +131,7 @@
     let lastSourceText = '示例数据';
 
     const map = L.map('map', {
-      zoomControl: true,
+      zoomControl: false,
       maxZoom: tileMaxZoom,
       maxBounds: mapBounds,
       maxBoundsViscosity: 1.0,
@@ -537,7 +516,6 @@
       });
 
       heatRasterLayer.setData(heatData.map((item) => ({ lat: item[0], lng: item[1], weight: item[2] })));
-      statusBox.textContent = `数据源：${lastSourceText}｜点位：${heatData.length}｜更新时间：${new Date().toLocaleTimeString('zh-CN', { hour12: false })}`;
     }
 
     function applyInitialView(forceFit = false) {
@@ -607,7 +585,7 @@
       script.onload = () => {
         const raw = window.BEE_REALTIME_DATA;
         const records = Array.isArray(raw) ? raw : ((raw && raw.points) ? raw.points : []);
-        applyIncomingRecords(records, '本地脚本实时轮询');
+        applyIncomingRecords(records, '');
       };
       script.onerror = () => {
         console.warn('实时数据脚本读取失败');
@@ -640,7 +618,6 @@
       });
 
       mqttClient.on('connect', () => {
-        statusBox.textContent = '数据源：MQTT 已连接';
         cfg.mqtt.subscriptions.forEach((item) => {
           if (item && item.topic) {
             mqttClient.subscribe(item.topic);

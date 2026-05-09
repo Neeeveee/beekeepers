@@ -142,21 +142,21 @@
       position: absolute;
       top: 32px;
       right: 22px;
-      width: 580px;
+      width: 640px;
       min-height: 46px;
       border: 0.6px solid var(--line-top);
-      border-radius: 10px;
+      border-radius: 0;
       background: rgba(255, 255, 255, 0.78);
       backdrop-filter: blur(8px) saturate(180%);
       overflow: hidden;
-      z-index: 3;
+      z-index: 4;
     }
 
     .top-right-info-line {
       position: absolute;
       top: 0;
       left: 0;
-      width: 580px;
+      width: 640px;
       height: 3px;
       object-fit: cover;
       pointer-events: none;
@@ -165,7 +165,7 @@
     .info-chip-list {
       position: relative;
       display: grid;
-      grid-template-columns: 148px 84px 64px 96px 62px 62px 62px;
+      grid-template-columns: 148px 92px 70px 96px 84px 74px 74px;
       gap: 0;
       align-items: stretch;
       padding: 4px 0 2px;
@@ -180,13 +180,13 @@
       justify-content: center;
       gap: 2px;
       border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: var(--radius-sm);
+      border-radius: 0;
       background: var(--surface-softer);
       color: var(--text-subtle);
       font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
-      padding: 4px 8px;
+      padding: 4px 5px;
     }
 
     .info-chip-label {
@@ -202,8 +202,9 @@
       line-height: 1.1;
       font-weight: 700;
       color: var(--text-subtle);
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: nowrap;
     }
 
     .info-chip-saturation .info-chip-label {
@@ -265,7 +266,7 @@
       background: rgba(255, 255, 255, 0.68);
       backdrop-filter: blur(6px);
       box-shadow: 0 14px 28px rgba(44, 44, 44, 0.08);
-      z-index: 3;
+      z-index: 4;
       opacity: 0;
       pointer-events: none;
       transform: translateY(-8px);
@@ -310,6 +311,137 @@
       min-width: 0;
       font-weight: 600;
       color: var(--text-main);
+    }
+
+    .map-legend {
+      position: absolute;
+      top: 96px;
+      right: 22px;
+      width: 188px;
+      padding: 0;
+      border: 0.6px solid rgba(176, 176, 176, 0.4);
+      border-radius: 0;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 14px 28px rgba(44, 44, 44, 0.08);
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .map-legend-toggle {
+      width: 100%;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 0;
+      background: rgba(255, 255, 255, 0.2);
+      color: #616161;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .map-legend-toggle:hover {
+      background: rgba(255, 255, 255, 0.42);
+    }
+
+    .map-legend-chevron {
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid #707785;
+      transform: rotate(0deg);
+      transition: transform 0.18s ease;
+      flex: 0 0 auto;
+    }
+
+    .map-legend.is-collapsed .map-legend-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .map-legend-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0 12px 10px;
+      list-style: none;
+    }
+
+    .map-legend.is-collapsed .map-legend-list {
+      display: none;
+    }
+
+    .map-legend-item {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 9px;
+      align-items: center;
+      min-height: 20px;
+      color: #111111;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .map-legend-swatch {
+      width: 40px;
+      height: 20px;
+      border-radius: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      flex: 0 0 auto;
+    }
+
+    .map-legend-swatch.commercial-hatch {
+      border: 1.4px solid #aaaaaa;
+      background:
+        repeating-linear-gradient(135deg, transparent 0 11px, #aaaaaa 12px 13.5px, transparent 14px 25px),
+        #ffffff;
+    }
+
+    .map-legend-swatch.commercial-dot {
+      background:
+        radial-gradient(circle, rgba(170, 170, 170, 0.85) 0 0.6px, transparent 0.8px) 0 0 / 3px 3px,
+        #ffffff;
+    }
+
+    .map-legend-swatch.greenland {
+      border: 1px solid #9d9d9d;
+      background: #cfcfcf;
+    }
+
+    .map-legend-swatch.residential {
+      background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.7) 0 0.6px, transparent 0.8px) 0 0 / 3px 3px,
+        #bbbbbb;
+    }
+
+    .map-legend-swatch.retail {
+      background:
+        radial-gradient(circle, rgba(188, 188, 188, 0.8) 0 0.55px, transparent 0.75px) 0 0 / 3px 3px,
+        #ffffff;
+    }
+
+    .map-legend-swatch.range-3km {
+      background: rgba(255, 255, 0, 0.16);
+    }
+
+    .map-legend-swatch.range-2km {
+      background: rgba(255, 255, 0, 0.28);
+    }
+
+    .map-legend-swatch.range-1km {
+      background: rgba(255, 255, 0, 0.46);
+    }
+
+    .map-legend-swatch.nectar-current {
+      background: #ffff22;
     }
     .left-navigation {
       position: absolute;
@@ -426,12 +558,16 @@
       position: absolute;
       left: 23px;
       bottom: 20px;
-      width: 118px;
-      height: 50px;
+      width: 234px;
+      height: 54px;
       border: 1px solid #afafaf;
-      border-radius: 40px;
+      border-radius: 0;
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(4px);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 6px;
       z-index: 3;
       opacity: 0;
       pointer-events: none;
@@ -448,42 +584,50 @@
     }
 
     .toggle-button {
-      position: absolute;
-      top: 4px;
-      width: 40px;
+      width: 100%;
       height: 40px;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
+      gap: 6px;
       border: 0.6px solid #bbbbbb;
-      border-radius: 20px;
+      border-radius: 0;
       background: transparent;
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
       cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
     }
 
     .toggle-button.active {
       background: var(--highlight);
+      border-color: rgba(44, 44, 44, 0.32);
+      color: var(--text-main);
     }
 
-    .toggle-button.heatmap-toggle {
-      left: 13px;
-    }
-
-    .toggle-button.curve-toggle {
-      left: 63px;
+    .toggle-button:hover {
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--text-main);
     }
 
     .toggle-icon {
-      width: 24px;
-      height: 24px;
+      width: 18px;
+      height: 18px;
       object-fit: cover;
       pointer-events: none;
     }
 
     .toggle-icon.curve {
-      width: 24px;
-      height: 24px;
+      width: 18px;
+      height: 18px;
       object-position: center;
+    }
+
+    .toggle-label {
+      pointer-events: none;
     }
 
     .right-information {
@@ -801,6 +945,47 @@
       </div>
     </section>
 
+    <aside class="map-legend is-collapsed" aria-label="地图图示含义">
+      <button class="map-legend-toggle" id="mapLegendToggle" type="button" aria-expanded="false" aria-controls="mapLegendList">
+        <span>图示说明</span>
+        <span class="map-legend-chevron" aria-hidden="true"></span>
+      </button>
+      <ul class="map-legend-list" id="mapLegendList">
+        <li class="map-legend-item">
+          <span class="map-legend-swatch commercial-hatch" aria-hidden="true"></span>
+          <span>商业用地</span>
+        </li>
+        <li class="map-legend-item">
+          <span class="map-legend-swatch commercial-dot" aria-hidden="true"></span>
+          <span>商业用地</span>
+        </li>
+        <li class="map-legend-item">
+          <span class="map-legend-swatch greenland" aria-hidden="true"></span>
+          <span>绿地</span>
+        </li>
+        <li class="map-legend-item">
+          <span class="map-legend-swatch residential" aria-hidden="true"></span>
+          <span>住宅</span>
+        </li>
+        <li class="map-legend-item">
+          <span class="map-legend-swatch retail" aria-hidden="true"></span>
+          <span>零售</span>
+        </li>
+        <li class="map-legend-item">
+          <span class="map-legend-swatch range-3km" aria-hidden="true"></span>
+          <span>3km范围圈</span>
+        </li>
+        <li class="map-legend-item">
+          <span class="map-legend-swatch range-2km" aria-hidden="true"></span>
+          <span>2km范围圈</span>
+        </li>
+        <li class="map-legend-item">
+          <span class="map-legend-swatch range-1km" aria-hidden="true"></span>
+          <span>1km范围圈</span>
+        </li>
+      </ul>
+    </aside>
+
     <aside class="left-navigation" aria-label="左侧导航">
       <img class="brand-mark" src="./images/image 21.png" alt="B-Cue 标识" />
       <nav class="mode-switch" aria-label="模式切换">
@@ -822,9 +1007,11 @@
     <section class="bottom-left-layer-toggle" aria-label="左下控制区">
       <button class="toggle-button heatmap-toggle" type="button" data-toggle-mode="independent" data-panel-target="heatmap" aria-label="热力图开关">
         <img class="toggle-icon" src="./images/image 22.png" alt="" aria-hidden="true" />
+        <span class="toggle-label">热力分布</span>
       </button>
       <button class="toggle-button curve-toggle" type="button" data-toggle-mode="independent" data-panel-target="curve" aria-label="曲线图开关">
         <img class="toggle-icon curve" src="./images/image 23.png" alt="" aria-hidden="true" />
+        <span class="toggle-label">指标曲线</span>
       </button>
     </section>
 
@@ -876,6 +1063,8 @@
     const gaugeInstances = new Map();
     const siteInfoToggle = document.getElementById("siteInfoToggle");
     const siteDetailCard = document.getElementById("siteDetailCard");
+    const mapLegend = document.querySelector(".map-legend");
+    const mapLegendToggle = document.getElementById("mapLegendToggle");
     const infoDate = document.getElementById("infoDate");
     const infoTime = document.getElementById("infoTime");
     const infoWeather = document.getElementById("infoWeather");
@@ -914,6 +1103,26 @@
     const BEE_CORE_END_HOUR = 15;
     const MIN_CORE_DAY_SAMPLES = 3;
     const MIN_FALLBACK_DAY_SAMPLES = 6;
+    const MAP_LEGEND_ITEMS = {
+      default: [
+        { swatch: "commercial-hatch", label: "商业用地" },
+        { swatch: "commercial-dot", label: "商业用地" },
+        { swatch: "greenland", label: "绿地" },
+        { swatch: "residential", label: "住宅" },
+        { swatch: "retail", label: "零售" },
+        { swatch: "range-3km", label: "3km范围圈" },
+        { swatch: "range-2km", label: "2km范围圈" },
+        { swatch: "range-1km", label: "1km范围圈" }
+      ],
+      flower: [
+        { swatch: "commercial-hatch", label: "商业用地" },
+        { swatch: "commercial-dot", label: "商业用地" },
+        { swatch: "greenland", label: "绿地" },
+        { swatch: "residential", label: "住宅" },
+        { swatch: "retail", label: "零售" },
+        { swatch: "nectar-current", label: "当下蜜源分布" }
+      ]
+    };
 
     function parseGaugeTime(value) {
       if (!value) {
@@ -1256,6 +1465,25 @@
       bottomLeftLayerToggle.classList.toggle("is-visible", visible);
     }
 
+    function setMapLegendMode(mode) {
+      const list = document.getElementById("mapLegendList");
+      const items = MAP_LEGEND_ITEMS[mode] || MAP_LEGEND_ITEMS.default;
+      list.replaceChildren(...items.map(item => {
+        const row = document.createElement("li");
+        row.className = "map-legend-item";
+
+        const swatch = document.createElement("span");
+        swatch.className = `map-legend-swatch ${item.swatch}`;
+        swatch.setAttribute("aria-hidden", "true");
+
+        const label = document.createElement("span");
+        label.textContent = item.label;
+
+        row.append(swatch, label);
+        return row;
+      }));
+    }
+
     document.addEventListener("click", event => {
       const action = event.target.closest("button, a, [role='button']");
       if (!action) {
@@ -1280,6 +1508,7 @@
         modeButtons.forEach(item => item.classList.remove("active"));
 
         if (isAlreadyActive) {
+          setMapLegendMode("default");
           setBottomLeftLayerToggleVisible(false);
           setHeatmapToggleState(false);
           applyCurveModuleView();
@@ -1289,6 +1518,7 @@
         button.classList.add("active");
 
         if (button.dataset.layerTarget === "flower") {
+          setMapLegendMode("flower");
           setBottomLeftLayerToggleVisible(true);
           setHeatmapToggleState(true, "flower");
           applyCurveModuleView();
@@ -1296,12 +1526,14 @@
         }
 
         if (button.dataset.layerTarget === "bee") {
+          setMapLegendMode("default");
           setBottomLeftLayerToggleVisible(true);
           setHeatmapToggleState(true, "bee");
           applyCurveModuleView();
           return;
         }
 
+        setMapLegendMode("default");
         setBottomLeftLayerToggleVisible(false);
         setHeatmapToggleState(false);
         applyCurveModuleView();
@@ -1342,6 +1574,11 @@
     siteInfoToggle.addEventListener("click", event => {
       event.stopPropagation();
       setSiteCardVisible(!siteDetailCard.classList.contains("is-visible"));
+    });
+
+    mapLegendToggle.addEventListener("click", () => {
+      const collapsed = mapLegend.classList.toggle("is-collapsed");
+      mapLegendToggle.setAttribute("aria-expanded", String(!collapsed));
     });
 
     document.addEventListener("click", event => {

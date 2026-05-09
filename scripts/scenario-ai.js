@@ -119,6 +119,11 @@ const detailSectionTitle = $("detailSectionTitle");
 const detailCopy = $("detailCopy");
 const detailMetrics = $("detailMetrics");
 const detailPrimary = $("detailPrimaryAction");
+const detailModal = document.querySelector(".detail-modal");
+const corridorPanel = $("corridorPanel");
+const corridorButton = $("detailCorridorButton");
+const corridorBackButton = $("corridorBackButton");
+const corridorCloseButton = $("corridorCloseButton");
 const siteInfoToggle = $("siteInfoToggle");
 const siteDetailCard = $("siteDetailCard");
 const infoDate = $("infoDate");
@@ -127,6 +132,8 @@ const infoActivity = $("infoActivity");
 const infoNectar = $("infoNectar");
 const infoMismatch = $("infoMismatch");
 const siteDateRange = $("siteDateRange");
+
+const CARD_IMAGE_COUNT = 4;
 
 const GAUGE_DATA_BASE_URL = "https://neeeveee.github.io/beekeepers/data";
 const BEE_CORE_START_HOUR = 10;
@@ -439,8 +446,9 @@ function metricHtml(metric) {
 
 function cardHtml(scenario, index) {
   const serial = String(index + 1).padStart(3, "0");
+  const cardImageClass = `card-image-${(index % CARD_IMAGE_COUNT) + 1}`;
   return `
-    <button class="scenario-card" type="button" data-index="${index}">
+    <button class="scenario-card ${cardImageClass}" type="button" data-index="${index}">
       <div class="card-topline"><span class="card-chip">${serial}</span><span class="card-kpi"></span></div>
       <strong class="card-title">${scenario.title}</strong>
       <span class="card-text">${scenario.summary}</span>
@@ -553,6 +561,7 @@ function renderDetail(index) {
 
 function openDetail(index) {
   renderDetail(index);
+  showStrategyDetail();
   if (detailOverlay) {
     detailOverlay.classList.add("is-visible");
     detailOverlay.setAttribute("aria-hidden", "false");
@@ -564,6 +573,19 @@ function closeDetail() {
     detailOverlay.classList.remove("is-visible");
     detailOverlay.setAttribute("aria-hidden", "true");
   }
+  showStrategyDetail();
+}
+
+function showStrategyDetail() {
+  detailModal?.classList.remove("is-hidden");
+  corridorPanel?.classList.add("is-hidden");
+  corridorPanel?.setAttribute("aria-hidden", "true");
+}
+
+function showCorridorPanel() {
+  detailModal?.classList.add("is-hidden");
+  corridorPanel?.classList.remove("is-hidden");
+  corridorPanel?.setAttribute("aria-hidden", "false");
 }
 
 function readScenarioCache() {
@@ -634,6 +656,9 @@ function bindEvents() {
   if (detailClose) detailClose.addEventListener("click", closeDetail);
   if (detailBackdrop) detailBackdrop.addEventListener("click", closeDetail);
   if (detailPrimary) detailPrimary.addEventListener("click", () => enterStrategyChat(state.selectedIndex));
+  if (corridorButton) corridorButton.addEventListener("click", showCorridorPanel);
+  if (corridorBackButton) corridorBackButton.addEventListener("click", showStrategyDetail);
+  if (corridorCloseButton) corridorCloseButton.addEventListener("click", closeDetail);
   if (sendButton) sendButton.addEventListener("click", sendChatMessage);
   if (chatComposer) {
     chatComposer.addEventListener("keydown", (e) => {

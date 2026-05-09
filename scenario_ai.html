@@ -157,6 +157,47 @@
             采用该策略
           </button>
           <span class="detail-action-note">如果需要更个性化的方案，也可以返回后点击上方“聊聊别的”。</span>
+          <button class="detail-secondary-action" id="detailCorridorButton" type="button">
+            查看长线生态廊道
+          </button>
+        </div>
+      </section>
+
+      <section class="corridor-modal glass-panel is-hidden" id="corridorPanel" aria-label="生态廊道长线效益" aria-hidden="true">
+        <div class="detail-header">
+          <div class="detail-heading-group">
+            <span class="detail-kicker">LONG-TERM CORRIDOR / 生态廊道</span>
+            <h2 class="detail-title">长线效益策略方案</h2>
+            <p class="detail-summary">生态廊道用于连接蜂群活动路径、花源节点与农场边界缓冲带，作为当前策略之外的长期增益方案。</p>
+          </div>
+
+          <div class="corridor-header-side">
+            <button class="detail-close-button" id="corridorCloseButton" type="button" aria-label="Close corridor panel">
+              <span class="detail-close-icon"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="corridor-content-grid">
+          <section class="corridor-map-block glass-subpanel" aria-label="生态廊道地图">
+            <iframe
+              class="corridor-map-frame"
+              src="./__map_web_extract/%E5%9C%B0%E5%9B%BE%E7%BD%91%E9%A1%B5/map%20embed%20corridor%20with%20risk%20zone/index.html"
+              title="生态廊道地图"
+              loading="lazy"
+            ></iframe>
+          </section>
+
+          <section class="corridor-device-block glass-subpanel" aria-label="生态廊道装置">
+            <img class="corridor-device-image" src="./images/view.png" alt="生态廊道装置预览" />
+          </section>
+        </div>
+
+        <div class="detail-action-row">
+          <button class="detail-primary-action" id="corridorBackButton" type="button">
+            返回策略详情
+          </button>
+          <span class="detail-action-note">该方案偏向长期建设收益，可与当前策略并行评估。</span>
         </div>
       </section>
     </div>

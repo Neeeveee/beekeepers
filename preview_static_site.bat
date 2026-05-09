@@ -18,6 +18,9 @@ echo ========================================
 echo Starting static preview server
 echo ========================================
 echo.
+echo [INFO] Static preview does not start the Node scenario service.
+echo [INFO] scenario_ai.html and /api/scenarios need start_bee_site.bat or npm start.
+echo.
 
 start "Bee Static Preview" cmd /k ""%PYTHON_EXE%" -m http.server %PORT%"
 

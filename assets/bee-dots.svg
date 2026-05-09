@@ -1,0 +1,16 @@
+<svg width="300" height="230" viewBox="0 0 300 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="beeDots" width="7" height="7" patternUnits="userSpaceOnUse">
+      <circle cx="2.2" cy="2.2" r="1.8" fill="#111"/>
+    </pattern>
+  </defs>
+  <path d="M128 69C157 38 205 22 248 25C221 57 184 82 142 83C135 83 129 78 128 69Z" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="2 5"/>
+  <path d="M148 87C185 72 233 75 270 95C230 113 187 113 154 100C147 97 144 91 148 87Z" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="2 5"/>
+  <ellipse cx="113" cy="107" rx="56" ry="38" transform="rotate(12 113 107)" fill="url(#beeDots)"/>
+  <circle cx="56" cy="94" r="18" fill="url(#beeDots)"/>
+  <path d="M82 74C95 95 91 122 77 141M113 70C126 96 121 126 105 150M145 84C153 103 151 124 140 143" stroke="#f7f7f5" stroke-width="6"/>
+  <path d="M43 80C34 68 23 65 12 69M45 76C37 58 43 45 55 36" stroke="#111" stroke-width="2" stroke-linecap="round"/>
+  <path d="M90 144L76 174M116 150L111 186M140 143L155 174" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+  <path d="M171 108L198 96" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+  <path d="M17 191C82 147 134 184 189 158C228 140 246 136 286 150" stroke="#111" stroke-width="1" stroke-dasharray="2 8" opacity=".35"/>
+</svg>
