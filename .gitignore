@@ -210,6 +210,9 @@ cython_debug/
 node_modules/
 .push-temp/
 .push-temp-2/
+.push-upload/
+.sync-index-upload/
+*__backup_*/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
