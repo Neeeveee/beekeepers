@@ -476,12 +476,25 @@
       background-image: url("./images/image 27.png");
     }
 
-    .brand-mark {
+    .brand-home-link {
       position: absolute;
       top: 30px;
       left: 18px;
       width: 120px;
       height: 105px;
+      display: block;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .brand-home-link:focus-visible {
+      outline: 2px solid rgba(44, 44, 44, 0.72);
+      outline-offset: 4px;
+    }
+
+    .brand-mark {
+      width: 100%;
+      height: 100%;
       object-fit: contain;
       object-position: left top;
       pointer-events: none;
@@ -987,7 +1000,9 @@
     </aside>
 
     <aside class="left-navigation" aria-label="左侧导航">
-      <img class="brand-mark" src="./images/image 21.png" alt="B-Cue 标识" />
+      <a class="brand-home-link" href="./index.html#hero" aria-label="返回首页">
+        <img class="brand-mark" src="./images/image 21.png" alt="B-Cue 标识" />
+      </a>
       <nav class="mode-switch" aria-label="模式切换">
         <button class="mode-button mode-flower" type="button" data-toggle-group="mode-switch" data-layer-target="flower">
           <img class="mode-icon" src="./images/image 26.png" alt="" aria-hidden="true" />
