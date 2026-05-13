@@ -2511,7 +2511,7 @@ body.is-scenario-chat-active .composer-shell {
   background: rgba(243, 243, 243, 0.64);
   box-shadow: 0 24px 48px rgba(29, 33, 39, 0.06);
   display: grid;
-  grid-template-rows: minmax(112px, auto) minmax(0, 1fr) 48px;
+  grid-template-rows: auto minmax(0, 1fr) 48px;
   gap: 15px;
   overflow: hidden;
 }
@@ -2564,11 +2564,9 @@ body.is-scenario-chat-active .composer-shell {
   font-weight: 400;
   line-height: 23.52px;
   letter-spacing: 0.08px;
-  display: -webkit-box;
-  overflow: hidden;
+  display: block;
+  overflow: visible;
   overflow-wrap: anywhere;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
   white-space: normal;
 }
 
@@ -2587,24 +2585,29 @@ body.is-scenario-chat-active .composer-shell {
 
 .detail-inline-highlights {
   display: grid;
-  grid-template-columns: repeat(3, 132px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  min-width: 0;
+  align-items: stretch;
 }
 
 .detail-metric-card,
 .chat-stage .detail-metric-card {
-  width: 132px;
-  height: 93px;
-  min-height: 93px;
-  padding: 14px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 104px;
+  padding: 12px;
   border-radius: 16px;
   border: 0.667px solid rgba(42, 47, 56, 0.05);
   background: rgba(255, 255, 255, 0.56);
   box-shadow: none;
   display: grid;
-  grid-template-rows: 16px 21px 17px;
-  gap: 6px;
+  grid-template-rows: auto auto auto;
+  gap: 5px;
   align-content: start;
+  overflow: hidden;
 }
 
 .detail-metric-label,
@@ -2622,11 +2625,13 @@ body.is-scenario-chat-active .composer-shell {
 .chat-stage .detail-metric-value {
   color: #1f2430;
   font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
-  font-size: 20px;
+  font-size: clamp(16px, 1.55vw, 20px);
   font-weight: 400;
-  line-height: 21px;
+  line-height: 1.16;
   letter-spacing: 0.08px;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .detail-metric-note,
@@ -2634,11 +2639,13 @@ body.is-scenario-chat-active .composer-shell {
   margin: 0;
   color: #6e7688;
   font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
-  line-height: 16.8px;
+  line-height: 15.5px;
   letter-spacing: 0.08px;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .detail-close-button {
