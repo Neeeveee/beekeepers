@@ -667,6 +667,15 @@ app.get("/api/current-weather", (req, res) => {
 // 获取策略卡片数据。
 app.get("/api/scenarios", async (req, res) => {
   const analysisContext = buildAnalysisContext();
+  if (req.query.summaryOnly === "1") {
+    res.set("Cache-Control", "no-store");
+    return res.json({
+      source: "summary-only",
+      analysisContext,
+      cachedAt: new Date().toISOString()
+    });
+  }
+
   const cachedScenarios = readScenarioCache();
 
   if (!DEEPSEEK_API_KEY) {

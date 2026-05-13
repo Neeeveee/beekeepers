@@ -93,6 +93,137 @@
   }
 ];
 
+const FROZEN_AI_SCENARIOS = [
+  {
+    id: "scenario-a",
+    shortLabel: "A",
+    title: "稳态守护策略",
+    kicker: "低成本保守",
+    summary: "基于当前冬青花期指数0.818与花蜜量0.763，蜂群核心活跃度0.577，错配风险0.476（基本匹配），建议维持现有管理，减少干预，以最低成本保持当前授粉效率。",
+    sectionTitle: "策略详情",
+    detailPoints: [
+      "当前冬青花期指数0.818，花蜜量0.763，蜂群活跃度0.577，错配风险低，无需额外干预。",
+      "天气多云，温度30°C，降水概率0%，风速10km/h，适合蜂群正常采集。",
+      "保持蜂群自然状态，仅进行常规检查，避免打扰。"
+    ],
+    detailSections: [
+      { label: "应对问题", value: "当前授粉匹配良好，无需应对显著问题，主要维持现状。" },
+      { label: "建议类型", value: "保守型管理" },
+      { label: "建议内容", value: "不增加额外投入，仅执行常规蜂群检查与病虫害监控。" },
+      { label: "具体操作", value: "每日10:00-15:00观察蜂群出勤，记录活跃度变化；无需补充饲喂或调整蜂箱。" },
+      { label: "成本", value: "极低，仅需人工观察时间。" },
+      { label: "效果", value: "维持当前授粉效率，预计冬青授粉覆盖率保持在68%左右。" },
+      { label: "收益导向", value: "短期稳定，长期依赖自然条件。" }
+    ],
+    detailHighlights: [
+      { label: "成本", value: "极低", note: "按当前场地条件估算" },
+      { label: "效果", value: "维持现状", note: "围绕当下事实底座设计" },
+      { label: "收益导向", value: "短期稳定", note: "用于选择不同管理取向" }
+    ],
+    metrics: [
+      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
+      { label: "风险等级", value: "中", note: "风险可控，但若天气突变可能影响效率。" },
+      { label: "建议动作", value: "持续监测，暂不干预。", note: "主花源：冬青" }
+    ]
+  },
+  {
+    id: "scenario-b",
+    shortLabel: "B",
+    title: "时段防护策略",
+    kicker: "天气/时段保护",
+    summary: "针对当前30°C高温与10km/h风速，结合蜂群活跃度峰值在10:00-15:00（峰值0.815），建议在核心时段加强保护，减少高温与风对采集的影响。",
+    sectionTitle: "策略详情",
+    detailPoints: [
+      "当前温度30°C，风速10km/h，可能影响蜂群采集效率。",
+      "蜂群核心活跃度0.577，峰值0.815出现在10:00-15:00。",
+      "冬青花期指数0.818，花蜜量0.763，需确保采集窗口充分利用。"
+    ],
+    detailSections: [
+      { label: "应对问题", value: "高温与风可能降低蜂群采集效率，需在核心时段提供保护。" },
+      { label: "建议类型", value: "时段性防护" },
+      { label: "建议内容", value: "在10:00-15:00核心时段，为蜂箱提供遮荫或防风屏障。" },
+      { label: "具体操作", value: "在蜂箱上方搭建遮阳网，或设置挡风板；确保水源充足。" },
+      { label: "成本", value: "低，遮阳网或挡风板材料费约50元。" },
+      { label: "效果", value: "预计提升核心时段采集效率10-15%。" },
+      { label: "收益导向", value: "短期效率提升，保护蜂群健康。" }
+    ],
+    detailHighlights: [
+      { label: "成本", value: "低", note: "按当前场地条件估算" },
+      { label: "效果", value: "提升核心时段效率", note: "围绕当下事实底座设计" },
+      { label: "收益导向", value: "短期效率与健康", note: "用于选择不同管理取向" }
+    ],
+    metrics: [
+      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
+      { label: "风险等级", value: "中", note: "防护措施降低天气风险，但需及时调整。" },
+      { label: "建议动作", value: "立即实施遮荫与防风。", note: "主花源：冬青" }
+    ]
+  },
+  {
+    id: "scenario-c",
+    shortLabel: "C",
+    title: "短期增效策略",
+    kicker: "短期增效",
+    summary: "利用当前冬青花蜜量0.763与蜂群活跃度0.577，通过补充饲喂与蜂群激励，短期内提升授粉与采集效率，投入适中。",
+    sectionTitle: "策略详情",
+    detailPoints: [
+      "冬花花蜜量0.763，仍有提升空间；蜂群活跃度0.577可被激励。",
+      "天气多云，30°C，无降水，适合进行补充饲喂。",
+      "错配风险0.476，基本匹配，短期增效可进一步优化匹配。"
+    ],
+    detailSections: [
+      { label: "应对问题", value: "蜂群活跃度未达峰值，可通过激励提升采集效率。" },
+      { label: "建议类型", value: "激励型管理" },
+      { label: "建议内容", value: "补充糖浆或花粉替代物，刺激蜂群出勤。" },
+      { label: "具体操作", value: "每日清晨在蜂箱内放置1:1糖浆饲喂器，连续3天。" },
+      { label: "成本", value: "中等，糖浆成本约100元。" },
+      { label: "效果", value: "预计提升活跃度15%，授粉效率提高10%。" },
+      { label: "收益导向", value: "短期增产，快速见效。" }
+    ],
+    detailHighlights: [
+      { label: "成本", value: "中等", note: "按当前场地条件估算" },
+      { label: "效果", value: "提升活跃度与授粉", note: "围绕当下事实底座设计" },
+      { label: "收益导向", value: "短期增产", note: "用于选择不同管理取向" }
+    ],
+    metrics: [
+      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
+      { label: "风险等级", value: "中", note: "补充饲喂可能引起盗蜂，需谨慎操作。" },
+      { label: "建议动作", value: "执行补充饲喂，监控蜂群反应。", note: "主花源：冬青" }
+    ]
+  },
+  {
+    id: "scenario-d",
+    shortLabel: "D",
+    title: "韧性提升策略",
+    kicker: "长期收益/生态韧性",
+    summary: "基于当前冬青花期与蜂群状态，通过种植辅助蜜源与优化蜂箱布局，提升生态韧性，确保未来窗口承接与长期收益。",
+    sectionTitle: "策略详情",
+    detailPoints: [
+      "当前冬青花期指数0.818，花蜜量0.763，但单一蜜源存在风险。",
+      "蜂群核心活跃度0.577，错配风险0.476，需增强系统韧性。",
+      "天气适宜，可进行辅助蜜源种植或蜂箱迁移准备。"
+    ],
+    detailSections: [
+      { label: "应对问题", value: "单一蜜源依赖，未来窗口可能错配，需提升生态韧性。" },
+      { label: "建议类型", value: "生态优化" },
+      { label: "建议内容", value: "在周边种植早春或晚秋蜜源植物，并调整蜂箱位置以利用微气候。" },
+      { label: "具体操作", value: "选择紫云英或向日葵种子，在非冬青区域播种；将部分蜂箱移至向阳坡地。" },
+      { label: "成本", value: "较高，种子与人工约300元。" },
+      { label: "效果", value: "长期提升蜜源多样性，减少错配风险。" },
+      { label: "收益导向", value: "长期生态韧性，可持续收益。" }
+    ],
+    detailHighlights: [
+      { label: "成本", value: "较高", note: "按当前场地条件估算" },
+      { label: "效果", value: "提升生态韧性", note: "围绕当下事实底座设计" },
+      { label: "收益导向", value: "长期可持续", note: "用于选择不同管理取向" }
+    ],
+    metrics: [
+      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
+      { label: "风险等级", value: "中", note: "长期投资，短期效果不明显，但降低未来风险。" },
+      { label: "建议动作", value: "规划种植与蜂箱调整。", note: "主花源：冬青" }
+    ]
+  }
+];
+
 const $ = (id) => document.getElementById(id);
 const stage = $("carouselStage");
 const backButton = $("backDashboardButton");
@@ -142,12 +273,13 @@ const MIN_CORE_DAY_SAMPLES = 3;
 const MIN_FALLBACK_DAY_SAMPLES = 6;
 
 const state = {
-  scenarios: [...DEFAULT_SCENARIOS],
+  scenarios: [...FROZEN_AI_SCENARIOS],
   selectedIndex: 0,
   activeScenario: null,
   messages: [],
   isSending: false,
-  source: "default"
+  source: "frozen",
+  analysisContext: null
 };
 
 const SCENARIO_CACHE_KEY = "beeScenarioCardsCache:v2";
@@ -496,13 +628,36 @@ function renderLoadingCards() {
   stage.innerHTML = [0, 1, 2, 3].map(loadingCardHtml).join("");
 }
 
+function asPercent(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return "--";
+  return String(Number(numeric.toFixed(3)));
+}
+
+function currentDetailSummary(scenario) {
+  const basis = state.analysisContext?.strategyBasis || {};
+  const weather = state.analysisContext?.weather || {};
+  if (!basis.date) return scenario.summary;
+
+  const common = `${basis.date} 实时数据：${basis.topFlower || "当前主花源"}花期指数${asPercent(basis.floweringValue)}、花蜜量${asPercent(basis.nectarValue)}，蜂群核心活跃度${asPercent(basis.activityValue)}，错配风险${asPercent(basis.mismatchGap)}（${basis.mismatchLevel || "待评估"}），天气${weather.text || "暂无"}、${weather.temp ?? "--"}°C、降水概率${weather.pop ?? "--"}%、风速${weather.windSpeed ?? "--"}km/h。`;
+
+  const endings = {
+    "scenario-a": "因此当前详情摘要只提示维持低扰动监测，下面的保守型管理策略保持不变。",
+    "scenario-b": "因此当前详情摘要只提示关注核心活动时段的遮荫、防风与补水，下面的时段防护策略保持不变。",
+    "scenario-c": "因此当前详情摘要只提示是否需要短期激励采集效率，下面的补充饲喂与增效策略保持不变。",
+    "scenario-d": "因此当前详情摘要只提示长期蜜源承接与生态韧性压力，下面的生态优化策略保持不变。"
+  };
+
+  return `${common}${endings[scenario.id] || "下面的策略说明保持不变。"}`;
+}
+
 function renderDetail(index) {
   const s = state.scenarios[index];
   if (!s) return;
 
   if (detailKicker) detailKicker.textContent = `${s.shortLabel} / ${s.kicker}`;
   if (detailTitle) detailTitle.textContent = s.title;
-  if (detailSummary) detailSummary.textContent = s.summary;
+  if (detailSummary) detailSummary.textContent = currentDetailSummary(s);
   if (detailSectionTitle) detailSectionTitle.textContent = s.sectionTitle || "策略说明";
 
   if (detailCopy) {
@@ -593,7 +748,7 @@ function readScenarioCache() {
     const raw = localStorage.getItem(SCENARIO_CACHE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed?.scenarios) || !parsed.scenarios.length) return null;
+    if (!parsed?.analysisContext) return null;
     return parsed;
   } catch {
     return null;
@@ -607,7 +762,7 @@ function writeScenarioCache(payload) {
       JSON.stringify({
         source: payload.source || "unknown",
         cachedAt: payload.cachedAt || new Date().toISOString(),
-        scenarios: payload.scenarios
+        analysisContext: payload.analysisContext || null
       })
     );
   } catch {
@@ -616,9 +771,9 @@ function writeScenarioCache(payload) {
 }
 
 function applyScenarioPayload(payload) {
-  if (!payload || !Array.isArray(payload.scenarios) || !payload.scenarios.length) return;
-  state.scenarios = payload.scenarios;
-  state.source = payload.source || "unknown";
+  if (!payload) return;
+  state.analysisContext = payload.analysisContext || payload;
+  state.source = payload.source || "summary-only";
   renderCards();
   renderDetail(state.selectedIndex || 0);
 }
@@ -627,15 +782,15 @@ async function fetchScenarios() {
   let timeout;
   try {
     const controller = new AbortController();
-    timeout = setTimeout(() => controller.abort(), 55000);
-    const res = await fetch("/api/scenarios", { cache: "no-store", signal: controller.signal });
+    timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(`/api/scenarios?summaryOnly=1&t=${Date.now()}`, { cache: "no-store", signal: controller.signal });
     if (!res.ok) throw new Error("bad response");
     const data = await res.json();
-    if (!Array.isArray(data?.scenarios) || !data.scenarios.length) throw new Error("empty");
+    if (!data?.analysisContext) throw new Error("empty");
     return {
       source: data.source || "server",
       cachedAt: data.cachedAt || new Date().toISOString(),
-      scenarios: data.scenarios
+      analysisContext: data.analysisContext
     };
   } catch {
     return null;
@@ -697,7 +852,7 @@ async function init() {
   updateClock();
   setInterval(updateClock, 60000);
   bindEvents();
-  renderLoadingCards();
+  renderCards();
 
   const infoReady = initializeInfoPanel();
   setInterval(initializeInfoPanel, 300000);
@@ -707,11 +862,7 @@ async function init() {
     applyScenarioPayload(remote);
     writeScenarioCache(remote);
   } else {
-    applyScenarioPayload(readScenarioCache() || {
-      source: "default",
-      cachedAt: new Date().toISOString(),
-      scenarios: DEFAULT_SCENARIOS
-    });
+    applyScenarioPayload(readScenarioCache() || { source: "frozen" });
   }
 
   await infoReady;
