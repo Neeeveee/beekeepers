@@ -841,7 +841,8 @@ async function chatWithDeepSeek({ message, history, scenarioContext, analysisCon
         `要点：${(scenarioContext.detailPoints || []).join("；")}`,
         `详情字段：${(scenarioContext.detailSections || []).map((item) => `${item.label}=${item.value}`).join("；")}`,
         `摘要卡：${(scenarioContext.detailHighlights || []).map((item) => `${item.label}=${item.value}（${item.note}）`).join("；")}`,
-        `指标：${(scenarioContext.metrics || []).map((item) => `${item.label}=${item.value}（${item.note}）`).join("；")}`
+        `指标：${(scenarioContext.metrics || []).map((item) => `${item.label}=${item.value}（${item.note}）`).join("；")}`,
+        `指标解释依据：${scenarioContext.metricRationale || "暂无单独说明，请结合当前实时数据、方案指标与策略详情解释。"}`
       ].join("\n")
     });
   }

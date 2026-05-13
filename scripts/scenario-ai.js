@@ -121,10 +121,11 @@ const FROZEN_AI_SCENARIOS = [
       { label: "收益导向", value: "短期稳定", note: "用于选择不同管理取向" }
     ],
     metrics: [
-      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
+      { label: "匹配度", value: "68%", note: "维持当前授粉窗口的稳态预期" },
       { label: "风险等级", value: "中", note: "风险可控，但若天气突变可能影响效率。" },
       { label: "建议动作", value: "持续监测，暂不干预。", note: "主花源：冬青" }
-    ]
+    ],
+    metricRationale: "A 方案作为低干预基线，不假设额外增益：匹配度沿用当前事实底座约 68%；风险保持中等，因为方案依赖天气与自然采集窗口，主要通过监测控制风险。"
   },
   {
     id: "scenario-b",
@@ -153,10 +154,11 @@ const FROZEN_AI_SCENARIOS = [
       { label: "收益导向", value: "短期效率与健康", note: "用于选择不同管理取向" }
     ],
     metrics: [
-      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
-      { label: "风险等级", value: "中", note: "防护措施降低天气风险，但需及时调整。" },
+      { label: "匹配度", value: "72%", note: "遮荫、防风与补水后的核心时段预期" },
+      { label: "风险等级", value: "中低", note: "防护措施降低天气风险，但需及时调整。" },
       { label: "建议动作", value: "立即实施遮荫与防风。", note: "主花源：冬青" }
-    ]
+    ],
+    metricRationale: "B 方案在 68% 基线之上增加约 4 个百分点，来自遮荫、防风、补水对 10:00-15:00 核心采集时段的保护；风险降为中低，因为它直接缓解高温、风速等当天执行扰动。"
   },
   {
     id: "scenario-c",
@@ -185,10 +187,11 @@ const FROZEN_AI_SCENARIOS = [
       { label: "收益导向", value: "短期增产", note: "用于选择不同管理取向" }
     ],
     metrics: [
-      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
+      { label: "匹配度", value: "75%", note: "短期激励蜂群出勤后的增效预期" },
       { label: "风险等级", value: "中", note: "补充饲喂可能引起盗蜂，需谨慎操作。" },
       { label: "建议动作", value: "执行补充饲喂，监控蜂群反应。", note: "主花源：冬青" }
-    ]
+    ],
+    metricRationale: "C 方案在 68% 基线之上增加约 7 个百分点，来自补充饲喂和蜂群激励对短期出勤与授粉效率的提升；风险仍为中等，因为增效操作可能带来盗蜂、过度刺激或管理频率上升。"
   },
   {
     id: "scenario-d",
@@ -217,10 +220,11 @@ const FROZEN_AI_SCENARIOS = [
       { label: "收益导向", value: "长期可持续", note: "用于选择不同管理取向" }
     ],
     metrics: [
-      { label: "匹配度", value: "68%", note: "基于 2026-05-13 同一组花期、蜜源、活跃度和错配数据" },
-      { label: "风险等级", value: "中", note: "长期投资，短期效果不明显，但降低未来风险。" },
+      { label: "匹配度", value: "70%", note: "辅助蜜源与蜂箱布局优化后的长期预期" },
+      { label: "风险等级", value: "低", note: "长期投资，短期效果不明显，但降低未来风险。" },
       { label: "建议动作", value: "规划种植与蜂箱调整。", note: "主花源：冬青" }
-    ]
+    ],
+    metricRationale: "D 方案短期只在 68% 基线之上增加约 2 个百分点，因为辅助蜜源和蜂箱布局优化见效较慢；风险降为低，是因为它减少单一蜜源依赖，提高后续花期承接和生态韧性。"
   }
 ];
 
@@ -476,7 +480,8 @@ function scenarioContext(scenario) {
     detailPoints: scenario.detailPoints || [],
     metrics: scenario.metrics || [],
     detailSections: scenario.detailSections || [],
-    detailHighlights: scenario.detailHighlights || []
+    detailHighlights: scenario.detailHighlights || [],
+    metricRationale: scenario.metricRationale || ""
   };
 }
 
