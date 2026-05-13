@@ -315,32 +315,32 @@
     {
       "time": "2026-05-12",
       "value": 0.818
+    },
+    {
+      "time": "2026-05-13",
+      "value": 0.818
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.934,
-      "flowering_index": 0.934,
+      "contribution_value": 0.904,
+      "flowering_index": 0.904,
       "plant_name": "冬青"
     },
     {
-      "contribution_value": 0.701,
-      "flowering_index": 0.701,
+      "contribution_value": 0.678,
+      "flowering_index": 0.678,
       "plant_name": "苦槠"
     }
   ],
   "forecast": [
-    {
-      "time": "2026-05-12",
-      "value": 0.818
-    },
     {
       "time": "2026-05-13",
       "value": 0.818
     },
     {
       "time": "2026-05-14",
-      "value": 0.8
+      "value": 0.791
     },
     {
       "time": "2026-05-15",
@@ -348,26 +348,30 @@
     },
     {
       "time": "2026-05-16",
-      "value": 0.662
-    },
-    {
-      "time": "2026-05-17",
       "value": 0.677
     },
     {
+      "time": "2026-05-17",
+      "value": 0.655
+    },
+    {
       "time": "2026-05-18",
-      "value": 0.53
+      "value": 0.512
+    },
+    {
+      "time": "2026-05-19",
+      "value": 0.548
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.663,
-      "flowering_index": 0.663,
+      "contribution_value": 0.685,
+      "flowering_index": 0.685,
       "plant_name": "冬青"
     },
     {
-      "contribution_value": 0.398,
-      "flowering_index": 0.398,
+      "contribution_value": 0.411,
+      "flowering_index": 0.411,
       "plant_name": "苦槠"
     }
   ]
