@@ -255,6 +255,7 @@ const detailSummaryFull = $("detailSummaryFull");
 const detailSectionTitle = $("detailSectionTitle");
 const detailCopy = $("detailCopy");
 const detailMetrics = $("detailMetrics");
+const detailGuideImage = $("detailGuideImage");
 const detailPrimary = $("detailPrimaryAction");
 const detailModal = document.querySelector(".detail-modal");
 const corridorPanel = $("corridorPanel");
@@ -271,6 +272,12 @@ const infoMismatch = $("infoMismatch");
 const siteDateRange = $("siteDateRange");
 
 const CARD_IMAGE_COUNT = 4;
+const DETAIL_GUIDE_IMAGES = {
+  "scenario-a": "./images/A.png",
+  "scenario-b": "./images/B.png",
+  "scenario-c": "./images/C.png",
+  "scenario-d": "./images/D.png"
+};
 
 const GAUGE_DATA_BASE_URL = "https://neeeveee.github.io/beekeepers/data";
 const BEE_CORE_START_HOUR = 10;
@@ -681,6 +688,10 @@ function renderDetail(index) {
   }
   setDetailSummaryExpanded(false);
   if (detailSectionTitle) detailSectionTitle.textContent = s.sectionTitle || "策略说明";
+  if (detailGuideImage) {
+    detailGuideImage.src = DETAIL_GUIDE_IMAGES[s.id] || "./images/A.png";
+    detailGuideImage.alt = `${s.title}操作说明图`;
+  }
 
   if (detailCopy) {
     const sections = s.detailSections || [];

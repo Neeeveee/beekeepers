@@ -2502,8 +2502,8 @@ body.is-scenario-chat-active .composer-shell {
 
 .detail-modal.glass-panel,
 .corridor-modal.glass-panel {
-  width: min(920px, calc(100vw - 72px));
-  height: min(610px, calc(100vh - 56px));
+  width: min(1120px, calc(100vw - 72px));
+  height: min(650px, calc(100vh - 56px));
   min-height: 0;
   padding: 25px;
   border-radius: 0;
@@ -2514,6 +2514,7 @@ body.is-scenario-chat-active .composer-shell {
   grid-template-rows: auto minmax(0, 1fr) 48px;
   gap: 15px;
   overflow: hidden;
+  position: relative;
 }
 
 .detail-modal.is-hidden,
@@ -2524,14 +2525,17 @@ body.is-scenario-chat-active .composer-shell {
 .detail-header {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 383px) minmax(0, 468px);
+  grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
   justify-content: space-between;
-  align-items: start;
-  gap: 20px;
+  align-items: center;
+  gap: 24px;
 }
 
 .detail-heading-group {
   min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(47px, auto);
+  align-content: start;
   gap: 8px;
   padding-top: 0;
   position: relative;
@@ -2559,7 +2563,7 @@ body.is-scenario-chat-active .composer-shell {
 
 .detail-summary {
   max-width: 100%;
-  padding-right: 30px;
+  padding-right: 32px;
   color: #3d4044;
   font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
   font-size: 14px;
@@ -2640,9 +2644,12 @@ body.is-scenario-chat-active .composer-shell {
 
 .detail-header-side {
   display: grid;
-  grid-template-columns: minmax(0, 416px) 40px;
-  align-items: start;
+  grid-template-columns: auto;
+  justify-content: end;
+  align-items: center;
   gap: 12px;
+  padding-top: 0;
+  padding-right: 56px;
 }
 
 .corridor-header-side {
@@ -2653,20 +2660,22 @@ body.is-scenario-chat-active .composer-shell {
 
 .detail-inline-highlights {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, 164px);
+  gap: 12px;
   min-width: 0;
   align-items: stretch;
+  height: auto;
 }
 
 .detail-metric-card,
 .chat-stage .detail-metric-card {
-  width: 100%;
+  width: 164px;
   min-width: 0;
   box-sizing: border-box;
   height: auto;
-  min-height: 104px;
-  padding: 12px;
+  min-height: 88px;
+  max-height: 98px;
+  padding: 11px 13px;
   border-radius: 16px;
   border: 0.667px solid rgba(42, 47, 56, 0.05);
   background: rgba(255, 255, 255, 0.56);
@@ -2693,7 +2702,7 @@ body.is-scenario-chat-active .composer-shell {
 .chat-stage .detail-metric-value {
   color: #1f2430;
   font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
-  font-size: clamp(16px, 1.55vw, 20px);
+  font-size: clamp(16px, 1.45vw, 19px);
   font-weight: 400;
   line-height: 1.16;
   letter-spacing: 0.08px;
@@ -2709,7 +2718,7 @@ body.is-scenario-chat-active .composer-shell {
   font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
   font-size: 11px;
   font-weight: 400;
-  line-height: 15.5px;
+  line-height: 15.4px;
   letter-spacing: 0.08px;
   min-width: 0;
   overflow-wrap: anywhere;
@@ -2717,6 +2726,9 @@ body.is-scenario-chat-active .composer-shell {
 }
 
 .detail-close-button {
+  position: absolute;
+  top: 25px;
+  right: 25px;
   width: 40px;
   height: 40px;
   min-width: 40px;
@@ -2762,6 +2774,9 @@ body.is-scenario-chat-active .composer-shell {
   border-radius: 0;
   border: 0.667px solid rgba(42, 47, 56, 0.05);
   background: rgba(255, 255, 255, 0.54);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.78fr);
+  gap: 0;
   overflow: hidden;
 }
 
@@ -2775,6 +2790,28 @@ body.is-scenario-chat-active .composer-shell {
   grid-template-rows: 17px minmax(0, 1fr);
   gap: 11px;
   overflow: hidden;
+}
+
+.detail-guide-panel {
+  min-width: 0;
+  min-height: 0;
+  padding: 14px;
+  border: 0;
+  border-left: 0.667px solid rgba(42, 47, 56, 0.07);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.detail-guide-image {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .detail-section-title {
@@ -2972,15 +3009,32 @@ body.is-scenario-chat-active .composer-shell {
 }
 
 .corridor-device-block {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
+  padding: 0;
+}
+
+.corridor-device-scroll {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 36, 48, 0.24) transparent;
+}
+
+.corridor-device-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.corridor-device-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(31, 36, 48, 0.24);
 }
 
 .corridor-device-image {
-  width: 100%;
+  width: auto;
   height: 100%;
+  max-width: none;
   object-fit: contain;
   display: block;
   filter: contrast(1.02);
@@ -3025,6 +3079,13 @@ body.is-scenario-chat-active .composer-shell {
 
   .detail-content-grid {
     height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(160px, 0.58fr);
+  }
+
+  .detail-guide-panel {
+    border-left: 0;
+    border-top: 0.667px solid rgba(42, 47, 56, 0.07);
   }
 
 }
@@ -3071,6 +3132,10 @@ body.is-scenario-chat-active .composer-shell {
     height: auto;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .detail-content-grid {
+    grid-template-rows: minmax(0, 1fr) minmax(130px, 0.45fr);
   }
 
   .detail-primary-action {
