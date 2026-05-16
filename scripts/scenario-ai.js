@@ -250,6 +250,8 @@ const detailClose = $("detailCloseButton");
 const detailKicker = $("detailKicker");
 const detailTitle = $("detailTitle");
 const detailSummary = $("detailSummary");
+const detailSummaryToggle = $("detailSummaryToggle");
+const detailSummaryFull = $("detailSummaryFull");
 const detailSectionTitle = $("detailSectionTitle");
 const detailCopy = $("detailCopy");
 const detailMetrics = $("detailMetrics");
@@ -656,13 +658,28 @@ function currentDetailSummary(scenario) {
   return `${common}${endings[scenario.id] || "下面的策略说明保持不变。"}`;
 }
 
+function setDetailSummaryExpanded(expanded) {
+  if (!detailSummaryToggle || !detailSummaryFull) return;
+  detailSummaryToggle.classList.toggle("is-expanded", expanded);
+  detailSummaryToggle.setAttribute("aria-expanded", String(expanded));
+  detailSummaryFull.classList.toggle("is-visible", expanded);
+  detailSummaryFull.setAttribute("aria-hidden", String(!expanded));
+}
+
 function renderDetail(index) {
   const s = state.scenarios[index];
   if (!s) return;
+  const summaryText = currentDetailSummary(s);
 
   if (detailKicker) detailKicker.textContent = `${s.shortLabel} / ${s.kicker}`;
   if (detailTitle) detailTitle.textContent = s.title;
-  if (detailSummary) detailSummary.textContent = currentDetailSummary(s);
+  if (detailSummary) detailSummary.textContent = summaryText;
+  if (detailSummaryFull) detailSummaryFull.textContent = summaryText;
+  if (detailSummaryToggle) {
+    detailSummaryToggle.hidden = summaryText.length < 70;
+    detailSummaryToggle.setAttribute("aria-label", "展开详情摘要");
+  }
+  setDetailSummaryExpanded(false);
   if (detailSectionTitle) detailSectionTitle.textContent = s.sectionTitle || "策略说明";
 
   if (detailCopy) {
@@ -733,6 +750,7 @@ function closeDetail() {
     detailOverlay.classList.remove("is-visible");
     detailOverlay.setAttribute("aria-hidden", "true");
   }
+  setDetailSummaryExpanded(false);
   showStrategyDetail();
 }
 
@@ -815,6 +833,12 @@ function bindEvents() {
   }
   if (detailClose) detailClose.addEventListener("click", closeDetail);
   if (detailBackdrop) detailBackdrop.addEventListener("click", closeDetail);
+  if (detailSummaryToggle) {
+    detailSummaryToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setDetailSummaryExpanded(!detailSummaryToggle.classList.contains("is-expanded"));
+    });
+  }
   if (detailPrimary) detailPrimary.addEventListener("click", () => enterStrategyChat(state.selectedIndex));
   if (corridorButton) corridorButton.addEventListener("click", showCorridorPanel);
   if (corridorBackButton) corridorBackButton.addEventListener("click", showStrategyDetail);
@@ -847,6 +871,14 @@ function bindEvents() {
   });
 
   document.addEventListener("click", (event) => {
+    if (
+      detailSummaryFull?.classList.contains("is-visible")
+      && !detailSummaryFull.contains(event.target)
+      && !detailSummaryToggle?.contains(event.target)
+    ) {
+      setDetailSummaryExpanded(false);
+    }
+
     if (!siteDetailCard || !siteInfoToggle || !siteDetailCard.classList.contains("is-visible")) return;
     if (siteDetailCard.contains(event.target) || siteInfoToggle.contains(event.target)) return;
     setSiteCardVisible(false);

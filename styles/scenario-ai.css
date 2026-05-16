@@ -2534,6 +2534,7 @@ body.is-scenario-chat-active .composer-shell {
   min-width: 0;
   gap: 8px;
   padding-top: 0;
+  position: relative;
 }
 
 .detail-kicker {
@@ -2558,16 +2559,83 @@ body.is-scenario-chat-active .composer-shell {
 
 .detail-summary {
   max-width: 100%;
+  padding-right: 30px;
   color: #3d4044;
   font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 23.52px;
   letter-spacing: 0.08px;
-  display: block;
-  overflow: visible;
+  display: -webkit-box;
+  overflow: hidden;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   white-space: normal;
+}
+
+.detail-summary-toggle {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0.667px solid rgba(42, 47, 56, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 24;
+}
+
+.detail-summary-toggle[hidden] {
+  display: none;
+}
+
+.detail-summary-toggle-icon {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #3d4044;
+  border-bottom: 1.5px solid #3d4044;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+.detail-summary-toggle.is-expanded .detail-summary-toggle-icon {
+  transform: translateY(2px) rotate(225deg);
+}
+
+.detail-summary-popover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 23;
+  max-height: 168px;
+  padding: 13px 15px;
+  border: 0.667px solid rgba(42, 47, 56, 0.08);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 34px rgba(29, 33, 39, 0.12);
+  color: #3d4044;
+  font-family: "Source Han Serif CN", "Noto Serif SC", "SimSun", serif;
+  font-size: 14px;
+  line-height: 23.52px;
+  letter-spacing: 0.08px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.detail-summary-popover.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .detail-header-side {
