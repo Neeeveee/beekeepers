@@ -6,6 +6,7 @@ const whyTimeline = document.querySelector("[data-why-timeline]");
 const systemCards = document.querySelectorAll(".system-card");
 const practiceStack = document.querySelector(".perspective-card-stack");
 const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const hoverPointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
 
 window.addEventListener("load", () => {
   document.body.classList.remove("is-loading");
@@ -47,6 +48,8 @@ systemCards.forEach((card) => {
   const inner = card.querySelector(".system-card-inner");
   let rotation = 0;
   let isFlipped = false;
+  let lastPointerType = "";
+  let lastTouchClickAt = 0;
 
   if (!inner) {
     return;
@@ -62,10 +65,50 @@ systemCards.forEach((card) => {
     inner.style.setProperty("--card-rotation", `${rotation}deg`);
   };
 
-  card.addEventListener("pointerenter", () => rotateForward(true));
-  card.addEventListener("pointerleave", () => rotateForward(false));
-  card.addEventListener("focusin", () => rotateForward(true));
-  card.addEventListener("focusout", () => rotateForward(false));
+  const hasHoverPointer = () => hoverPointerQuery.matches && lastPointerType !== "touch";
+
+  card.addEventListener("pointerdown", (event) => {
+    lastPointerType = event.pointerType || "";
+  });
+
+  card.addEventListener("pointerenter", (event) => {
+    if (event.pointerType === "mouse" && hoverPointerQuery.matches) {
+      rotateForward(true);
+    }
+  });
+
+  card.addEventListener("pointerleave", (event) => {
+    if (event.pointerType === "mouse" && hoverPointerQuery.matches) {
+      rotateForward(false);
+    }
+  });
+
+  card.addEventListener("focusin", () => {
+    if (hasHoverPointer()) {
+      rotateForward(true);
+    }
+  });
+
+  card.addEventListener("focusout", () => {
+    if (hasHoverPointer()) {
+      rotateForward(false);
+    }
+  });
+
+  card.addEventListener("click", () => {
+    if (hasHoverPointer()) {
+      return;
+    }
+
+    const now = window.performance.now();
+    if (now - lastTouchClickAt < 320) {
+      return;
+    }
+
+    lastTouchClickAt = now;
+    rotateForward(!isFlipped);
+    card.blur();
+  });
 });
 
 if (practiceStack) {
