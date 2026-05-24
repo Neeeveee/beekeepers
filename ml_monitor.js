@@ -76,7 +76,7 @@ function renderHistoryChart(data) {
 
     historyChart.setOption({
         animation: false,
-        color: ["#9C9C9C", "#BDFF52", "#FFE500"],
+        color: ["#9C9C9C", "#3F3F3F", "#FFE500"],
         tooltip: { trigger: "axis" },
         legend: { data: ["实际值", "规则预测", "ML 回测值"] },
         grid: { left: 48, right: 20, top: 44, bottom: 58 },
@@ -97,7 +97,7 @@ function renderHistoryChart(data) {
                 type: "line",
                 data: items.map(item => item.actual_activity),
                 smooth: true,
-                lineStyle: { color: "#9C9C9C" },
+                lineStyle: { color: "#9C9C9C", width: 1.4 },
                 itemStyle: { color: "#9C9C9C" },
                 symbolSize: 6
             },
@@ -106,8 +106,8 @@ function renderHistoryChart(data) {
                 type: "line",
                 data: items.map(item => item.rule_expected_activity),
                 smooth: true,
-                lineStyle: { type: "dashed", color: "#BDFF52" },
-                itemStyle: { color: "#BDFF52" },
+                lineStyle: { type: "dashed", color: "#3F3F3F", width: 1.4 },
+                itemStyle: { color: "#3F3F3F" },
                 symbolSize: 5
             },
             {
@@ -115,7 +115,7 @@ function renderHistoryChart(data) {
                 type: "line",
                 data: items.map(item => item.ml_adjusted_activity),
                 smooth: true,
-                lineStyle: { color: "#FFE500" },
+                lineStyle: { color: "#FFE500", width: 1.4 },
                 itemStyle: { color: "#FFE500" },
                 symbolSize: 5
             }
@@ -132,7 +132,7 @@ function renderFutureChart(data) {
 
     futureChart.setOption({
         animation: false,
-        color: ["#BDFF52", "#89CE00", "#FFF765"],
+        color: ["#3F3F3F", "#89CE00", "#FFF765"],
         tooltip: { trigger: "axis" },
         legend: { data: ["规则预测", "ML 修正预测", "修正量"] },
         grid: { left: 48, right: 46, top: 44, bottom: 58 },
@@ -159,8 +159,8 @@ function renderFutureChart(data) {
                 type: "line",
                 data: items.map(item => item.rule_expected_activity),
                 smooth: true,
-                lineStyle: { type: "dashed", color: "#BDFF52" },
-                itemStyle: { color: "#BDFF52" },
+                lineStyle: { type: "dashed", color: "#3F3F3F", width: 1.4 },
+                itemStyle: { color: "#3F3F3F" },
                 symbolSize: 5
             },
             {
@@ -168,7 +168,7 @@ function renderFutureChart(data) {
                 type: "line",
                 data: items.map(item => item.ml_adjusted_activity),
                 smooth: true,
-                lineStyle: { color: "#89CE00" },
+                lineStyle: { color: "#89CE00", width: 1.4 },
                 itemStyle: { color: "#89CE00" },
                 symbolSize: 5
             },
