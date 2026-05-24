@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>展陈实时曲线</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --text: #000000;
+      --muted: #1d1d1f;
+      --hairline: #1d1d1f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+    }
+
+    .screen {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: minmax(178px, 25vh) 1px minmax(0, 1fr);
+      gap: clamp(22px, 2.6vw, 42px);
+      padding: clamp(34px, 4.2vw, 64px) clamp(42px, 5.2vw, 84px) clamp(30px, 3.4vw, 52px);
+      background: var(--bg);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: start;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(58px, 5.8vw, 112px);
+      line-height: 0.96;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: clamp(18px, 1.8vw, 28px) 0 0;
+      max-width: 1120px;
+      color: var(--muted);
+      font-size: clamp(18px, 1.32vw, 26px);
+      font-weight: 750;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    .status {
+      min-width: 220px;
+      display: grid;
+      gap: 8px;
+      justify-items: end;
+      color: var(--text);
+      font-size: clamp(16px, 1.18vw, 24px);
+      font-weight: 800;
+      white-space: nowrap;
+      align-self: end;
+      padding-bottom: 2px;
+    }
+
+    .live {
+      color: var(--text);
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--hairline);
+    }
+
+    .chart-shell {
+      min-height: 0;
+      position: relative;
+      background: transparent;
+    }
+
+    #liveChart {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .metric-row {
+      position: absolute;
+      right: clamp(42px, 5.2vw, 84px);
+      top: clamp(34px, 4.2vw, 64px);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 1.4vw, 24px);
+    }
+
+    .metric-card {
+      display: block;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(0, 0, 0, 0.32);
+      text-align: right;
+      cursor: pointer;
+    }
+
+    .metric-card.is-active {
+      color: #000000;
+    }
+
+    .metric-label {
+      color: currentColor;
+      font-size: clamp(13px, 0.92vw, 17px);
+      font-weight: 760;
+      line-height: 1;
+    }
+
+    .metric-value {
+      margin-top: 6px;
+      color: currentColor;
+      font-size: clamp(16px, 1.15vw, 22px);
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 760px) {
+      .screen {
+        padding: 28px 24px 30px;
+        gap: 24px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: clamp(42px, 12vw, 72px);
+      }
+
+      .status {
+        justify-items: start;
+        align-self: start;
+      }
+
+      .metric-row {
+        position: static;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <header class="topbar">
+      <div>
+        <h1 id="screenTitle">生态序列曲线</h1>
+        <p class="subtitle" id="screenSubtitle">开花状态基于历史实际数据按分钟动态更新，当前窗口180分钟</p>
+      </div>
+      <div class="status">
+        <div class="live">实时更新中</div>
+        <div id="clockText">--:--</div>
+      </div>
+    </header>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <section class="chart-shell" aria-label="实时曲线">
+      <div id="liveChart"></div>
+    </section>
+
+    <section class="metric-row" aria-label="当前指标">
+      <button class="metric-card" type="button" data-metric-card="flowering">
+        <div class="metric-label">开花状态</div>
+        <div class="metric-value" id="floweringValue">--%</div>
+      </button>
+      <button class="metric-card" type="button" data-metric-card="nectar">
+        <div class="metric-label">蜜源供给</div>
+        <div class="metric-value" id="nectarValue">--%</div>
+      </button>
+      <button class="metric-card" type="button" data-metric-card="mismatch">
+        <div class="metric-label">错配风险</div>
+        <div class="metric-value" id="mismatchValue">--%</div>
+      </button>
+      <button class="metric-card" type="button" data-metric-card="activity">
+        <div class="metric-label">蜂群活跃</div>
+        <div class="metric-value" id="activityValue">--%</div>
+      </button>
+    </section>
+  </main>
+
+  <script src="./js/exhibition-realtime-curve.js?v=20260519v3"></script>
+</body>
+</html>

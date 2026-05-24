@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>蜜源月度更新轮播</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="./css/nectar-carousel.css" />
+</head>
+<body>
+  <main class="screen">
+    <div id="nectarMap" aria-label="蜜源分布图"></div>
+
+    <section class="info-panel" aria-live="polite">
+      <div class="kicker-row">
+        <p class="eyebrow">MONTHLY NECTAR SOURCE</p>
+      </div>
+      <span class="panel-divider" aria-hidden="true"></span>
+      <div class="month-line">
+        <span id="monthNumber">01</span>
+        <span id="monthLabel">一月</span>
+      </div>
+      <div class="source-block">
+        <span class="source-label">主要蜜源</span>
+        <strong id="mainSources">枇杷</strong>
+        <p id="sourceSummary" class="source-summary">冬季早春蜜源斑块，为蜂群越冬后恢复提供连续补充。</p>
+      </div>
+      <div class="panel-footer">
+        <div id="sourceChips" class="source-chips"></div>
+        <div class="panel-progress" aria-hidden="true">
+          <svg class="progress-ring" viewBox="0 0 48 48">
+            <circle class="progress-ring-track" cx="24" cy="24" r="19"></circle>
+            <circle id="progressBar" class="progress-ring-value" cx="24" cy="24" r="19"></circle>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <aside class="legend-card" aria-label="蜜源类型图例">
+      <h2>蜜源类型</h2>
+      <div class="legend-grid">
+        <span class="legend-item"><i style="background:#f39c12"></i>枇杷</span>
+        <span class="legend-item"><i style="background:#82d8c4"></i>油菜</span>
+        <span class="legend-item"><i style="background:#e0a09b"></i>柃木</span>
+        <span class="legend-item"><i style="background:#b45aa1"></i>果梅</span>
+        <span class="legend-item"><i style="background:#c6b347"></i>五倍子</span>
+        <span class="legend-item"><i style="background:#a8c9d7"></i>苦槠</span>
+        <span class="legend-item"><i style="background:#a9d07a"></i>栾树</span>
+        <span class="legend-item"><i style="background:#f3ea2a"></i>冬青</span>
+      </div>
+    </aside>
+
+    <div class="progress" aria-hidden="true"></div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="./js/nectar-carousel.js"></script>
+</body>
+</html>
