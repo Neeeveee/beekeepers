@@ -118,20 +118,29 @@
     .metric-card {
       width: 100%;
       min-height: clamp(54px, 5.2vw, 82px);
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
       padding: 0 clamp(20px, 2.2vw, 34px);
       border: 0;
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.055);
       color: #1d1d1f;
       text-align: center;
-      cursor: pointer;
+      cursor: default;
     }
 
     .metric-card.is-active {
-      background: #fff89a;
       color: #000000;
+    }
+
+    .metric-dot {
+      width: 14px;
+      height: 14px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--metric-color, #1d1d1f);
     }
 
     .metric-label {
@@ -142,7 +151,6 @@
     }
 
     .metric-value {
-      display: none;
       margin-top: 7px;
       color: currentColor;
       font-size: clamp(13px, 0.95vw, 18px);
@@ -184,10 +192,20 @@
       .metric-card {
         min-height: 48px;
         padding: 0 10px;
+        gap: 7px;
       }
 
       .metric-label {
         font-size: 14px;
+      }
+
+      .metric-dot {
+        width: 9px;
+        height: 9px;
+      }
+
+      .metric-value {
+        display: none;
       }
     }
   </style>
@@ -197,7 +215,7 @@
     <header class="topbar">
       <div>
         <h1 id="screenTitle">生态时间序列</h1>
-        <p class="subtitle" id="screenSubtitle">开花状态基于历史实际数据按分钟动态更新，当前窗口180分钟</p>
+        <p class="subtitle" id="screenSubtitle">开花状态、蜜源供给强度、错配风险基于历史实际数据按分钟动态更新，当前窗口180分钟</p>
       </div>
       <div class="status">
         <div class="live">实时更新中</div>
@@ -209,24 +227,27 @@
 
     <section class="content-grid">
       <section class="metric-row" aria-label="当前指标">
-        <button class="metric-card" type="button" data-metric-card="flowering">
+        <div class="metric-card is-active" data-metric-card="flowering">
+          <span class="metric-dot" style="--metric-color: #BDFF52"></span>
           <div>
             <div class="metric-label">开花状态</div>
             <div class="metric-value" id="floweringValue">--%</div>
           </div>
-        </button>
-        <button class="metric-card" type="button" data-metric-card="nectar">
+        </div>
+        <div class="metric-card is-active" data-metric-card="nectar">
+          <span class="metric-dot" style="--metric-color: #797979"></span>
           <div>
             <div class="metric-label">蜜源供给强度</div>
             <div class="metric-value" id="nectarValue">--%</div>
           </div>
-        </button>
-        <button class="metric-card" type="button" data-metric-card="mismatch">
+        </div>
+        <div class="metric-card is-active" data-metric-card="mismatch">
+          <span class="metric-dot" style="--metric-color: #FFE500"></span>
           <div>
             <div class="metric-label">错配风险</div>
             <div class="metric-value" id="mismatchValue">--%</div>
           </div>
-        </button>
+        </div>
       </section>
 
       <section class="chart-shell" aria-label="实时曲线">
@@ -235,6 +256,6 @@
     </section>
   </main>
 
-  <script src="./js/exhibition-realtime-curve.js?v=20260524v4"></script>
+  <script src="./js/exhibition-realtime-curve.js?v=20260524v5"></script>
 </body>
 </html>

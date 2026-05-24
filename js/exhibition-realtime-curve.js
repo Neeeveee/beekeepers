@@ -3,8 +3,6 @@
   const DATA_BASE = params.get("data") || "./data";
   const UPDATE_SECONDS = Math.max(1, Number(params.get("speed")) || 60);
   const WINDOW_MINUTES = Math.max(30, Number(params.get("window")) || 180);
-  const DEFAULT_METRIC = params.get("metric") || "flowering";
-  const CYCLE_SECONDS = Math.max(0, Number(params.get("cycle")) || 0);
 
   const METRICS = {
     flowering: {
@@ -12,30 +10,34 @@
       title: "生态时间序列",
       subtitle: "开花状态基于历史实际数据按分钟动态更新",
       source: "flowering-overview.json",
-      valueId: "floweringValue"
+      valueId: "floweringValue",
+      color: "#BDFF52",
+      area: ["rgba(189, 255, 82, 0.18)", "rgba(189, 255, 82, 0.02)"]
     },
     nectar: {
       label: "蜜源供给强度",
       title: "生态时间序列",
       subtitle: "蜜源供给强度基于历史实际数据按分钟动态更新",
       source: "nectar-supply-overview.json",
-      valueId: "nectarValue"
+      valueId: "nectarValue",
+      color: "#797979",
+      area: ["rgba(121, 121, 121, 0.12)", "rgba(121, 121, 121, 0.015)"]
     },
     mismatch: {
       label: "错配风险",
       title: "生态时间序列",
       subtitle: "生态错配风险基于历史实际数据按分钟动态更新",
       source: "mismatch-overview.json",
-      valueId: "mismatchValue"
+      valueId: "mismatchValue",
+      color: "#FFE500",
+      area: ["rgba(255, 229, 0, 0.16)", "rgba(255, 229, 0, 0.02)"]
     }
   };
 
   const metricOrder = Object.keys(METRICS);
-  let activeMetric = METRICS[DEFAULT_METRIC] ? DEFAULT_METRIC : "flowering";
   let sourceCache = {};
   let displayMinute = getInitialDisplayMinute();
   let chart = null;
-  let lastCycleAt = Date.now();
 
   function clamp01(value) {
     if (!Number.isFinite(value)) {
@@ -157,13 +159,9 @@
     return rows;
   }
 
-  function buildOption(rows, metric) {
-    const values = rows.map(row => row.value);
-    const currentIndex = values.length - 1;
-    const fill = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-      { offset: 0, color: "rgba(0, 0, 0, 0.075)" },
-      { offset: 1, color: "rgba(0, 0, 0, 0.018)" }
-    ]);
+  function buildOption(rowsByMetric) {
+    const firstRows = rowsByMetric[metricOrder[0]] || [];
+    const currentIndex = Math.max(0, firstRows.length - 1);
 
     return {
       backgroundColor: "transparent",
@@ -184,17 +182,21 @@
         extraCssText: "box-shadow:none;border-radius:6px;font-weight:700;",
         textStyle: { color: "#000000" },
         formatter(items) {
-          const item = Array.isArray(items) ? items[0] : null;
-          if (!item) {
+          const list = Array.isArray(items) ? items : [];
+          if (!list.length) {
             return "";
           }
-          return `${formatDateTime(rows[item.dataIndex].time)}<br>${metric.label}: ${percent(item.data)}`;
+          const time = firstRows[list[0].dataIndex]?.time;
+          const lines = list
+            .map(item => `${item.marker}${item.seriesName}: ${percent(item.data)}`)
+            .join("<br>");
+          return `${formatDateTime(time)}<br>${lines}`;
         }
       },
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: rows.map(row => formatTime(row.time)),
+        data: firstRows.map(row => formatTime(row.time)),
         axisLine: {
           show: true,
           lineStyle: { color: "rgba(0,0,0,0.18)", width: 1 }
@@ -241,8 +243,16 @@
           lineStyle: { color: "rgba(0,0,0,0.052)", width: 1 }
         }
       },
-      series: [
-        {
+      series: metricOrder.map(key => {
+        const metric = METRICS[key];
+        const rows = rowsByMetric[key] || [];
+        const values = rows.map(row => row.value);
+        const fill = new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: metric.area[0] },
+          { offset: 1, color: metric.area[1] }
+        ]);
+
+        return {
           name: metric.label,
           type: "line",
           data: values,
@@ -251,8 +261,8 @@
           showSymbol: false,
           connectNulls: true,
           lineStyle: {
-            width: 1.35,
-            color: "rgba(0,0,0,0.58)"
+            width: 1.25,
+            color: metric.color
           },
           areaStyle: {
             color: fill
@@ -262,7 +272,7 @@
             symbolSize: 26,
             data: currentIndex >= 0 ? [{ coord: [currentIndex, values[currentIndex]] }] : [],
             itemStyle: {
-              color: "#d7d7d7",
+              color: metric.color,
               borderColor: "#000000",
               borderWidth: 1.3
             },
@@ -280,8 +290,8 @@
             label: { show: false }
           },
           emphasis: { focus: "none" }
-        }
-      ]
+        };
+      })
     };
   }
 
@@ -293,60 +303,31 @@
       }
       const card = document.querySelector(`[data-metric-card="${key}"]`);
       if (card) {
-        card.classList.toggle("is-active", key === activeMetric);
+        card.classList.add("is-active");
       }
     });
   }
 
   async function render() {
-    const points = await fetchMetric(activeMetric);
-    const metric = METRICS[activeMetric];
-    const rows = buildSeries(points, displayMinute);
     const currentValues = {};
+    const rowsByMetric = {};
 
     await Promise.all(metricOrder.map(async key => {
       const metricPoints = await fetchMetric(key);
       const metricRows = buildSeries(metricPoints, displayMinute);
+      rowsByMetric[key] = metricRows;
       currentValues[key] = metricRows[metricRows.length - 1]?.value ?? null;
     }));
 
-    document.getElementById("screenTitle").textContent = metric.title;
-    document.getElementById("screenSubtitle").textContent = `${metric.subtitle}，当前窗口${WINDOW_MINUTES}分钟`;
+    document.getElementById("screenTitle").textContent = "生态时间序列";
+    document.getElementById("screenSubtitle").textContent = `开花状态、蜜源供给强度、错配风险基于历史实际数据按分钟动态更新，当前窗口${WINDOW_MINUTES}分钟`;
     document.getElementById("clockText").textContent = formatTime(displayMinute);
     updateMetricCards(currentValues);
-    chart.setOption(buildOption(rows, metric), true);
-  }
-
-  function bindMetricSwitching() {
-    document.querySelectorAll("[data-metric-card]").forEach(button => {
-      button.addEventListener("click", () => {
-        const nextMetric = button.dataset.metricCard;
-        if (!METRICS[nextMetric] || nextMetric === activeMetric) {
-          return;
-        }
-        activeMetric = nextMetric;
-        lastCycleAt = Date.now();
-        render().catch(error => console.warn(error));
-      });
-    });
-  }
-
-  function maybeCycleMetric() {
-    if (!CYCLE_SECONDS) {
-      return;
-    }
-    const now = Date.now();
-    if (now - lastCycleAt < CYCLE_SECONDS * 1000) {
-      return;
-    }
-    lastCycleAt = now;
-    const currentIndex = metricOrder.indexOf(activeMetric);
-    activeMetric = metricOrder[(currentIndex + 1) % metricOrder.length];
+    chart.setOption(buildOption(rowsByMetric), true);
   }
 
   async function tick() {
     displayMinute = addMinutes(displayMinute, 1);
-    maybeCycleMetric();
     try {
       await render();
     } catch (error) {
@@ -356,7 +337,6 @@
 
   async function init() {
     chart = echarts.init(document.getElementById("liveChart"));
-    bindMetricSwitching();
     await render();
     setInterval(tick, UPDATE_SECONDS * 1000);
     setInterval(() => {
