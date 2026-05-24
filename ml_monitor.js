@@ -73,16 +73,18 @@ function renderHistoryChart(data) {
         showError("历史回测数据为空，当前无法绘制左侧回测图。");
         return;
     }
+    const futureCount = data.future?.items?.length || 24;
+    const visibleItems = items.slice(-futureCount);
 
     historyChart.setOption({
         animation: false,
-        color: ["#9C9C9C", "#3F3F3F", "#FFE500"],
+        color: ["#9C9C9C", "#797979", "#FFE500"],
         tooltip: { trigger: "axis" },
         legend: { data: ["实际值", "规则预测", "ML 回测值"] },
         grid: { left: 48, right: 20, top: 44, bottom: 58 },
         xAxis: {
             type: "category",
-            data: items.map(item => item.time),
+            data: visibleItems.map(item => item.time),
             axisLabel: { rotate: 25 }
         },
         yAxis: {
@@ -95,7 +97,7 @@ function renderHistoryChart(data) {
             {
                 name: "实际值",
                 type: "line",
-                data: items.map(item => item.actual_activity),
+                data: visibleItems.map(item => item.actual_activity),
                 smooth: true,
                 lineStyle: { color: "#9C9C9C", width: 1.4 },
                 itemStyle: { color: "#9C9C9C" },
@@ -104,16 +106,16 @@ function renderHistoryChart(data) {
             {
                 name: "规则预测",
                 type: "line",
-                data: items.map(item => item.rule_expected_activity),
+                data: visibleItems.map(item => item.rule_expected_activity),
                 smooth: true,
-                lineStyle: { type: "dashed", color: "#3F3F3F", width: 1.4 },
-                itemStyle: { color: "#3F3F3F" },
+                lineStyle: { type: "dashed", color: "#797979", width: 1.4 },
+                itemStyle: { color: "#797979" },
                 symbolSize: 5
             },
             {
                 name: "ML 回测值",
                 type: "line",
-                data: items.map(item => item.ml_adjusted_activity),
+                data: visibleItems.map(item => item.ml_adjusted_activity),
                 smooth: true,
                 lineStyle: { color: "#FFE500", width: 1.4 },
                 itemStyle: { color: "#FFE500" },
@@ -132,35 +134,29 @@ function renderFutureChart(data) {
 
     futureChart.setOption({
         animation: false,
-        color: ["#3F3F3F", "#89CE00", "#FFF765"],
+        color: ["#797979", "#89CE00"],
         tooltip: { trigger: "axis" },
-        legend: { data: ["规则预测", "ML 修正预测", "修正量"] },
-        grid: { left: 48, right: 46, top: 44, bottom: 58 },
+        legend: { data: ["规则预测", "ML 修正预测"] },
+        grid: { left: 48, right: 20, top: 44, bottom: 58 },
         xAxis: {
             type: "category",
             data: items.map(item => item.time),
             axisLabel: { rotate: 25 }
         },
-        yAxis: [
-            {
-                type: "value",
-                min: 0,
-                max: 1,
-                name: "活跃度"
-            },
-            {
-                type: "value",
-                name: "修正量"
-            }
-        ],
+        yAxis: {
+            type: "value",
+            min: 0,
+            max: 1,
+            name: "活跃度"
+        },
         series: [
             {
                 name: "规则预测",
                 type: "line",
                 data: items.map(item => item.rule_expected_activity),
                 smooth: true,
-                lineStyle: { type: "dashed", color: "#3F3F3F", width: 1.4 },
-                itemStyle: { color: "#3F3F3F" },
+                lineStyle: { type: "dashed", color: "#797979", width: 1.4 },
+                itemStyle: { color: "#797979" },
                 symbolSize: 5
             },
             {
@@ -171,14 +167,6 @@ function renderFutureChart(data) {
                 lineStyle: { color: "#89CE00", width: 1.4 },
                 itemStyle: { color: "#89CE00" },
                 symbolSize: 5
-            },
-            {
-                name: "修正量",
-                type: "bar",
-                yAxisIndex: 1,
-                data: items.map(item => item.ml_residual_adjustment),
-                itemStyle: { color: "#FFF765" },
-                barMaxWidth: 18
             }
         ]
     });

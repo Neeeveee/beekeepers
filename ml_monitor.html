@@ -167,7 +167,7 @@
             align-items: stretch;
             min-height: 0;
             height: auto;
-            max-height: 720px;
+            max-height: 820px;
         }
 
         .chart-card {
@@ -198,7 +198,7 @@
         .chart {
             width: 100%;
             flex: 1;
-            min-height: clamp(380px, 52vh, 560px);
+            min-height: clamp(460px, 60vh, 660px);
         }
 
         @media (max-width: 1400px) {
@@ -297,10 +297,10 @@
             </div>
 
             <div class="chart-card">
-                <h2>未来试运行：规则预测 / ML 修正 / 修正量</h2>
+                <h2>未来试运行：规则预测 / ML 修正预测</h2>
                 <div class="chart-help">
                     这里才是 ML 真正参与未来预测的位置。
-                    黄色柱子表示它对规则模型加了多少修正，用来观察有没有出现异常偏移。
+                    用来观察 ML 修正后的趋势是否出现异常偏移。
                 </div>
                 <div id="futureChart" class="chart"></div>
             </div>
