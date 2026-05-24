@@ -103,6 +103,27 @@
             border-radius: 12px;
         }
 
+        .figma-capture-button {
+            position: fixed;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            z-index: 2147483646;
+            border: 0;
+            border-radius: 999px;
+            padding: 10px 16px;
+            background: #111827;
+            color: #ffffff;
+            font: 600 13px/1.2 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+            cursor: pointer;
+        }
+
+        .figma-capture-button:disabled {
+            cursor: wait;
+            opacity: 0.72;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -323,8 +344,52 @@
         </div>
     </div>
 
+    <button id="figmaCaptureButton" class="figma-capture-button" type="button">捕获到 Figma</button>
     <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
     <script src="./ml_monitor.js"></script>
+    <script>
+        (function () {
+            const button = document.getElementById("figmaCaptureButton");
+
+            function waitForCaptureApi() {
+                return new Promise((resolve, reject) => {
+                    const startedAt = Date.now();
+                    const timer = setInterval(() => {
+                        if (window.figma && typeof window.figma.captureForDesign === "function") {
+                            clearInterval(timer);
+                            resolve(window.figma.captureForDesign);
+                            return;
+                        }
+
+                        if (Date.now() - startedAt > 6000) {
+                            clearInterval(timer);
+                            reject(new Error("Figma 捕获脚本还没有加载完成，请刷新后再试。"));
+                        }
+                    }, 120);
+                });
+            }
+
+            button.addEventListener("click", async () => {
+                const originalText = button.textContent;
+                button.disabled = true;
+                button.textContent = "正在准备捕获...";
+
+                try {
+                    const captureForDesign = await waitForCaptureApi();
+                    await captureForDesign({
+                        selector: "body",
+                        delayMs: 600,
+                        verbose: true
+                    });
+                } catch (error) {
+                    alert(error.message || "Figma 捕获启动失败，请刷新页面后重试。");
+                } finally {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
