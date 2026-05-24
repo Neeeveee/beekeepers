@@ -177,10 +177,10 @@
       animationDuration: 760,
       animationEasing: "cubicOut",
       grid: {
-        top: 12,
-        right: 0,
-        bottom: 18,
-        left: 68,
+        top: 18,
+        right: 28,
+        bottom: 24,
+        left: 76,
         containLabel: false
       },
       tooltip: {
@@ -254,6 +254,7 @@
           type: "line",
           data: values,
           smooth: true,
+          clip: false,
           showSymbol: false,
           connectNulls: true,
           lineStyle: {
