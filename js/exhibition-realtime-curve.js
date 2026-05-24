@@ -1,7 +1,7 @@
 (function () {
   const params = new URLSearchParams(window.location.search);
   const DATA_BASE = params.get("data") || "./data";
-  const UPDATE_SECONDS = Math.max(1, Number(params.get("speed")) || 60);
+  const UPDATE_SECONDS = Math.max(1, Number(params.get("speed")) || 10);
   const WINDOW_MINUTES = Math.max(30, Number(params.get("window")) || 180);
 
   const METRICS = {
@@ -327,7 +327,8 @@
   }
 
   async function tick() {
-    displayMinute = addMinutes(displayMinute, 1);
+    displayMinute = getInitialDisplayMinute();
+    sourceCache = {};
     try {
       await render();
     } catch (error) {
@@ -339,9 +340,6 @@
     chart = echarts.init(document.getElementById("liveChart"));
     await render();
     setInterval(tick, UPDATE_SECONDS * 1000);
-    setInterval(() => {
-      sourceCache = {};
-    }, 5 * 60 * 1000);
     window.addEventListener("resize", () => chart.resize());
   }
 
