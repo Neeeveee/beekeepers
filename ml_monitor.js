@@ -67,17 +67,6 @@ function renderMetricCards(data) {
     `).join("");
 }
 
-function renderAlerts(data) {
-    const container = document.getElementById("alerts");
-    const alerts = data.alerts || [];
-    container.innerHTML = alerts.map(alert => `
-        <div class="alert ${alert.level === "ok" ? "ok" : ""}">
-            <div class="alert-title">${alert.title}</div>
-            <div>${alert.message}</div>
-        </div>
-    `).join("");
-}
-
 function renderHistoryChart(data) {
     const items = data.history?.items || [];
     if (!items.length) {
@@ -87,6 +76,7 @@ function renderHistoryChart(data) {
 
     historyChart.setOption({
         animation: false,
+        color: ["#374151", "#6b7280", "#10b981"],
         tooltip: { trigger: "axis" },
         legend: { data: ["实际值", "规则预测", "ML 回测值"] },
         grid: { left: 48, right: 20, top: 44, bottom: 58 },
@@ -107,6 +97,8 @@ function renderHistoryChart(data) {
                 type: "line",
                 data: items.map(item => item.actual_activity),
                 smooth: true,
+                lineStyle: { color: "#374151" },
+                itemStyle: { color: "#374151" },
                 symbolSize: 6
             },
             {
@@ -114,7 +106,8 @@ function renderHistoryChart(data) {
                 type: "line",
                 data: items.map(item => item.rule_expected_activity),
                 smooth: true,
-                lineStyle: { type: "dashed" },
+                lineStyle: { type: "dashed", color: "#6b7280" },
+                itemStyle: { color: "#6b7280" },
                 symbolSize: 5
             },
             {
@@ -122,6 +115,8 @@ function renderHistoryChart(data) {
                 type: "line",
                 data: items.map(item => item.ml_adjusted_activity),
                 smooth: true,
+                lineStyle: { color: "#10b981" },
+                itemStyle: { color: "#10b981" },
                 symbolSize: 5
             }
         ]
@@ -137,6 +132,7 @@ function renderFutureChart(data) {
 
     futureChart.setOption({
         animation: false,
+        color: ["#374151", "#10b981", "#f59e0b"],
         tooltip: { trigger: "axis" },
         legend: { data: ["规则预测", "ML 修正预测", "修正量"] },
         grid: { left: 48, right: 46, top: 44, bottom: 58 },
@@ -163,7 +159,8 @@ function renderFutureChart(data) {
                 type: "line",
                 data: items.map(item => item.rule_expected_activity),
                 smooth: true,
-                lineStyle: { type: "dashed" },
+                lineStyle: { type: "dashed", color: "#374151" },
+                itemStyle: { color: "#374151" },
                 symbolSize: 5
             },
             {
@@ -171,6 +168,8 @@ function renderFutureChart(data) {
                 type: "line",
                 data: items.map(item => item.ml_adjusted_activity),
                 smooth: true,
+                lineStyle: { color: "#10b981" },
+                itemStyle: { color: "#10b981" },
                 symbolSize: 5
             },
             {
@@ -178,6 +177,7 @@ function renderFutureChart(data) {
                 type: "bar",
                 yAxisIndex: 1,
                 data: items.map(item => item.ml_residual_adjustment),
+                itemStyle: { color: "#f59e0b" },
                 barMaxWidth: 18
             }
         ]
@@ -188,7 +188,6 @@ async function main() {
     try {
         const data = await loadMonitorData();
         renderMetricCards(data);
-        renderAlerts(data);
         renderHistoryChart(data);
         renderFutureChart(data);
     } catch (error) {
