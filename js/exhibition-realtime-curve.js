@@ -9,31 +9,24 @@
   const METRICS = {
     flowering: {
       label: "开花状态",
-      title: "生态序列曲线",
+      title: "生态时间序列",
       subtitle: "开花状态基于历史实际数据按分钟动态更新",
       source: "flowering-overview.json",
       valueId: "floweringValue"
     },
     nectar: {
-      label: "蜜源供给",
-      title: "蜜源供给曲线",
+      label: "蜜源供给强度",
+      title: "生态时间序列",
       subtitle: "蜜源供给强度基于历史实际数据按分钟动态更新",
       source: "nectar-supply-overview.json",
       valueId: "nectarValue"
     },
     mismatch: {
       label: "错配风险",
-      title: "错配风险曲线",
+      title: "生态时间序列",
       subtitle: "生态错配风险基于历史实际数据按分钟动态更新",
       source: "mismatch-overview.json",
       valueId: "mismatchValue"
-    },
-    activity: {
-      label: "蜂群活跃",
-      title: "蜂群活跃曲线",
-      subtitle: "蜂群活跃度基于历史实际数据按分钟动态更新",
-      source: "bee-activity-forecast.json",
-      valueId: "activityValue"
     }
   };
 
