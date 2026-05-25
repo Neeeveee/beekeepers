@@ -362,24 +362,24 @@
     },
     {
       "time": "2026-05-24",
-      "value": 0.455
+      "value": 0.448
+    },
+    {
+      "time": "2026-05-25",
+      "value": 0.422
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.204,
-      "nectar_supply_index": 0.448,
+      "contribution_value": 0.123,
+      "nectar_supply_index": 0.269,
       "plant_name": "冬青"
     }
   ],
   "forecast": [
     {
-      "time": "2026-05-24",
-      "value": 0.455
-    },
-    {
       "time": "2026-05-25",
-      "value": 0.354
+      "value": 0.422
     },
     {
       "time": "2026-05-26",
@@ -387,7 +387,7 @@
     },
     {
       "time": "2026-05-27",
-      "value": 0.273
+      "value": 0.379
     },
     {
       "time": "2026-05-28",
@@ -400,13 +400,11 @@
     {
       "time": "2026-05-30",
       "value": 0.392
+    },
+    {
+      "time": "2026-05-31",
+      "value": 0.0
     }
   ],
-  "future_top": [
-    {
-      "contribution_value": 0.179,
-      "nectar_supply_index": 0.392,
-      "plant_name": "冬青"
-    }
-  ]
+  "future_top": []
 }

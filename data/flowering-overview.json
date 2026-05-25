@@ -363,23 +363,23 @@
     {
       "time": "2026-05-24",
       "value": 0.582
+    },
+    {
+      "time": "2026-05-25",
+      "value": 0.582
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.582,
-      "flowering_index": 0.582,
+      "contribution_value": 0.349,
+      "flowering_index": 0.349,
       "plant_name": "冬青"
     }
   ],
   "forecast": [
     {
-      "time": "2026-05-24",
-      "value": 0.582
-    },
-    {
       "time": "2026-05-25",
-      "value": 0.488
+      "value": 0.582
     },
     {
       "time": "2026-05-26",
@@ -387,7 +387,7 @@
     },
     {
       "time": "2026-05-27",
-      "value": 0.349
+      "value": 0.411
     },
     {
       "time": "2026-05-28",
@@ -400,13 +400,11 @@
     {
       "time": "2026-05-30",
       "value": 0.42
+    },
+    {
+      "time": "2026-05-31",
+      "value": 0.0
     }
   ],
-  "future_top": [
-    {
-      "contribution_value": 0.42,
-      "flowering_index": 0.42,
-      "plant_name": "冬青"
-    }
-  ]
+  "future_top": []
 }
