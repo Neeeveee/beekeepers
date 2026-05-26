@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后端接口快速查看</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #4b5563;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      height: 38px;
+      padding: 0 11px;
+      box-sizing: border-box;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      color: #111827;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 0 0 20px;
+    }
+
+    .note {
+      margin: -6px 0 18px;
+      padding: 12px 14px;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    button {
+      min-height: 36px;
+      padding: 8px 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+      color: #111827;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: #2563eb;
+      color: #1d4ed8;
+    }
+
+    button.primary {
+      border-color: #2563eb;
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      min-width: 0;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .path {
+      margin-top: 3px;
+      color: #64748b;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge.fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge.skip {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .meta {
+      display: flex;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #eef2f7;
+      color: #64748b;
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    pre {
+      max-height: 320px;
+      margin: 0;
+      padding: 13px 14px;
+      overflow: auto;
+      background: #0f172a;
+      color: #e5e7eb;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>后端接口快速查看</h1>
+
+    <section class="toolbar">
+      <div>
+        <label for="flaskBase">Flask 图表服务地址（未部署可留空）</label>
+        <input id="flaskBase" value="" placeholder="例如：https://your-flask-service.onrender.com">
+      </div>
+      <div>
+        <label for="nodeBase">Node 策略服务地址（Render 上传版）</label>
+        <input id="nodeBase" value="https://bee-scenario-ai.onrender.com">
+      </div>
+    </section>
+
+    <section class="note">
+      如果要测试上传/部署后的接口，把上面的服务地址改成你的线上地址；GitHub Pages 只能托管静态页面，真正的后端接口通常是 Render、Railway、服务器或其他云服务地址。
+    </section>
+
+    <section class="actions">
+      <button class="primary" onclick="runAvailable()">测试已部署接口</button>
+      <button onclick="runAll()">测试全部配置项</button>
+      <button onclick="runGroup('flask')">只测 Flask</button>
+      <button onclick="runGroup('node')">只测线上 Node</button>
+      <button onclick="clearResults()">清空结果</button>
+    </section>
+
+    <section id="resultGrid" class="grid"></section>
+  </main>
+
+  <script>
+    const endpoints = [
+      { group: "flask", name: "Flask 首页", base: "flaskBase", method: "GET", path: "/" },
+      { group: "flask", name: "蜂群活动预测", base: "flaskBase", method: "GET", path: "/api/bee-activity-forecast" },
+      { group: "flask", name: "环境影响预测", base: "flaskBase", method: "GET", path: "/api/env-impact-forecast" },
+      { group: "flask", name: "花期概览", base: "flaskBase", method: "GET", path: "/api/flowering-overview" },
+      { group: "flask", name: "蜜源供给概览", base: "flaskBase", method: "GET", path: "/api/nectar-supply-overview" },
+      { group: "flask", name: "物候错配概览", base: "flaskBase", method: "GET", path: "/api/mismatch-overview" },
+      { group: "node", name: "Node 健康检查", base: "nodeBase", method: "GET", path: "/api/health" },
+      { group: "node", name: "当前天气", base: "nodeBase", method: "GET", path: "/api/current-weather" },
+      { group: "node", name: "策略卡片", base: "nodeBase", method: "GET", path: "/api/scenarios" }
+    ];
+
+    function normalizeBase(value) {
+      return value.replace(/\/+$/, "");
+    }
+
+    function createCard(endpoint) {
+      const grid = document.getElementById("resultGrid");
+      const card = document.createElement("article");
+      card.className = "card";
+      card.id = `card-${endpoint.group}-${endpoint.path.replace(/[^a-z0-9]/gi, "-")}`;
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="name">${endpoint.name}</div>
+            <div class="path">${endpoint.method} ${endpoint.path}</div>
+          </div>
+          <span class="badge">等待</span>
+        </div>
+        <div class="meta">
+          <span>状态：-</span>
+          <span>耗时：-</span>
+          <span>大小：-</span>
+        </div>
+        <pre>尚未请求</pre>
+      `;
+      grid.appendChild(card);
+      return card;
+    }
+
+    function setCard(card, state, status, ms, size, text) {
+      const badge = card.querySelector(".badge");
+      badge.className = `badge ${state}`;
+      badge.textContent = state === "ok" ? "成功" : state === "skip" ? "未部署" : "失败";
+      card.querySelector(".meta").innerHTML = `
+        <span>状态：${status}</span>
+        <span>耗时：${ms} ms</span>
+        <span>大小：${size}</span>
+      `;
+      card.querySelector("pre").textContent = text;
+    }
+
+    async function testEndpoint(endpoint) {
+      const card = createCard(endpoint);
+      const base = normalizeBase(document.getElementById(endpoint.base).value.trim());
+      if (!base) {
+        setCard(card, "skip", "未测试", 0, "-", "该服务还没有填写线上地址，因此不计入线上接口测试结果。");
+        return;
+      }
+      const url = `${base}${endpoint.path}`;
+      const start = performance.now();
+
+      try {
+        const response = await fetch(url, { method: endpoint.method });
+        const rawText = await response.text();
+        const elapsed = Math.round(performance.now() - start);
+        let output = rawText;
+
+        try {
+          output = JSON.stringify(JSON.parse(rawText), null, 2);
+        } catch (error) {
+          output = rawText || "(empty response)";
+        }
+
+        setCard(
+          card,
+          response.ok ? "ok" : "fail",
+          response.status,
+          elapsed,
+          `${rawText.length} 字符`,
+          output
+        );
+      } catch (error) {
+        const elapsed = Math.round(performance.now() - start);
+        setCard(card, "fail", "请求失败", elapsed, "-", String(error));
+      }
+    }
+
+    async function runGroup(group) {
+      clearResults();
+      for (const endpoint of endpoints.filter(item => item.group === group)) {
+        await testEndpoint(endpoint);
+      }
+    }
+
+    async function runAll() {
+      clearResults();
+      for (const endpoint of endpoints) {
+        await testEndpoint(endpoint);
+      }
+    }
+
+    async function runAvailable() {
+      clearResults();
+      for (const endpoint of endpoints) {
+        const base = normalizeBase(document.getElementById(endpoint.base).value.trim());
+        if (base) {
+          await testEndpoint(endpoint);
+        }
+      }
+    }
+
+    function clearResults() {
+      document.getElementById("resultGrid").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
