@@ -14,7 +14,16 @@
   const script = document.currentScript;
   const homeUrl = script?.dataset.homeUrl || "./index.html";
   const isEmbedded = window.self !== window.top;
+  const excludedPages = [
+    "/ml_monitor.html",
+    "/nectar_carousel.html",
+    "/exhibition_realtime_curve.html"
+  ];
   let idleTimer = 0;
+
+  if (excludedPages.some((page) => window.location.pathname.endsWith(page))) {
+    return;
+  }
 
   function notifyParent() {
     if (!isEmbedded) {
