@@ -375,6 +375,16 @@ function normalizeGaugeValue(value) {
   return Math.max(0, Math.min(100, Math.round(numeric * 100)));
 }
 
+function applyScenarioBasisMetrics() {
+  const basis = state.analysisContext?.strategyBasis;
+  if (!basis || !infoActivity || !infoNectar || !infoMismatch) return false;
+
+  infoActivity.textContent = `${normalizeGaugeValue(basis.activityValue)}%`;
+  infoNectar.textContent = `${normalizeGaugeValue(basis.nectarValue)}%`;
+  infoMismatch.textContent = `${normalizeGaugeValue(basis.mismatchGap)}%`;
+  return true;
+}
+
 function getTimeBounds(items) {
   return (items || [])
     .filter(item => item && item.time)
@@ -385,6 +395,10 @@ function getTimeBounds(items) {
 
 async function refreshScenarioMetrics() {
   if (!infoActivity || !infoNectar || !infoMismatch) return;
+
+  if (applyScenarioBasisMetrics()) {
+    return;
+  }
 
   try {
     const cacheBust = Date.now();
@@ -808,6 +822,7 @@ function applyScenarioPayload(payload) {
   if (!payload) return;
   state.analysisContext = payload.analysisContext || payload;
   state.source = payload.source || "summary-only";
+  applyScenarioBasisMetrics();
   renderCards();
   renderDetail(state.selectedIndex || 0);
 }
