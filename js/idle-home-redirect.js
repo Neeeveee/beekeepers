@@ -1,5 +1,5 @@
 (function () {
-  const IDLE_TIMEOUT_MS = 30 * 1000;
+  const IDLE_TIMEOUT_MS = 2 * 60 * 1000;
   const ACTIVITY_MESSAGE_TYPE = "bee-project-user-activity";
   const events = [
     "mousemove",
