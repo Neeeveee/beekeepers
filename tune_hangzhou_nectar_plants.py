@@ -40,9 +40,9 @@ HANGZHOU_TUNING = {
         "note": "Hangzhou localized tuning: dominant spring field nectar source.",
     },
     "冬青": {
-        "bloom_start_mmdd": "04-18",
-        "bloom_end_mmdd": "05-25",
-        "bloom_days": 38,
+        "bloom_start_mmdd": "04-20",
+        "bloom_end_mmdd": "06-20",
+        "bloom_days": 62,
         "nectar_grade": 2,
         "pollen_grade": 1,
         "avg_yield_kg_per_colony": 2.0,
