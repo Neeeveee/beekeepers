@@ -645,10 +645,19 @@ const fallbackScenarios = [
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(STATIC_ROOT, "dashboard1.html"));
+  res.sendFile(path.join(STATIC_ROOT, "index.html"));
 });
 
-app.use(express.static(STATIC_ROOT, { index: false }));
+app.use(express.static(STATIC_ROOT, {
+  index: false,
+  setHeaders(res, filePath) {
+    if (path.extname(filePath).toLowerCase() === ".html") {
+      res.setHeader("Cache-Control", "no-cache");
+      return;
+    }
+    res.setHeader("Cache-Control", "public, max-age=604800");
+  }
+}));
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, hasDeepSeekKey: Boolean(DEEPSEEK_API_KEY) });

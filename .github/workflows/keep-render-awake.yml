@@ -1,0 +1,29 @@
+name: Keep Render Awake
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+jobs:
+  ping-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping Render service
+        run: |
+          set -e
+
+          BASE_URL="https://bee-scenario-ai.onrender.com"
+          urls=(
+            "$BASE_URL/api/health"
+            "$BASE_URL/index.html"
+            "$BASE_URL/dashboard1.html"
+            "$BASE_URL/scenario_ai.html"
+          )
+
+          for url in "${urls[@]}"; do
+            echo "Pinging $url"
+            curl --fail --silent --show-error --location --max-time 60 "$url" > /dev/null
+          done
