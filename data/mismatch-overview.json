@@ -318,53 +318,52 @@
     },
     {
       "time": "2026-06-05",
-      "value": 0.043
+      "value": 0.036
+    },
+    {
+      "time": "2026-06-06",
+      "value": 0.273
     }
   ],
   "forecast": [
     {
-      "time": "2026-06-05",
-      "value": 0.043
-    },
-    {
       "time": "2026-06-06",
-      "value": 0.116
+      "value": 0.273
     },
     {
       "time": "2026-06-07",
-      "value": 0.182
+      "value": 0.007
     },
     {
       "time": "2026-06-08",
-      "value": 0.146
+      "value": 0.133
     },
     {
       "time": "2026-06-09",
-      "value": 0.136
+      "value": 0.133
     },
     {
       "time": "2026-06-10",
-      "value": 0.16
+      "value": 0.136
     },
     {
       "time": "2026-06-11",
-      "value": 0.16
+      "value": 0.136
+    },
+    {
+      "time": "2026-06-12",
+      "value": 0.136
     }
   ],
   "forecast_info": [
     {
-      "mismatch_level": "中度错配",
-      "mismatch_type": "behavior_ahead",
-      "time": "2026-06-05"
-    },
-    {
-      "mismatch_level": "基本匹配",
+      "mismatch_level": "轻度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-06-06"
     },
     {
-      "mismatch_level": "轻度错配",
-      "mismatch_type": "behavior_ahead",
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "matched",
       "time": "2026-06-07"
     },
     {
@@ -378,14 +377,19 @@
       "time": "2026-06-09"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "基本匹配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-06-10"
     },
     {
-      "mismatch_level": "轻度错配",
+      "mismatch_level": "基本匹配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-06-11"
+    },
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "behavior_ahead",
+      "time": "2026-06-12"
     }
   ],
   "history_info": [
@@ -788,6 +792,11 @@
       "mismatch_level": "基本匹配",
       "mismatch_type": "matched",
       "time": "2026-06-05"
+    },
+    {
+      "mismatch_level": "轻度错配",
+      "mismatch_type": "resource_ahead",
+      "time": "2026-06-06"
     }
   ]
 }
