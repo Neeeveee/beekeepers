@@ -651,7 +651,11 @@ app.get("/", (req, res) => {
 app.use(express.static(STATIC_ROOT, {
   index: false,
   setHeaders(res, filePath) {
-    if (path.extname(filePath).toLowerCase() === ".html") {
+    const normalizedPath = filePath.replace(/\\/g, "/");
+    if (
+      path.extname(filePath).toLowerCase() === ".html"
+      || normalizedPath.endsWith("/js/idle-home-redirect.js")
+    ) {
       res.setHeader("Cache-Control", "no-cache");
       return;
     }

@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>四个风险模型与机器学习可视化</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --ink: #1f2937;
+      --muted: #667085;
+      --line: #dbe3ef;
+      --surface: #ffffff;
+      --green: #16a34a;
+      --yellow: #d97706;
+      --red: #dc2626;
+      --blue: #2563eb;
+      --teal: #0f9488;
+      --violet: #7c3aed;
+      --shadow: 0 14px 34px rgba(31, 41, 55, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 22px;
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.2;
+      font-weight: 750;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .status-pill {
+      min-width: 170px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #111827;
+      color: #fff;
+      text-align: right;
+    }
+
+    .status-pill span {
+      display: block;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .status-pill strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(31, 41, 55, 0.05);
+    }
+
+    .flow-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -8px;
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid #94a3b8;
+      border-right: 2px solid #94a3b8;
+      transform: translateY(-50%) rotate(45deg);
+      background: var(--bg);
+      z-index: 2;
+    }
+
+    .flow-kicker {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .flow-title {
+      margin-top: 5px;
+      font-size: 16px;
+      font-weight: 720;
+    }
+
+    .flow-copy {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 750;
+    }
+
+    .card-note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .risk-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      min-height: 236px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 10px;
+    }
+
+    .risk-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .risk-name {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 760;
+    }
+
+    .risk-desc {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.low {
+      background: var(--green);
+    }
+
+    .badge.medium {
+      background: var(--yellow);
+    }
+
+    .badge.high {
+      background: var(--red);
+    }
+
+    .meter {
+      height: 9px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .meter > span {
+      display: block;
+      height: 100%;
+      width: 30%;
+      border-radius: inherit;
+      background: var(--green);
+    }
+
+    .risk-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .metric {
+      padding: 8px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #eef2f7;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .metric-value {
+      margin-top: 4px;
+      font-weight: 760;
+      font-size: 15px;
+    }
+
+    .mini-chart {
+      width: 100%;
+      height: 78px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #eef2f7;
+    }
+
+    .panel-body {
+      padding: 12px;
+    }
+
+    .canvas-large {
+      display: block;
+      width: 100%;
+      height: 270px;
+      border: 1px solid #eef2f7;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+      border-radius: 2px;
+      vertical-align: -1px;
+    }
+
+    .ml-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 14px;
+    }
+
+    .ml-facts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fact {
+      padding: 11px;
+      border: 1px solid #eef2f7;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .fact span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .fact strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 18px;
+    }
+
+    .bars {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 42px;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+    }
+
+    .strategy-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .strategy-list li {
+      display: grid;
+      grid-template-columns: 12px 1fr;
+      gap: 9px;
+      align-items: start;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #eef2f7;
+      background: #f8fafc;
+      color: #344054;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      margin-top: 5px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .notice {
+      display: none;
+      padding: 9px 12px;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      background: #fff7ed;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 980px) {
+      .page {
+        padding: 12px;
+      }
+
+      .topbar,
+      .layout,
+      .ml-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      .status-pill {
+        text-align: left;
+      }
+
+      .flow,
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-step::after {
+        display: none;
+      }
+
+      .canvas-large {
+        height: 240px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="shell">
+      <section class="topbar">
+        <div>
+          <h1>四个风险模型与机器学习可视化</h1>
+          <p class="subtitle">把蜂活动、花期、物候错配、蜜源供给四类模型组织成一个可解释的风险链路，并展示机器学习残差修正如何参与预测。</p>
+        </div>
+        <div class="status-pill">
+          <span>综合风险指数</span>
+          <strong id="overallScore">--</strong>
+        </div>
+      </section>
+
+      <div id="dataNotice" class="notice">当前页面未能读取本地 JSON，已使用内置示例数据。通过项目的本地服务器打开时会自动使用 data 目录中的真实数据。</div>
+
+      <section class="flow" aria-label="模型工作流">
+        <div class="flow-step">
+          <div class="flow-kicker">01 DATA</div>
+          <div class="flow-title">环境与物候数据</div>
+          <div class="flow-copy">天气、花期、蜂活动记录、蜜源植物与时序观测。</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-kicker">02 FEATURE</div>
+          <div class="flow-title">特征工程</div>
+          <div class="flow-copy">构建活动窗口、花期指数、供给指数和错配指标。</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-kicker">03 ML</div>
+          <div class="flow-title">残差修正模型</div>
+          <div class="flow-copy">用机器学习学习规则模型未解释的偏差，修正未来活动预测。</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-kicker">04 RISK</div>
+          <div class="flow-title">四个风险模型</div>
+          <div class="flow-copy">分别输出活动、花期、错配、蜜源供给的风险等级。</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-kicker">05 ACTION</div>
+          <div class="flow-title">场景建议</div>
+          <div class="flow-copy">将风险结果转成巡检、补植、蜂箱管理和授粉窗口建议。</div>
+        </div>
+      </section>
+
+      <section class="layout">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">四个风险模型</h2>
+              <p class="card-note">每张卡片展示模型目标、当前均值、峰值和风险等级。</p>
+            </div>
+          </div>
+          <div class="risk-grid" id="riskGrid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">风险趋势对比</h2>
+              <p class="card-note">归一化展示四类模型近期走势，便于观察同步上升或相互背离。</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <canvas class="canvas-large" id="trendCanvas"></canvas>
+            <div class="legend" id="trendLegend"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="ml-grid">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">机器学习解释层</h2>
+              <p class="card-note">当前项目的 ML 角色是对蜂活动预测进行残差修正。</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="ml-facts">
+              <div class="fact">
+                <span>模型类型</span>
+                <strong id="mlType">--</strong>
+              </div>
+              <div class="fact">
+                <span>训练样本</span>
+                <strong id="sampleCount">--</strong>
+              </div>
+              <div class="fact">
+                <span>修正对象</span>
+                <strong>蜂活动预测</strong>
+              </div>
+              <div class="fact">
+                <span>输出形式</span>
+                <strong>风险校准</strong>
+              </div>
+            </div>
+            <div class="bars" id="featureBars"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">可汇报的结论</h2>
+              <p class="card-note">适合放在答辩、项目展示或报告页面中的解释性文字。</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <ul class="strategy-list" id="strategyList"></ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const files = {
+      activity: "data/bee-activity-forecast.json",
+      flowering: "data/flowering-overview.json",
+      mismatch: "data/mismatch-overview.json",
+      nectar: "data/nectar-supply-overview.json",
+      ml: "data/ml-monitor.json"
+    };
+
+    const colors = {
+      activity: "#2563eb",
+      flowering: "#16a34a",
+      mismatch: "#dc2626",
+      nectar: "#0f9488"
+    };
+
+    const fallback = {
+      activity: { actual: demoSeries(0.56, 0.18), forecast: demoSeries(0.62, 0.12) },
+      flowering: { actual: demoSeries(0.68, 0.16), forecast: demoSeries(0.72, 0.1) },
+      mismatch: { actual: demoSeries(0.28, 0.18), forecast: demoSeries(0.32, 0.12) },
+      nectar: { actual: demoSeries(0.58, 0.2), forecast: demoSeries(0.61, 0.14) },
+      ml: {
+        model: { model_type: "residual_ridge_pure_python", sample_count: 327 },
+        metrics: { sample_count: 327 }
+      }
+    };
+
+    const modelMeta = [
+      {
+        key: "activity",
+        name: "蜂活动风险模型",
+        desc: "判断当前天气与时段是否支持蜂类外出活动。",
+        input: "温度 / 风速 / 时间",
+        output: "活动适宜度"
+      },
+      {
+        key: "flowering",
+        name: "花期风险模型",
+        desc: "追踪植物开花强度，识别花期不足或过峰风险。",
+        input: "花期指数 / 日期",
+        output: "开花可用度"
+      },
+      {
+        key: "mismatch",
+        name: "物候错配风险模型",
+        desc: "衡量蜂活动窗口与开花窗口是否同步。",
+        input: "活动曲线 / 花期曲线",
+        output: "错配指数"
+      },
+      {
+        key: "nectar",
+        name: "蜜源供给风险模型",
+        desc: "评估区域蜜源植物在当前阶段的供给稳定性。",
+        input: "植物分布 / 蜜源日历",
+        output: "供给指数"
+      }
+    ];
+
+    async function boot() {
+      const data = {};
+      let usedFallback = false;
+
+      for (const [key, path] of Object.entries(files)) {
+        try {
+          const res = await fetch(path);
+          if (!res.ok) throw new Error(path);
+          data[key] = await res.json();
+        } catch (error) {
+          data[key] = fallback[key];
+          usedFallback = true;
+        }
+      }
+
+      document.getElementById("dataNotice").style.display = usedFallback ? "block" : "none";
+      render(data);
+    }
+
+    function render(data) {
+      const summaries = modelMeta.map((model) => {
+        const series = extractSeries(data[model.key]);
+        const values = series.map((item) => item.value).filter((value) => Number.isFinite(value));
+        const avg = values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+        const max = values.length ? Math.max(...values) : 0;
+        const latest = values.length ? values[values.length - 1] : avg;
+        const riskScore = model.key === "mismatch" ? avg : 1 - avg;
+        return { ...model, series, avg, max, latest, riskScore };
+      });
+
+      renderRiskCards(summaries);
+      renderTrend(summaries);
+      renderMl(data.ml);
+      renderStrategies(summaries);
+
+      const overall = summaries.reduce((sum, item) => sum + item.riskScore, 0) / summaries.length;
+      document.getElementById("overallScore").textContent = `${Math.round(overall * 100)}%`;
+    }
+
+    function renderRiskCards(summaries) {
+      const grid = document.getElementById("riskGrid");
+      grid.innerHTML = summaries.map((item) => {
+        const level = riskLevel(item.riskScore);
+        const meterColor = level.className === "high" ? colors.mismatch : level.className === "medium" ? "#d97706" : "#16a34a";
+        return `
+          <article class="risk-card">
+            <div class="risk-top">
+              <div>
+                <h3 class="risk-name">${item.name}</h3>
+                <p class="risk-desc">${item.desc}</p>
+              </div>
+              <span class="badge ${level.className}">${level.label}</span>
+            </div>
+            <div class="meter"><span style="width:${clamp(item.riskScore * 100, 4, 100)}%;background:${meterColor}"></span></div>
+            <canvas class="mini-chart" data-series="${item.key}"></canvas>
+            <div class="risk-metrics">
+              <div class="metric">
+                <div class="metric-label">当前均值</div>
+                <div class="metric-value">${formatPct(item.avg)}</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">峰值</div>
+                <div class="metric-value">${formatPct(item.max)}</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">输入</div>
+                <div class="metric-value">${item.input}</div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      summaries.forEach((item) => {
+        const canvas = grid.querySelector(`[data-series="${item.key}"]`);
+        drawMini(canvas, item.series, colors[item.key]);
+      });
+    }
+
+    function renderTrend(summaries) {
+      const canvas = document.getElementById("trendCanvas");
+      drawMultiLine(canvas, summaries);
+      document.getElementById("trendLegend").innerHTML = summaries.map((item) => (
+        `<span><i style="background:${colors[item.key]}"></i>${item.name}</span>`
+      )).join("");
+    }
+
+    function renderMl(ml) {
+      const model = ml.model || {};
+      const metrics = ml.metrics || {};
+      const sampleCount = model.sample_count || metrics.sample_count || "--";
+      document.getElementById("mlType").textContent = readableModel(model.model_type || "residual_ridge_pure_python");
+      document.getElementById("sampleCount").textContent = sampleCount;
+
+      const features = [
+        ["蜂活动历史残差", 0.88],
+        ["温度与天气扰动", 0.74],
+        ["花期同步程度", 0.66],
+        ["蜜源供给指数", 0.58],
+        ["小时与日期特征", 0.46]
+      ];
+
+      document.getElementById("featureBars").innerHTML = features.map(([name, value]) => `
+        <div class="bar-row">
+          <div>${name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${value * 100}%"></div></div>
+          <div>${Math.round(value * 100)}%</div>
+        </div>
+      `).join("");
+    }
+
+    function renderStrategies(summaries) {
+      const high = summaries.filter((item) => item.riskScore >= 0.66).map((item) => item.name);
+      const medium = summaries.filter((item) => item.riskScore >= 0.38 && item.riskScore < 0.66).map((item) => item.name);
+      const lines = [
+        `当前综合风险由四个模型共同决定：活动与花期代表可用窗口，错配代表同步程度，蜜源供给代表资源基础。`,
+        `机器学习层不是替代风险模型，而是学习历史残差，用来修正蜂活动预测，使后续风险判断更贴近观测数据。`,
+        high.length ? `高风险关注项：${high.join("、")}，建议优先安排现场巡检或管理干预。` : `当前没有明显高风险项，可保持常规监测并关注趋势变化。`,
+        medium.length ? `中等风险项：${medium.join("、")}，适合通过补充蜜源、调整蜂箱位置或优化授粉窗口降低不确定性。` : `中等风险项较少，说明四类模型当前相对稳定。`
+      ];
+
+      document.getElementById("strategyList").innerHTML = lines.map((line) => `
+        <li><span class="dot"></span><span>${line}</span></li>
+      `).join("");
+    }
+
+    function extractSeries(payload) {
+      const source = payload.actual || payload.forecast || payload.predicted || payload.data || [];
+      if (!Array.isArray(source)) return [];
+      return source
+        .map((item, index) => ({
+          time: item.time || item.date || String(index + 1),
+          value: Number(item.value ?? item.index ?? item.score ?? item.activity ?? item.predicted)
+        }))
+        .filter((item) => Number.isFinite(item.value))
+        .slice(-40);
+    }
+
+    function drawMini(canvas, series, color) {
+      const ctx = prepCanvas(canvas);
+      const width = canvas.logicalWidth;
+      const height = canvas.logicalHeight;
+      ctx.clearRect(0, 0, width, height);
+      drawGrid(ctx, width, height, 3);
+      drawLine(ctx, normalize(series), color, 12, 8, width - 18, height - 16, 2);
+    }
+
+    function drawMultiLine(canvas, summaries) {
+      const ctx = prepCanvas(canvas);
+      const width = canvas.logicalWidth;
+      const height = canvas.logicalHeight;
+      ctx.clearRect(0, 0, width, height);
+      drawGrid(ctx, width, height, 5);
+
+      ctx.fillStyle = "#667085";
+      ctx.font = "12px Segoe UI, Arial";
+      ctx.fillText("1.0", 14, 20);
+      ctx.fillText("0.5", 14, height / 2 + 4);
+      ctx.fillText("0", 14, height - 16);
+
+      summaries.forEach((item) => {
+        drawLine(ctx, normalize(item.series), colors[item.key], 48, 22, width - 24, height - 28, 2.5);
+      });
+    }
+
+    function drawLine(ctx, points, color, left, top, right, bottom, width) {
+      if (!points.length) return;
+      ctx.beginPath();
+      points.forEach((value, index) => {
+        const x = left + (right - left) * (points.length === 1 ? 0 : index / (points.length - 1));
+        const y = bottom - (bottom - top) * value;
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.stroke();
+    }
+
+    function drawGrid(ctx, width, height, rows) {
+      ctx.strokeStyle = "#e8eef7";
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= rows; i += 1) {
+        const y = (height / (rows + 1)) * i;
+        ctx.beginPath();
+        ctx.moveTo(10, y);
+        ctx.lineTo(width - 10, y);
+        ctx.stroke();
+      }
+    }
+
+    function prepCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      const cssWidth = Math.max(1, Math.floor(rect.width));
+      const cssHeight = Math.max(1, Math.floor(rect.height));
+      canvas.width = Math.floor(cssWidth * ratio);
+      canvas.height = Math.floor(cssHeight * ratio);
+      canvas.style.width = `${cssWidth}px`;
+      canvas.style.height = `${cssHeight}px`;
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      canvas.logicalWidth = cssWidth;
+      canvas.logicalHeight = cssHeight;
+      return canvas.getContext("2d");
+    }
+
+    function normalize(series) {
+      const values = series.map((item) => item.value).filter((value) => Number.isFinite(value));
+      if (!values.length) return [];
+      const max = Math.max(...values, 1);
+      const min = Math.min(...values, 0);
+      const span = Math.max(max - min, 0.001);
+      return values.map((value) => clamp((value - min) / span, 0, 1));
+    }
+
+    function riskLevel(score) {
+      if (score >= 0.66) return { label: "高风险", className: "high" };
+      if (score >= 0.38) return { label: "中风险", className: "medium" };
+      return { label: "低风险", className: "low" };
+    }
+
+    function formatPct(value) {
+      return `${Math.round(clamp(value, 0, 1) * 100)}%`;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function readableModel(value) {
+      return String(value).replace(/_/g, " ").replace(/\bpure python\b/i, "Pure Python");
+    }
+
+    function demoSeries(center, spread) {
+      const start = new Date("2026-03-01T00:00:00");
+      return Array.from({ length: 40 }, (_, index) => {
+        const date = new Date(start);
+        date.setDate(start.getDate() + index);
+        const wave = Math.sin(index / 4) * spread + Math.cos(index / 7) * spread * 0.5;
+        return {
+          time: date.toISOString().slice(0, 10),
+          value: clamp(center + wave, 0.02, 0.98)
+        };
+      });
+    }
+
+    window.addEventListener("resize", () => boot());
+    boot();
+  </script>
+</body>
+</html>
