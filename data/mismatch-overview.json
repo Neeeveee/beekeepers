@@ -346,21 +346,21 @@
     },
     {
       "time": "2026-06-12",
-      "value": 0.309
+      "value": 0.282
+    },
+    {
+      "time": "2026-06-13",
+      "value": 0.016
     }
   ],
   "forecast": [
     {
-      "time": "2026-06-12",
-      "value": 0.309
-    },
-    {
       "time": "2026-06-13",
-      "value": 0.246
+      "value": 0.016
     },
     {
       "time": "2026-06-14",
-      "value": 0.472
+      "value": 0.513
     },
     {
       "time": "2026-06-15",
@@ -368,7 +368,7 @@
     },
     {
       "time": "2026-06-16",
-      "value": 0.5
+      "value": 0.466
     },
     {
       "time": "2026-06-17",
@@ -376,22 +376,21 @@
     },
     {
       "time": "2026-06-18",
-      "value": 0.54
+      "value": 0.439
+    },
+    {
+      "time": "2026-06-19",
+      "value": 0.506
     }
   ],
   "forecast_info": [
     {
       "mismatch_level": "轻度错配",
       "mismatch_type": "behavior_ahead",
-      "time": "2026-06-12"
-    },
-    {
-      "mismatch_level": "轻度错配",
-      "mismatch_type": "behavior_ahead",
       "time": "2026-06-13"
     },
     {
-      "mismatch_level": "中度错配",
+      "mismatch_level": "显著错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-06-14"
     },
@@ -401,7 +400,7 @@
       "time": "2026-06-15"
     },
     {
-      "mismatch_level": "显著错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-06-16"
     },
@@ -411,9 +410,14 @@
       "time": "2026-06-17"
     },
     {
-      "mismatch_level": "显著错配",
+      "mismatch_level": "中度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-06-18"
+    },
+    {
+      "mismatch_level": "显著错配",
+      "mismatch_type": "behavior_ahead",
+      "time": "2026-06-19"
     }
   ],
   "history_info": [
@@ -848,9 +852,14 @@
       "time": "2026-06-11"
     },
     {
-      "mismatch_level": "中度错配",
+      "mismatch_level": "轻度错配",
       "mismatch_type": "resource_ahead",
       "time": "2026-06-12"
+    },
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "matched",
+      "time": "2026-06-13"
     }
   ]
 }

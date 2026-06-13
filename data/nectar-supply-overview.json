@@ -439,27 +439,27 @@
     {
       "time": "2026-06-12",
       "value": 0.647
+    },
+    {
+      "time": "2026-06-13",
+      "value": 0.466
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.25,
-      "nectar_supply_index": 0.549,
+      "contribution_value": 0.123,
+      "nectar_supply_index": 0.269,
       "plant_name": "冬青"
     }
   ],
   "forecast": [
     {
-      "time": "2026-06-12",
-      "value": 0.647
-    },
-    {
       "time": "2026-06-13",
-      "value": 0.549
+      "value": 0.466
     },
     {
       "time": "2026-06-14",
-      "value": 0.358
+      "value": 0.329
     },
     {
       "time": "2026-06-15",
@@ -467,7 +467,7 @@
     },
     {
       "time": "2026-06-16",
-      "value": 0.339
+      "value": 0.299
     },
     {
       "time": "2026-06-17",
@@ -475,6 +475,10 @@
     },
     {
       "time": "2026-06-18",
+      "value": 0.317
+    },
+    {
+      "time": "2026-06-19",
       "value": 0.253
     }
   ],
