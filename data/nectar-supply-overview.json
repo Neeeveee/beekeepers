@@ -671,14 +671,14 @@
     {
       "time": "2026-08-09",
       "value": 0.0
+    },
+    {
+      "time": "2026-08-10",
+      "value": 0.0
     }
   ],
   "current_top": [],
   "forecast": [
-    {
-      "time": "2026-08-09",
-      "value": 0.0
-    },
     {
       "time": "2026-08-10",
       "value": 0.0
@@ -701,13 +701,17 @@
     },
     {
       "time": "2026-08-15",
-      "value": 0.379
+      "value": 0.317
+    },
+    {
+      "time": "2026-08-16",
+      "value": 0.317
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.173,
-      "nectar_supply_index": 0.379,
+      "contribution_value": 0.145,
+      "nectar_supply_index": 0.317,
       "plant_name": "栾树"
     }
   ]
