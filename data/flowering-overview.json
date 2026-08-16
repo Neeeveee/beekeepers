@@ -695,6 +695,10 @@
     {
       "time": "2026-08-15",
       "value": 0.375
+    },
+    {
+      "time": "2026-08-16",
+      "value": 0.411
     }
   ],
   "current_top": [
@@ -706,20 +710,16 @@
   ],
   "forecast": [
     {
-      "time": "2026-08-15",
-      "value": 0.375
-    },
-    {
       "time": "2026-08-16",
       "value": 0.411
     },
     {
       "time": "2026-08-17",
-      "value": 0.305
+      "value": 0.354
     },
     {
       "time": "2026-08-18",
-      "value": 0.293
+      "value": 0.318
     },
     {
       "time": "2026-08-19",
@@ -731,13 +731,17 @@
     },
     {
       "time": "2026-08-21",
-      "value": 0.305
+      "value": 0.279
+    },
+    {
+      "time": "2026-08-22",
+      "value": 0.327
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.305,
-      "flowering_index": 0.305,
+      "contribution_value": 0.327,
+      "flowering_index": 0.327,
       "plant_name": "栾树"
     }
   ]
