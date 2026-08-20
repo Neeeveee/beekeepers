@@ -711,27 +711,27 @@
     {
       "time": "2026-08-19",
       "value": 0.363
+    },
+    {
+      "time": "2026-08-20",
+      "value": 0.293
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.398,
-      "flowering_index": 0.398,
+      "contribution_value": 0.336,
+      "flowering_index": 0.336,
       "plant_name": "栾树"
     }
   ],
   "forecast": [
     {
-      "time": "2026-08-19",
-      "value": 0.363
-    },
-    {
       "time": "2026-08-20",
-      "value": 0.398
+      "value": 0.293
     },
     {
       "time": "2026-08-21",
-      "value": 0.336
+      "value": 0.349
     },
     {
       "time": "2026-08-22",
@@ -739,14 +739,18 @@
     },
     {
       "time": "2026-08-23",
-      "value": 0.279
-    },
-    {
-      "time": "2026-08-24",
       "value": 0.305
     },
     {
+      "time": "2026-08-24",
+      "value": 0.341
+    },
+    {
       "time": "2026-08-25",
+      "value": 0.509
+    },
+    {
+      "time": "2026-08-26",
       "value": 0.495
     }
   ],
