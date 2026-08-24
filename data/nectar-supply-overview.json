@@ -727,35 +727,35 @@
     {
       "time": "2026-08-23",
       "value": 0.292
+    },
+    {
+      "time": "2026-08-24",
+      "value": 0.3
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.155,
-      "nectar_supply_index": 0.341,
+      "contribution_value": 0.218,
+      "nectar_supply_index": 0.478,
       "plant_name": "栾树"
     }
   ],
   "forecast": [
-    {
-      "time": "2026-08-23",
-      "value": 0.292
-    },
     {
       "time": "2026-08-24",
       "value": 0.3
     },
     {
       "time": "2026-08-25",
-      "value": 0.365
+      "value": 0.484
     },
     {
       "time": "2026-08-26",
-      "value": 0.43
+      "value": 0.478
     },
     {
       "time": "2026-08-27",
-      "value": 0.365
+      "value": 0.374
     },
     {
       "time": "2026-08-28",
@@ -763,13 +763,17 @@
     },
     {
       "time": "2026-08-29",
-      "value": 0.45
+      "value": 0.46
+    },
+    {
+      "time": "2026-08-30",
+      "value": 0.434
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.205,
-      "nectar_supply_index": 0.45,
+      "contribution_value": 0.198,
+      "nectar_supply_index": 0.434,
       "plant_name": "栾树"
     }
   ]

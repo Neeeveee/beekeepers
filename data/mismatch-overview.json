@@ -383,24 +383,20 @@
   ],
   "forecast": [
     {
-      "time": "2026-08-23",
-      "value": 0.555
-    },
-    {
       "time": "2026-08-24",
-      "value": 0.57
+      "value": 0.304
     },
     {
       "time": "2026-08-25",
-      "value": 0.367
+      "value": 0.319
     },
     {
       "time": "2026-08-26",
-      "value": 0.364
+      "value": 0.293
     },
     {
       "time": "2026-08-27",
-      "value": 0.367
+      "value": 0.354
     },
     {
       "time": "2026-08-28",
@@ -408,18 +404,17 @@
     },
     {
       "time": "2026-08-29",
-      "value": 0.31
+      "value": 0.296
+    },
+    {
+      "time": "2026-08-30",
+      "value": 0.264
     }
   ],
   "forecast_info": [
     {
-      "mismatch_level": "显著错配",
-      "mismatch_type": "behavior_ahead",
-      "time": "2026-08-23"
-    },
-    {
-      "mismatch_level": "显著错配",
-      "mismatch_type": "behavior_ahead",
+      "mismatch_level": "中度错配",
+      "mismatch_type": "resource_ahead",
       "time": "2026-08-24"
     },
     {
@@ -428,7 +423,7 @@
       "time": "2026-08-25"
     },
     {
-      "mismatch_level": "中度错配",
+      "mismatch_level": "轻度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-08-26"
     },
@@ -443,9 +438,14 @@
       "time": "2026-08-28"
     },
     {
-      "mismatch_level": "中度错配",
+      "mismatch_level": "轻度错配",
       "mismatch_type": "behavior_ahead",
       "time": "2026-08-29"
+    },
+    {
+      "mismatch_level": "轻度错配",
+      "mismatch_type": "behavior_ahead",
+      "time": "2026-08-30"
     }
   ],
   "history_info": [
