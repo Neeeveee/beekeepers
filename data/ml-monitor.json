@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-01 06:10:07",
+  "generated_at": "2026-09-02 05:36:21",
   "model": {
     "target_layer": "第3层",
     "target_name": "蜜蜂行为模型",
     "ml_role": "残差修正",
     "model_type": "residual_ridge_pure_python",
-    "trained_at": "2026-09-01 06:10:07",
+    "trained_at": "2026-09-02 05:36:20",
     "sample_count": 710,
     "safeguards": {
       "full_confidence_sample_count": 72,
@@ -15,7 +15,7 @@
     }
   },
   "metrics": {
-    "trained_at": "2026-09-01 06:10:07",
+    "trained_at": "2026-09-02 05:36:20",
     "sample_count": 710,
     "timestamps": [
       "2026-03-10 14:00:00",
@@ -10691,262 +10691,9 @@
     }
   },
   "future": {
-    "generated_at": "2026-09-01 06:10:07",
+    "generated_at": "2026-09-02 05:36:20",
     "source_model": "residual_ridge_pure_python",
     "items": [
-      {
-        "time": "2026-09-01 07:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.0433,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0433,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 08:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.1083,
-        "ml_raw_residual_adjustment": -0.0511,
-        "ml_guarded_residual_adjustment": -0.0511,
-        "ml_residual_adjustment": -0.0511,
-        "ml_adjusted_activity": 0.0572,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 09:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.2531,
-        "ml_raw_residual_adjustment": -0.0966,
-        "ml_guarded_residual_adjustment": -0.0966,
-        "ml_residual_adjustment": -0.0966,
-        "ml_adjusted_activity": 0.1565,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 10:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.463,
-        "ml_raw_residual_adjustment": -0.1211,
-        "ml_guarded_residual_adjustment": -0.1,
-        "ml_residual_adjustment": -0.1,
-        "ml_adjusted_activity": 0.363,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 11:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.7022,
-        "ml_raw_residual_adjustment": -0.1271,
-        "ml_guarded_residual_adjustment": -0.1,
-        "ml_residual_adjustment": -0.1,
-        "ml_adjusted_activity": 0.6022,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 12:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.828,
-        "ml_raw_residual_adjustment": -0.0804,
-        "ml_guarded_residual_adjustment": -0.0804,
-        "ml_residual_adjustment": -0.0804,
-        "ml_adjusted_activity": 0.7476,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 13:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.9,
-        "ml_raw_residual_adjustment": -0.0714,
-        "ml_guarded_residual_adjustment": -0.0714,
-        "ml_residual_adjustment": -0.0714,
-        "ml_adjusted_activity": 0.8286,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 14:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.828,
-        "ml_raw_residual_adjustment": -0.0597,
-        "ml_guarded_residual_adjustment": -0.0597,
-        "ml_residual_adjustment": -0.0597,
-        "ml_adjusted_activity": 0.7683,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 15:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.6449,
-        "ml_raw_residual_adjustment": -0.0461,
-        "ml_guarded_residual_adjustment": -0.0461,
-        "ml_residual_adjustment": -0.0461,
-        "ml_adjusted_activity": 0.5988,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 16:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.4252,
-        "ml_raw_residual_adjustment": -0.0315,
-        "ml_guarded_residual_adjustment": -0.0315,
-        "ml_residual_adjustment": -0.0315,
-        "ml_adjusted_activity": 0.3937,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 17:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.2372,
-        "ml_raw_residual_adjustment": -0.029,
-        "ml_guarded_residual_adjustment": -0.029,
-        "ml_residual_adjustment": -0.029,
-        "ml_adjusted_activity": 0.2082,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 18:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.1195,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.1195,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 19:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.0478,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0478,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 20:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 21:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 22:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-01 23:00:00",
-        "date": "2026-09-01",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-02 00:00:00",
-        "date": "2026-09-02",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-02 01:00:00",
-        "date": "2026-09-02",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-02 02:00:00",
-        "date": "2026-09-02",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-02 03:00:00",
-        "date": "2026-09-02",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-02 04:00:00",
-        "date": "2026-09-02",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
-      {
-        "time": "2026-09-02 05:00:00",
-        "date": "2026-09-02",
-        "rule_expected_activity": 0.0,
-        "ml_raw_residual_adjustment": 0.0,
-        "ml_guarded_residual_adjustment": 0.0,
-        "ml_residual_adjustment": 0.0,
-        "ml_adjusted_activity": 0.0,
-        "ml_confidence_scale": 1.0,
-        "ml_adjustment_cap": 0.1
-      },
       {
         "time": "2026-09-02 06:00:00",
         "date": "2026-09-02",
@@ -11045,14 +10792,267 @@
         "ml_adjusted_activity": 0.8127,
         "ml_confidence_scale": 1.0,
         "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 15:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.6663,
+        "ml_raw_residual_adjustment": 0.0091,
+        "ml_guarded_residual_adjustment": 0.0091,
+        "ml_residual_adjustment": 0.0091,
+        "ml_adjusted_activity": 0.6754,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 16:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.411,
+        "ml_raw_residual_adjustment": 0.0667,
+        "ml_guarded_residual_adjustment": 0.0667,
+        "ml_residual_adjustment": 0.0667,
+        "ml_adjusted_activity": 0.4777,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 17:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.2293,
+        "ml_raw_residual_adjustment": 0.079,
+        "ml_guarded_residual_adjustment": 0.079,
+        "ml_residual_adjustment": 0.079,
+        "ml_adjusted_activity": 0.3083,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 18:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.1083,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.1083,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 19:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.0433,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0433,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 20:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 21:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 22:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-02 23:00:00",
+        "date": "2026-09-02",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 00:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 01:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 02:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 03:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 04:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 05:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 06:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0157,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0157,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 07:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0463,
+        "ml_raw_residual_adjustment": 0.0,
+        "ml_guarded_residual_adjustment": 0.0,
+        "ml_residual_adjustment": 0.0,
+        "ml_adjusted_activity": 0.0463,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 08:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.0984,
+        "ml_raw_residual_adjustment": 0.0044,
+        "ml_guarded_residual_adjustment": 0.0044,
+        "ml_residual_adjustment": 0.0044,
+        "ml_adjusted_activity": 0.1028,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 09:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.2531,
+        "ml_raw_residual_adjustment": -0.036,
+        "ml_guarded_residual_adjustment": -0.036,
+        "ml_residual_adjustment": -0.036,
+        "ml_adjusted_activity": 0.2171,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 10:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.4535,
+        "ml_raw_residual_adjustment": -0.032,
+        "ml_guarded_residual_adjustment": -0.032,
+        "ml_residual_adjustment": -0.032,
+        "ml_adjusted_activity": 0.4215,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 11:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.7022,
+        "ml_raw_residual_adjustment": -0.0507,
+        "ml_guarded_residual_adjustment": -0.0507,
+        "ml_residual_adjustment": -0.0507,
+        "ml_adjusted_activity": 0.6515,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 12:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.9016,
+        "ml_raw_residual_adjustment": -0.0473,
+        "ml_guarded_residual_adjustment": -0.0473,
+        "ml_residual_adjustment": -0.0473,
+        "ml_adjusted_activity": 0.8543,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
+      },
+      {
+        "time": "2026-09-03 13:00:00",
+        "date": "2026-09-03",
+        "rule_expected_activity": 0.98,
+        "ml_raw_residual_adjustment": -0.0397,
+        "ml_guarded_residual_adjustment": -0.0397,
+        "ml_residual_adjustment": -0.0397,
+        "ml_adjusted_activity": 0.9403,
+        "ml_confidence_scale": 1.0,
+        "ml_adjustment_cap": 0.1
       }
     ]
   },
   "alerts": [
     {
-      "level": "warning",
-      "title": "未来修正触及保护上限",
-      "message": "未来预测中的修正量已经触及当前保护上限 0.1，说明模型原始修正意图偏大，建议人工复核规则模型与样本质量。"
+      "level": "ok",
+      "title": "当前状态稳定",
+      "message": "ML 修正链路已运行，当前未发现明显异常，但仍建议持续观察样本量和误差变化。"
     }
   ]
 }
