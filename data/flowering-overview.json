@@ -779,6 +779,10 @@
     {
       "time": "2026-09-05",
       "value": 0.605
+    },
+    {
+      "time": "2026-09-06",
+      "value": 0.662
     }
   ],
   "current_top": [
@@ -788,27 +792,23 @@
       "plant_name": "栾树"
     },
     {
-      "contribution_value": 0.411,
-      "flowering_index": 0.411,
+      "contribution_value": 0.64,
+      "flowering_index": 0.64,
       "plant_name": "五倍子"
     }
   ],
   "forecast": [
-    {
-      "time": "2026-09-05",
-      "value": 0.605
-    },
     {
       "time": "2026-09-06",
       "value": 0.662
     },
     {
       "time": "2026-09-07",
-      "value": 0.752
+      "value": 0.794
     },
     {
       "time": "2026-09-08",
-      "value": 0.777
+      "value": 0.709
     },
     {
       "time": "2026-09-09",
@@ -820,18 +820,22 @@
     },
     {
       "time": "2026-09-11",
-      "value": 0.709
+      "value": 0.683
+    },
+    {
+      "time": "2026-09-12",
+      "value": 0.752
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.834,
-      "flowering_index": 0.834,
+      "contribution_value": 0.884,
+      "flowering_index": 0.884,
       "plant_name": "栾树"
     },
     {
-      "contribution_value": 0.584,
-      "flowering_index": 0.584,
+      "contribution_value": 0.619,
+      "flowering_index": 0.619,
       "plant_name": "五倍子"
     }
   ]
