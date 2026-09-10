@@ -383,40 +383,35 @@
   ],
   "forecast": [
     {
-      "time": "2026-09-09",
-      "value": 0.004
-    },
-    {
       "time": "2026-09-10",
-      "value": 0.0
+      "value": 0.006
     },
     {
       "time": "2026-09-11",
-      "value": 0.018
+      "value": 0.0
     },
     {
       "time": "2026-09-12",
-      "value": 0.042
+      "value": 0.006
     },
     {
       "time": "2026-09-13",
-      "value": 0.012
+      "value": 0.046
     },
     {
       "time": "2026-09-14",
-      "value": 0.0
+      "value": 0.025
     },
     {
       "time": "2026-09-15",
       "value": 0.072
+    },
+    {
+      "time": "2026-09-16",
+      "value": 0.072
     }
   ],
   "forecast_info": [
-    {
-      "mismatch_level": "基本匹配",
-      "mismatch_type": "matched",
-      "time": "2026-09-09"
-    },
     {
       "mismatch_level": "基本匹配",
       "mismatch_type": "matched",
@@ -434,7 +429,7 @@
     },
     {
       "mismatch_level": "基本匹配",
-      "mismatch_type": "matched",
+      "mismatch_type": "behavior_ahead",
       "time": "2026-09-13"
     },
     {
@@ -446,6 +441,11 @@
       "mismatch_level": "基本匹配",
       "mismatch_type": "resource_ahead",
       "time": "2026-09-15"
+    },
+    {
+      "mismatch_level": "基本匹配",
+      "mismatch_type": "resource_ahead",
+      "time": "2026-09-16"
     }
   ],
   "history_info": [
