@@ -931,14 +931,14 @@
     {
       "time": "2026-10-13",
       "value": 0.0
+    },
+    {
+      "time": "2026-10-14",
+      "value": 0.0
     }
   ],
   "current_top": [],
   "forecast": [
-    {
-      "time": "2026-10-13",
-      "value": 0.0
-    },
     {
       "time": "2026-10-14",
       "value": 0.0
@@ -962,7 +962,17 @@
     {
       "time": "2026-10-19",
       "value": 0.0
+    },
+    {
+      "time": "2026-10-20",
+      "value": 0.399
     }
   ],
-  "future_top": []
+  "future_top": [
+    {
+      "contribution_value": 0.205,
+      "nectar_supply_index": 0.399,
+      "plant_name": "柃木"
+    }
+  ]
 }
