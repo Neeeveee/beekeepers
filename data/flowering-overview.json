@@ -943,14 +943,14 @@
     {
       "time": "2026-10-16",
       "value": 0.0
+    },
+    {
+      "time": "2026-10-17",
+      "value": 0.0
     }
   ],
   "current_top": [],
   "forecast": [
-    {
-      "time": "2026-10-16",
-      "value": 0.0
-    },
     {
       "time": "2026-10-17",
       "value": 0.0
@@ -965,7 +965,7 @@
     },
     {
       "time": "2026-10-20",
-      "value": 0.42
+      "value": 0.384
     },
     {
       "time": "2026-10-21",
@@ -974,12 +974,16 @@
     {
       "time": "2026-10-22",
       "value": 0.45
+    },
+    {
+      "time": "2026-10-23",
+      "value": 0.441
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.45,
-      "flowering_index": 0.45,
+      "contribution_value": 0.441,
+      "flowering_index": 0.441,
       "plant_name": "柃木"
     }
   ]
