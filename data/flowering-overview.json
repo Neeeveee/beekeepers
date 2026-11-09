@@ -1035,6 +1035,10 @@
     {
       "time": "2026-11-08",
       "value": 0.383
+    },
+    {
+      "time": "2026-11-09",
+      "value": 0.424
     }
   ],
   "current_top": [
@@ -1051,10 +1055,6 @@
   ],
   "forecast": [
     {
-      "time": "2026-11-08",
-      "value": 0.383
-    },
-    {
       "time": "2026-11-09",
       "value": 0.424
     },
@@ -1064,30 +1064,34 @@
     },
     {
       "time": "2026-11-11",
-      "value": 0.415
+      "value": 0.424
     },
     {
       "time": "2026-11-12",
-      "value": 0.462
+      "value": 0.424
     },
     {
       "time": "2026-11-13",
-      "value": 0.41
+      "value": 0.433
     },
     {
       "time": "2026-11-14",
       "value": 0.514
+    },
+    {
+      "time": "2026-11-15",
+      "value": 0.579
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.609,
-      "flowering_index": 0.609,
+      "contribution_value": 0.686,
+      "flowering_index": 0.686,
       "plant_name": "柃木"
     },
     {
-      "contribution_value": 0.465,
-      "flowering_index": 0.427,
+      "contribution_value": 0.524,
+      "flowering_index": 0.481,
       "plant_name": "枇杷"
     }
   ]
