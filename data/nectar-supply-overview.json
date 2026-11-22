@@ -1087,12 +1087,16 @@
     {
       "time": "2026-11-21",
       "value": 0.344
+    },
+    {
+      "time": "2026-11-22",
+      "value": 0.466
     }
   ],
   "current_top": [
     {
-      "contribution_value": 0.4,
-      "nectar_supply_index": 0.425,
+      "contribution_value": 0.622,
+      "nectar_supply_index": 0.661,
       "plant_name": "枇杷"
     },
     {
@@ -1103,16 +1107,12 @@
   ],
   "forecast": [
     {
-      "time": "2026-11-21",
-      "value": 0.344
-    },
-    {
       "time": "2026-11-22",
       "value": 0.466
     },
     {
       "time": "2026-11-23",
-      "value": 0.604
+      "value": 0.618
     },
     {
       "time": "2026-11-24",
@@ -1124,22 +1124,26 @@
     },
     {
       "time": "2026-11-26",
-      "value": 0.739
+      "value": 0.618
     },
     {
       "time": "2026-11-27",
       "value": 0.754
+    },
+    {
+      "time": "2026-11-28",
+      "value": 0.618
     }
   ],
   "future_top": [
     {
-      "contribution_value": 0.758,
-      "nectar_supply_index": 0.806,
+      "contribution_value": 0.622,
+      "nectar_supply_index": 0.661,
       "plant_name": "枇杷"
     },
     {
-      "contribution_value": 0.338,
-      "nectar_supply_index": 0.658,
+      "contribution_value": 0.277,
+      "nectar_supply_index": 0.54,
       "plant_name": "柃木"
     }
   ]
